@@ -2,3 +2,6 @@ include distribute_setup.py
 include README.rst
 include CHANGELOG.rst
 recursive-include source *.h
+recursive-include overlays *.dts *.py
+recursive-exclude overlays *.pyo
+recursive-exclude overlays *.pyc
