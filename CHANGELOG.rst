@@ -1,3 +1,8 @@
+0.0.7
+____
+* Refactor and clean up adc and pwm
+* Fix tests for Adafruit_BBIO rename
+
 0.0.6
 ____
 * Include Adafruit_I2C.py as top-level module
