@@ -26,19 +26,6 @@ SOFTWARE.
 #include "common.h"
 #include "c_pwm.h"
 
-static PyObject *bb_revision;
-static int gpio_warnings = 1;
-
-struct py_callback
-{
-   unsigned int gpio;
-   PyObject *py_cb;
-   unsigned long long lastcall;
-   unsigned int bouncetime;
-   struct py_callback *next;
-};
-static struct py_callback *py_callbacks = NULL;
-
 static int init_module(void)
 {
     int i;

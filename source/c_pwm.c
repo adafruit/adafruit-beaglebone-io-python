@@ -53,23 +53,6 @@ struct pwm_exp *exported_pwms = NULL;
 
 int load_device_tree(const char *name);
 
-int fd_lookup(const char *key, int type_fd)
-{
-    struct pwm_exp *pwm = exported_pwms;
-    while (pwm != NULL)
-    {
-        if (strcmp(pwm->key, key)) {
-            if (type_fd == DUTY) {
-                return pwm->duty_fd;
-            } else {
-                return pwm->period_fd;
-            }
-        }
-        pwm = pwm->next;
-    }
-    return 0;
-}
-
 struct pwm_exp *lookup_exported_pwm(const char *key) 
 {
     struct pwm_exp *pwm = exported_pwms;
