@@ -1,3 +1,7 @@
+0.0.6
+____
+* Include Adafruit_I2C.py as top-level module
+
 0.0.5
 ----
 * Rename from BBIO to Adafruit_BBIO to reduce library conflicts and confusion.
