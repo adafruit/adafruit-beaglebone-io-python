@@ -136,18 +136,17 @@ int unload_device_tree(const char *name)
     return 1;
 }
 
-int read(unsigned int *ain)
+int read_value(unsigned int ain, int *value)
 {
     FILE * fh;
     char ain_path[40];
-    int value = 0;
     snprintf(ain_path, sizeof(ain_path), "%s/%d", adc_prefix_dir, ain);
 
     fh = fopen(ain_path, "r");
 
-    fscanf(fh, "%d", &value);
+    fscanf(fh, "%d", value);
  
-    return value;    
+    return 1;
 }
 
 int adc_setup()

@@ -26,15 +26,6 @@ SOFTWARE.
 #include "common.h"
 #include "c_adc.h"
 
-static int init_module(void)
-{
-    int i;
-
-    module_setup = 0;
-
-    return 0;
-}
-
 // python function cleanup()
 static PyObject *py_cleanup(PyObject *self, PyObject *args)
 {
@@ -56,18 +47,19 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 static PyObject *py_read(PyObject *self, PyObject *args)
 {
     unsigned int ain;
+    int value;
     char *channel;
     PyObject *py_value;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
 
-    if (!get_adc_ain(channel, ain)) {
+    if (!get_adc_ain(channel, &ain)) {
         PyErr_SetString(PyExc_ValueError, "Invalid AIN key or name.");
         return NULL;    
     }
 
-    read(ain);
+    read_value(ain, &value);
 
     py_value = Py_BuildValue("i", value);
 

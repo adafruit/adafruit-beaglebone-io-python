@@ -47,4 +47,5 @@ setup(name             = 'BBIO',
       classifiers      = classifiers,
       packages         = find_packages(),
       ext_modules      = [Extension('BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c']), 
-                          Extension('BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c'])])
+                          Extension('BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c']),
+                          Extension('BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'])])

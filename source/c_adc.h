@@ -21,6 +21,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-int adc_setup();
-int read(unsigned int *ain);
+int adc_setup(void);
+int read_value(unsigned int ain, int *value);
 void adc_cleanup(void);
