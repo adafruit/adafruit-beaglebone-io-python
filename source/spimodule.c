@@ -1,4 +1,11 @@
 /*
+ * Copyright (c) 2013 Adafruit
+
+ * Modified for BBIO Author Justin Cooper
+
+ * This file incorporates work covered by the following copyright and 
+ * permission notice, all modified code adopts the original license:
+ *
  * spimodule.c - Python bindings for Linux SPI access through spidev
  * Copyright (C) 2009 Volker Thoms <unconnected@gmx.de>
  *
@@ -24,6 +31,7 @@
 #include <linux/spi/spidev.h>
 #include <linux/types.h>
 #include <sys/ioctl.h>
+#include "common.h"
 
 PyDoc_STRVAR(SPI_module_doc,
 	"This module defines an object type that allows SPI transactions\n"
@@ -681,13 +689,25 @@ static PyObject *
 SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 {
 	int bus, device;
+	int max_dt_length = 17;
+	char device_tree_name[max_dt_length];
 	char path[MAXPATH];
 	uint8_t tmp8;
-	uint32_t tmp32;
+	uint32_t tmp32;	
 	static char *kwlist[] = {"bus", "device", NULL};
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii:open", kwlist, &bus, &device))
 		return NULL;
-	if (snprintf(path, MAXPATH, "/dev/spidev%d.%d", bus, device) >= MAXPATH) {
+	if (snprintf(device_tree_name, max_dt_length, "ADAFRUIT-SPI%d-0%d", bus, device) >= max_dt_length) {
+		PyErr_SetString(PyExc_OverflowError,
+			"Bus and/or device number is invalid.");
+		return NULL;
+	}
+	if (load_device_tree(device_tree_name) == -1) {
+		PyErr_SetFromErrno(PyExc_IOError);
+		return NULL;
+	}
+
+	if (snprintf(path, MAXPATH, "/dev/spidev%d.%d", bus+1, device) >= MAXPATH) {
 		PyErr_SetString(PyExc_OverflowError,
 			"Bus and/or device number is invalid.");
 		return NULL;

@@ -6,7 +6,7 @@
     compatible = "ti,beaglebone", "ti,beaglebone-black";
 
     /* identification */
-    part-number = "ADAFRUIT-SPI1-01";
+    part-number = "ADAFRUIT-SPI1-00";
 
     /* version */
     version = "00A0";
@@ -45,11 +45,11 @@
             pinctrl-names    = "default";
             pinctrl-0        = <&pinctrl_spi1>;    
 
-            spidev@1{
+            spidev@0{
                 #address-cells       = <1>;
                 #size-cells       = <0>;
                 compatible           = "spidev";
-                reg               = <1>;
+                reg               = <0>;
                 spi-max-frequency = <24000000>;
             };
         };
