@@ -1,3 +1,7 @@
+0.0.3
+____
+* ADC enabled
+
 0.0.2
 ____
 * PWM enabled
