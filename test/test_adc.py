@@ -1,7 +1,7 @@
 import pytest
 import os
 
-import BBIO.ADC as ADC
+import Adafruit_BBIO.ADC as ADC
 
 def teardown_module(module):
     pass

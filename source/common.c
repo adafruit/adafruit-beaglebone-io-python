@@ -29,6 +29,7 @@ SOFTWARE.
 */
 
 #include "Python.h"
+#include <dirent.h>
 #include "common.h"
 
 int setup_error = 0;
@@ -260,6 +261,92 @@ int get_adc_ain(const char *key, unsigned int *ain)
           return 0;
         }
     }
+
+    return 1;
+}
+
+int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
+{
+    DIR *dp;
+    struct dirent *ep;
+
+    dp = opendir (partial_path);
+    if (dp != NULL) {
+        while ((ep = readdir (dp))) {
+            if (strstr(ep->d_name, prefix)) {
+                snprintf(full_path, full_path_len, "%s/%s", partial_path, ep->d_name);
+                (void) closedir (dp);
+                return 1;
+            }
+        }
+        (void) closedir (dp);
+    } else {
+        return 0;
+    }
+
+    return 0;
+}
+
+
+int load_device_tree(const char *name)
+{
+    FILE *file = NULL;
+    char slots[40];
+    char line[256];
+
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+
+    file = fopen(slots, "r+");
+    if (!file) {
+        return -1;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        //the device is already loaded, return 1
+        if (strstr(line, name)) {
+            fclose(file);
+            return 1;
+        }
+    }
+
+    //if the device isn't already loaded, load it, and return
+    fprintf(file, name);
+    fclose(file);
+
+    return 1;
+}
+
+int unload_device_tree(const char *name)
+{
+    FILE *file = NULL;
+    char slots[40];
+    char line[256];
+    char *slot_line;
+
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+
+    file = fopen(slots, "r+");
+    if (!file) {
+        return -1;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        //the device is loaded, let's unload it
+        if (strstr(line, name)) {
+            slot_line = strtok(line, ":");
+            //remove leading spaces
+            while(*slot_line == ' ')
+                slot_line++;
+
+            fprintf(file, "-%s", slot_line);
+            fclose(file);
+            return 1;
+        }
+    }
+
+    //not loaded, close file
+    fclose(file);
 
     return 1;
 }

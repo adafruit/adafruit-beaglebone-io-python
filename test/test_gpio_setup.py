@@ -1,7 +1,7 @@
 import pytest
 import os
 
-import BBIO.GPIO as GPIO
+import Adafruit_BBIO.GPIO as GPIO
 
 def teardown_module(module):
     GPIO.cleanup()

@@ -1,7 +1,7 @@
 import pytest
 import os
 
-import BBIO.PWM as PWM
+import Adafruit_BBIO.PWM as PWM
 
 def teardown_module(module):
     PWM.cleanup()

@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-int adc_initialized;
+extern int adc_initialized;
 
 int adc_setup(void);
 int read_value(unsigned int ain, float *value);
