@@ -132,7 +132,7 @@ pins_t table[] = {
   { "AIN5", "P9_36", 0, -1, 5},
   { "AIN2", "P9_37", 0, -1, 2},
   { "AIN3", "P9_38", 0, -1, 3},
-  { "AIN0", "P9_39", 0, -1, -1},
+  { "AIN0", "P9_39", 0, -1, 0},
   { "AIN1", "P9_40", 0, -1, 1},
   { "CLKOUT2", "P9_41", 20, -1, -1},
   { "GPIO0_7", "P9_42", 7, 0, -1},
@@ -170,13 +170,14 @@ int lookup_ain_by_key(const char *key)
   pins_t *p;
   for (p = table; p->key != NULL; ++p) {
       if (strcmp(p->key, key) == 0) {
-        if (p->ain == -1)
-          return 0;
-        else
+        if (p->ain == -1) {
+          return -1;
+        } else {
           return p->ain;
+        }
       }
   }
-  return 0;
+  return -1;
 }
 
 int lookup_ain_by_name(const char *name)
@@ -184,13 +185,14 @@ int lookup_ain_by_name(const char *name)
   pins_t *p;
   for (p = table; p->name != NULL; ++p) {
       if (strcmp(p->name, name) == 0) {
-        if (p->ain == -1)
-          return 0;
-        else
+        if (p->ain == -1) {
+          return -1;
+        } else {
           return p->ain;
+        }
       }
   }
-  return 0;
+  return -1;
 }
 
 int copy_pwm_key_by_key(const char *input_key, char *key)
@@ -251,9 +253,13 @@ int get_adc_ain(const char *key, unsigned int *ain)
 {
     *ain = lookup_ain_by_key(key);
     
-    if (!*ain) {
+    if (*ain == -1) {
         *ain = lookup_ain_by_name(key);
+
+        if (*ain == -1) {
+          return 0;
+        }
     }
 
-    return 0;
+    return 1;
 }

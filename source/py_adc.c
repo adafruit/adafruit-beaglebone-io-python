@@ -47,12 +47,19 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 static PyObject *py_read(PyObject *self, PyObject *args)
 {
     unsigned int ain;
-    int value;
+    float value;
     char *channel;
     PyObject *py_value;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
+
+    // check setup was called prior
+    if (!adc_initialized)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "You must setup() ADC prior to calling read.");
+        return NULL;
+    }    
 
     if (!get_adc_ain(channel, &ain)) {
         PyErr_SetString(PyExc_ValueError, "Invalid AIN key or name.");
@@ -61,7 +68,40 @@ static PyObject *py_read(PyObject *self, PyObject *args)
 
     read_value(ain, &value);
 
-    py_value = Py_BuildValue("i", value);
+    //scale modifier
+    value = value / 1800.0;
+
+    py_value = Py_BuildValue("f", value);
+
+    return py_value;
+}
+
+// python function read(channel)
+static PyObject *py_read_raw(PyObject *self, PyObject *args)
+{
+    unsigned int ain;
+    float value;
+    char *channel;
+    PyObject *py_value;
+
+    if (!PyArg_ParseTuple(args, "s", &channel))
+        return NULL;
+
+   // check setup was called prior
+    if (!adc_initialized)
+    {
+        PyErr_SetString(PyExc_RuntimeError, "You must setup() ADC prior to calling read.");
+        return NULL;
+    }       
+
+    if (!get_adc_ain(channel, &ain)) {
+        PyErr_SetString(PyExc_ValueError, "Invalid AIN key or name.");
+        return NULL;    
+    }
+
+    read_value(ain, &value);
+
+    py_value = Py_BuildValue("f", value);
 
     return py_value;
 }
@@ -70,8 +110,10 @@ static const char moduledocstring[] = "ADC functionality of a BeagleBone using P
 
 PyMethodDef adc_methods[] = {
     {"setup", py_setup_adc, METH_VARARGS, "Set up and start the ADC channel."},
-    {"read", (PyCFunction)py_read, METH_VARARGS, "Read the analog value for the channel" },
-    {"cleanup", py_cleanup, METH_VARARGS, "Clean up ADC."},
+    {"read", (PyCFunction)py_read, METH_VARARGS, "Read the normalized 0-1.0 analog value for the channel" },
+    {"read_raw", (PyCFunction)py_read_raw, METH_VARARGS, "Read the raw analog value for the channel" },
+    //disable cleanup for now, as unloading the driver locks up the system
+    //{"cleanup", py_cleanup, METH_VARARGS, "Clean up ADC."},
     //{"setwarnings", py_setwarnings, METH_VARARGS, "Enable or disable warning messages"},
     {NULL, NULL, 0, NULL}
 };

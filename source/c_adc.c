@@ -33,8 +33,8 @@ SOFTWARE.
 char ctrl_dir[30];
 char adc_prefix_dir[30];
 char ocp_dir[22];
-int adc_initialized = 0;
 
+adc_initialized = 0;
 
 int load_device_tree(const char *name);
 
@@ -65,7 +65,7 @@ int initialize_adc(void)
     if (!adc_initialized && load_device_tree("cape-bone-iio")) {
         build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
         build_path(ocp_dir, "helper", adc_prefix_dir, sizeof(adc_prefix_dir));
-        snprintf(adc_prefix_dir, sizeof(adc_prefix_dir), "%s/AIN", adc_prefix_dir);
+        strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
         adc_initialized = 1;
         return 1;
     }
@@ -136,15 +136,18 @@ int unload_device_tree(const char *name)
     return 1;
 }
 
-int read_value(unsigned int ain, int *value)
+int read_value(unsigned int ain, float *value)
 {
     FILE * fh;
     char ain_path[40];
-    snprintf(ain_path, sizeof(ain_path), "%s/%d", adc_prefix_dir, ain);
+    snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
+    fprintf(stderr, "adc_prefix_dir path %s\n", adc_prefix_dir);
+    fprintf(stderr, "ain path %s\n", ain_path);
 
     fh = fopen(ain_path, "r");
 
-    fscanf(fh, "%d", value);
+    fseek(fh, 0, SEEK_SET);
+    fscanf(fh, "%f", value);
  
     return 1;
 }
