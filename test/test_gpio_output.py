@@ -21,6 +21,18 @@ class TestGPIOOutput:
         assert not int(value)
         GPIO.cleanup()
 
+    def test_output_greater_than_one(self):
+        GPIO.setup("P8_10", GPIO.OUT)
+        GPIO.output("P8_10", 2)
+        value = open('/sys/class/gpio/gpio68/value').read()
+        assert int(value)
+        GPIO.cleanup()
+
+    def test_output_of_pin_not_setup(self):
+        with pytest.raises(RuntimeError):
+            GPIO.output("P8_11", GPIO.LOW)
+            GPIO.cleanup() 
+
     def test_output_setup_as_input(self):
         GPIO.setup("P8_10", GPIO.IN)
         with pytest.raises(RuntimeError):
