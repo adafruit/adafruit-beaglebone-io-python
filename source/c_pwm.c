@@ -4,9 +4,13 @@
 #include <dirent.h>
 #include <string.h>
 #include <fcntl.h>
+#include <unistd.h>
 #include "c_pwm.h"
 
 #define KEYLEN 7
+
+#define PERIOD 0
+#define DUTY 1
 
 char pwm_ctrl_dir[30];
 char ocp_dir[22];
@@ -16,12 +20,46 @@ int pwm_initialized = 0;
 struct pwm_exp
 {
     char key[KEYLEN];
-    int fd;
+    int period_fd;
+    int duty_fd;
+    unsigned long duty;
+    unsigned long period_ns;
     struct pwm_exp *next;
 };
 struct pwm_exp *exported_pwms = NULL;
 
 int load_device_tree(const char *name);
+
+int fd_lookup(const char *key, int type_fd)
+{
+    struct pwm_exp *pwm = exported_pwms;
+    while (pwm != NULL)
+    {
+        if (strcmp(pwm->key, key)) {
+            if (type_fd == DUTY) {
+                return pwm->duty_fd;
+            } else {
+                return pwm->period_fd;
+            }
+        }
+        pwm = pwm->next;
+    }
+    return 0;
+}
+
+struct pwm_exp *lookup_exported_pwm(const char *key) 
+{
+    struct pwm_exp *pwm = exported_pwms;
+
+    while (pwm != NULL)
+    {
+        if (strcmp(pwm->key, key)) {
+            return pwm;
+        }
+        pwm = pwm->next;
+    }
+    return 0;
+}
 
 int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
 {
@@ -123,12 +161,14 @@ int unload_device_tree(const char *name)
     return 1;
 }
 
-
-
 int pwm_enable(const char *key)
 {
     char fragment[18];
-    int fd;
+    char pwm_test_fragment[20];
+    char pwm_test_path[45];
+    char period_path[50];
+    char duty_path[50];
+    int period_fd, duty_fd;
     struct pwm_exp *new_pwm, *pwm;
 
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
@@ -139,8 +179,27 @@ int pwm_enable(const char *key)
         return -1;
     }
 
+    //creates the fragment in order to build the pwm_test_filename, such as "pwm_test_P9_13"
+    snprintf(pwm_test_fragment, sizeof(pwm_test_fragment), "pwm_test_%s", key);
+
+    //finds and builds the pwm_test_path, as it can be variable...
+    build_path(ocp_dir, pwm_test_fragment, pwm_test_path, sizeof(pwm_test_path));
+
+    //create the path for the period and duty
+    snprintf(period_path, sizeof(period_path), "%s/period", pwm_test_path);
+    snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_test_path);
+
+
     //TODO add fd to list
-    //fd = 
+    
+    if ((period_fd = open(period_path, O_RDWR)) < 0)
+        return -1;
+
+    if ((duty_fd = open(duty_path, O_RDWR)) < 0) {
+        //error, close already opened period_fd.
+        close(period_fd);
+        return -1;
+    }
 
     // add to list
     new_pwm = malloc(sizeof(struct pwm_exp));
@@ -149,7 +208,8 @@ int pwm_enable(const char *key)
     }
 
     strncpy(new_pwm->key, key, KEYLEN);
-    //new_pwm->fd = fd;
+    new_pwm->period_fd = period_fd;
+    new_pwm->duty_fd = duty_fd;
     new_pwm->next = NULL;
 
     if (exported_pwms == NULL)
@@ -183,7 +243,8 @@ int pwm_disable(const char *key)
         if (strcmp(pwm->key, key) == 0)
         {
             //close the fd
-            close(pwm->fd);
+            close(pwm->period_fd);
+            close(pwm->duty_fd);
             if (prev_pwm == NULL)
                 exported_pwms = pwm->next;
             else
@@ -197,6 +258,42 @@ int pwm_disable(const char *key)
         }
     }
     return 0;    
+}
+
+int pwm_set_frequency(const char *key, float freq) {
+    int len;
+    char buffer[20];
+    struct pwm_exp *pwm;
+
+    if (freq <= 0.0)
+        return -1;
+
+    pwm = lookup_exported_pwm(key);
+
+    pwm->period_ns = (unsigned long)(1e9 / freq);
+
+    len = snprintf(buffer, sizeof(buffer), "%lu", pwm->period_ns);
+    write(pwm->period_fd, buffer, len);
+
+    return 1;
+}
+
+int pwm_set_duty_cycle(const char *key, float duty) {
+    int len;
+    char buffer[20];
+    struct pwm_exp *pwm;
+
+    if (duty < 0.0 || duty > 100.0)
+        return -1;
+
+    pwm = lookup_exported_pwm(key);
+
+    pwm->duty = (unsigned long)(pwm->period_ns * duty);
+
+    len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty);
+    write(pwm->duty_fd, buffer, len);
+
+    return 0;
 }
 
 void pwm_cleanup(void)
