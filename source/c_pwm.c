@@ -53,11 +53,12 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
 
     while (pwm != NULL)
     {
-        if (strcmp(pwm->key, key)) {
+        if (strcmp(pwm->key, key) == 0) {
             return pwm;
         }
         pwm = pwm->next;
     }
+
     return 0;
 }
 
@@ -70,7 +71,7 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
     if (dp != NULL) {
         while ((ep = readdir (dp))) {
             if (strstr(ep->d_name, prefix)) {
-                snprintf(full_path, full_path_len, "%s%s", partial_path, ep->d_name);
+                snprintf(full_path, full_path_len, "%s/%s", partial_path, ep->d_name);
                 (void) closedir (dp);
                 return 1;
             }
@@ -85,8 +86,8 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
 
 int initialize_pwm(void)
 {
-    if  (build_path("/sys/devices/", "bone_capemgr", pwm_ctrl_dir, sizeof(pwm_ctrl_dir)) && 
-         build_path("/sys/devices/", "ocp", ocp_dir, sizeof(ocp_dir))) {
+    if  (build_path("/sys/devices", "bone_capemgr", pwm_ctrl_dir, sizeof(pwm_ctrl_dir)) && 
+         build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir))) {
         pwm_initialized = 1;
 
         load_device_tree("am33xx_pwm");
@@ -161,7 +162,57 @@ int unload_device_tree(const char *name)
     return 1;
 }
 
-int pwm_enable(const char *key)
+
+int pwm_set_frequency(const char *key, float freq) {
+    int len;
+    char buffer[20];
+    unsigned long period_ns;
+    struct pwm_exp *pwm;
+
+    if (freq <= 0.0)
+        return -1;
+
+    pwm = lookup_exported_pwm(key);
+
+    if (pwm == NULL) {
+        return -1;
+    }
+
+    period_ns = (unsigned long)(1e9 / freq);
+
+    if (period_ns != pwm->period_ns) {
+        pwm->period_ns = period_ns;
+
+        len = snprintf(buffer, sizeof(buffer), "%lu", period_ns);
+        write(pwm->period_fd, buffer, len);
+    }
+
+    return 1;
+}
+
+int pwm_set_duty_cycle(const char *key, float duty) {
+    int len;
+    char buffer[20];
+    struct pwm_exp *pwm;
+
+    if (duty < 0.0 || duty > 100.0)
+        return -1;
+
+    pwm = lookup_exported_pwm(key);
+
+    if (pwm == NULL) {
+        return -1;
+    }    
+
+    pwm->duty = (unsigned long)(pwm->period_ns * (duty / 100.0));
+
+    len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty);
+    write(pwm->duty_fd, buffer, len);
+
+    return 0;
+}
+
+int pwm_start(const char *key, float duty, float freq)
 {
     char fragment[18];
     char pwm_test_fragment[20];
@@ -189,11 +240,10 @@ int pwm_enable(const char *key)
     snprintf(period_path, sizeof(period_path), "%s/period", pwm_test_path);
     snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_test_path);
 
-
-    //TODO add fd to list
-    
+    //add period and duty fd to pwm list    
     if ((period_fd = open(period_path, O_RDWR)) < 0)
         return -1;
+
 
     if ((duty_fd = open(duty_path, O_RDWR)) < 0) {
         //error, close already opened period_fd.
@@ -224,6 +274,9 @@ int pwm_enable(const char *key)
         pwm->next = new_pwm;
     }
 
+    pwm_set_frequency(key, freq);
+    pwm_set_duty_cycle(key, duty);
+
     return 0;
 }
 
@@ -233,7 +286,6 @@ int pwm_disable(const char *key)
     char fragment[18];
 
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
-    fprintf(stderr, "pwm_disable fragment: %s\n", fragment);
     unload_device_tree(fragment);
 
     // remove from list
@@ -260,46 +312,9 @@ int pwm_disable(const char *key)
     return 0;    
 }
 
-int pwm_set_frequency(const char *key, float freq) {
-    int len;
-    char buffer[20];
-    struct pwm_exp *pwm;
-
-    if (freq <= 0.0)
-        return -1;
-
-    pwm = lookup_exported_pwm(key);
-
-    pwm->period_ns = (unsigned long)(1e9 / freq);
-
-    len = snprintf(buffer, sizeof(buffer), "%lu", pwm->period_ns);
-    write(pwm->period_fd, buffer, len);
-
-    return 1;
-}
-
-int pwm_set_duty_cycle(const char *key, float duty) {
-    int len;
-    char buffer[20];
-    struct pwm_exp *pwm;
-
-    if (duty < 0.0 || duty > 100.0)
-        return -1;
-
-    pwm = lookup_exported_pwm(key);
-
-    pwm->duty = (unsigned long)(pwm->period_ns * duty);
-
-    len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty);
-    write(pwm->duty_fd, buffer, len);
-
-    return 0;
-}
-
 void pwm_cleanup(void)
 {
     while (exported_pwms != NULL) {
-        fprintf(stderr, "pwm_clenaup key: %s\n", exported_pwms->key);
         pwm_disable(exported_pwms->key);
     }
 }
