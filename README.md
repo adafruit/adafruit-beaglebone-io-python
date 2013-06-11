@@ -6,9 +6,9 @@ It has been tested on the 5-20 angstrom image on the BeagleBone Black.
 
 ## Installation
 
-git clone
-opkg update && opkg install python-dev python3-dev
-python setup.py install
+    git clone
+    opkg update && opkg install python-dev python3-dev
+    python setup.py install
 
 ## Usage
 
