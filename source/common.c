@@ -172,8 +172,8 @@ int get_gpio_number(const char *key, unsigned int *gpio)
 int get_pwm_key(const char *input, char *key)
 {
     if (!copy_pwm_key_by_key(input, key)) {
-        get_pwm_key_by_name(input, key);
+        return get_pwm_key_by_name(input, key);
     }
 
-    return 0;
+    return 1;
 }
