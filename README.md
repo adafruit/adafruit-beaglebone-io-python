@@ -46,6 +46,19 @@ Polling inputs:
         print("HIGH")
     else:
         print("LOW")
+
+#### PWM
+        
+    import BBIO.PWM as PWM
+    #PWM.start(channel, duty, freq=2000)
+    #duty values are valid 0-100
+    PWM.start("P9_14", 50)
+    
+    PWM.set_duty_cycle("P9_14", 25.5)
+    PWM.set_frequency("P9_14", 10)
+    
+    PWM.disable("P9_14")
+    PWM.cleanup()
         
 ## Running tests
 
