@@ -23,6 +23,10 @@ class TestPwmSetup:
         assert int(period) == 500000
         PWM.cleanup()
 
+    def test_pwm_start_invalid_pwm_key(self):
+        with pytest.raises(ValueError):   
+            PWM.start("P8_25", -1)             
+
     def test_pwm_start_invalid_duty_cycle_negative(self):
         with pytest.raises(ValueError):   
             PWM.start("P9_14", -1)     
@@ -64,10 +68,15 @@ class TestPwmSetup:
         assert int(period) == 500000        
         PWM.cleanup()
 
-    def test_pwm_duty_cycle_invalid_key(self):
+    def test_pwm_duty_cycle_non_setup_key(self):
         with pytest.raises(RuntimeError):
+            PWM.set_duty_cycle("P9_14", 100)
+            PWM.cleanup()    
+
+    def test_pwm_duty_cycle_invalid_key(self):
+        with pytest.raises(ValueError):
             PWM.set_duty_cycle("P9_15", 100)
-            PWM.cleanup()      
+            PWM.cleanup()                  
 
     def test_pwm_duty_cycle_invalid_value_high(self):
         PWM.start("P9_14", 0)
@@ -99,10 +108,15 @@ class TestPwmSetup:
             PWM.set_frequency("P9_14", "11")
             PWM.cleanup()
 
-    def test_pwm_freq_invalid_key(self):
+    def test_pwm_freq_non_setup_key(self):
         with pytest.raises(RuntimeError):
+            PWM.set_frequency("P9_14", 100)
+            PWM.cleanup()       
+
+    def test_pwm_freq_non_setup_key(self):
+        with pytest.raises(ValueError):
             PWM.set_frequency("P9_15", 100)
-            PWM.cleanup()                    
+            PWM.cleanup()                            
 
     def test_stop_pwm(self):
         pass
