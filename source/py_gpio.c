@@ -75,8 +75,6 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (get_gpio_number(channel, &gpio))
        return NULL;
 
-   fprintf(stderr,"%d\n", gpio); 
-
    gpio_export(gpio);
    gpio_set_direction(gpio, direction);
    gpio_set_value(gpio, pud);
@@ -132,6 +130,7 @@ static PyObject *py_input_gpio(PyObject *self, PyObject *args)
     }
 
     gpio_get_value(gpio, &value);
+
     py_value = Py_BuildValue("i", value);
 
     return py_value;
