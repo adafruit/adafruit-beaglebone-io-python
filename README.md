@@ -72,3 +72,11 @@ Install py.test to run the tests.  You'll also need the python compiler package 
 Execute the following in the root of the project:
 
     py.test
+
+## Credits
+
+The BeagleBone IO Python library was originally forked from the excellent MIT Licensed [RPi.GPIO](https://code.google.com/p/raspberry-gpio-python) library written by Ben Croston.
+
+## License
+
+BeagleBone IO Python library is released under the [MIT License](http://www.opensource.org/licenses/MIT).
