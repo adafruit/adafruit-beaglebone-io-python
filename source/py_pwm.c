@@ -32,7 +32,6 @@ static int init_module(void)
 static PyObject *py_cleanup(PyObject *self, PyObject *args)
 {
     // unexport the PWM
-    fprintf(stderr, "in py_cleanup\n");
     pwm_cleanup();
 
     Py_RETURN_NONE;
@@ -60,7 +59,7 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
         PyErr_SetString(PyExc_ValueError, "duty_cycle must have a value from 0.0 to 100.0");
         return NULL;
     }
-    
+
     if (frequency <= 0.0)
     {
         PyErr_SetString(PyExc_ValueError, "frequency must be greater than 0.0");
