@@ -47,6 +47,18 @@ Polling inputs:
     else:
         print("LOW")
 
+Waiting for an edge (GPIO.RISING, GPIO.FALLING, or GPIO.BOTH:
+
+    GPIO.wait_for_edge(channel, GPIO.RISING)
+    
+Detecting events:
+
+    GPIO.add_event_detect("P9_12", GPIO.FALLING)
+    #your amazing code here
+    #detect wherever:
+    if GPIO.event_detected("P9_12"):
+        print "event detected!"
+
 #### PWM
         
     import BBIO.PWM as PWM
