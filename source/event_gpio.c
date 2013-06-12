@@ -211,7 +211,7 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
         if ((fd = open_value_file(gpio)) == -1)
             return -1;        
     }
- 
+    lseek(fd, 0, SEEK_SET);
     read(fd, &direction, 4);
 
     if (strcmp(direction, "out") == 0) {
@@ -220,7 +220,6 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
         *value = INPUT;
     }
  
-    close(fd);
     return 0;
 }
 
@@ -251,9 +250,10 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
     if (!fd)
     {
         if ((fd = open_value_file(gpio)) == -1)
-            return -1;        
-    }
- 
+            return -1;
+    }    
+
+    lseek(fd, 0, SEEK_SET);
     read(fd, &ch, 1);
 
     if (ch != '0') {
@@ -261,8 +261,7 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
     } else {
         *value = 0;
     }
- 
-    close(fd);
+
     return 0;
 }
 
