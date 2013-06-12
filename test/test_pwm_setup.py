@@ -4,8 +4,7 @@ import os
 import BBIO.PWM as PWM
 
 def teardown_module(module):
-    pass
-    #PWM.cleanup()
+    PWM.cleanup()
 
 class TestPwmSetup:    
     def test_start_pwm(self):
@@ -30,6 +29,16 @@ class TestPwmSetup:
     def test_pwm_start_invalid_duty_cycle_negative(self):
         with pytest.raises(ValueError):   
             PWM.start("P9_14", -1)     
+
+    def test_pwm_start_valid_duty_cycle_min(self):
+        #testing an exception isn't thrown
+        PWM.start("P9_14", 0)    
+        PWM.cleanup()
+
+    def test_pwm_start_valid_duty_cycle_max(self):
+        #testing an exception isn't thrown
+        PWM.start("P9_14", 100)  
+        PWM.cleanup()            
 
     def test_pwm_start_invalid_duty_cycle_high(self):
         with pytest.raises(ValueError):   
