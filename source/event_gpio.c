@@ -15,6 +15,7 @@ struct fdx
     int fd;
     unsigned int gpio;
     int initial;
+    unsigned int is_evented;
     struct fdx *next;
 };
 struct fdx *fd_list = NULL;
@@ -37,7 +38,7 @@ struct gpio_exp
 struct gpio_exp *exported_gpios = NULL;
 
 pthread_t threads;
-int event_occurred[54] = { 0 };
+int event_occurred[120] = { 0 };
 int thread_running = 0;
 int epfd = -1;
 
@@ -125,6 +126,7 @@ int add_fd_list(unsigned int gpio, int fd)
     new_fd->fd = fd;
     new_fd->gpio = gpio;
     new_fd->initial = 1;
+    new_fd->is_evented = 0;
     if (fd_list == NULL) {
         new_fd->next = NULL;
     } else {
@@ -419,7 +421,7 @@ void *poll_thread(void *threadarg)
     pthread_exit(NULL);
 }
 
-int gpio_event_added(unsigned int gpio)
+int gpio_is_evented(unsigned int gpio)
 {
     struct fdx *f = fd_list;
     while (f != NULL)
@@ -431,28 +433,64 @@ int gpio_event_added(unsigned int gpio)
     return 0;
 }
 
+int gpio_event_add(unsigned int gpio)
+{
+    struct fdx *f = fd_list;
+    while (f != NULL)
+    {
+        if (f->gpio == gpio)
+        {
+            if (f->is_evented)
+                return 1;
+
+            f->is_evented = 1;
+            return 0;
+        }
+        f = f->next;
+    }
+    return 0;
+}
+
+int gpio_event_remove(unsigned int gpio)
+{
+    struct fdx *f = fd_list;
+    while (f != NULL)
+    {
+        if (f->gpio == gpio)
+        {
+            f->is_evented = 0;
+            return 0;
+        }
+        f = f->next;
+    }
+    return 0;
+}
+
 int add_edge_detect(unsigned int gpio, unsigned int edge)
 // return values:
 // 0 - Success
 // 1 - Edge detection already added
 // 2 - Other error
 {
-    int fd;
+    int fd = fd_lookup(gpio);
     pthread_t threads;
     struct epoll_event ev;
     long t = 0;
 
     // check to see if this gpio has been added already
-    if (gpio_event_added(gpio) != 0)
+    if (gpio_event_add(gpio) != 0)
         return 1;
 
     // export /sys/class/gpio interface
     gpio_export(gpio);
     gpio_set_direction(gpio, 1); // 1=input
     gpio_set_edge(gpio, edge);
-    if ((fd = open_value_file(gpio)) == -1)
-        return 2;
-    add_fd_list(gpio,fd);
+
+    if (!fd)
+    {
+        if ((fd = open_value_file(gpio)) == -1)
+            return 2;
+    }
 
     // create epfd if not already open
     if ((epfd == -1) && ((epfd = epoll_create(1)) == -1))
@@ -485,14 +523,11 @@ void remove_edge_detect(unsigned int gpio)
     // delete epoll of fd
     epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &ev);
 
-    // close fd and remove from list
-    close_value_fd(gpio);
-
     // set edge to none
     gpio_set_edge(gpio, NO_EDGE);
 
     // unexport gpio
-    gpio_unexport(gpio);
+    gpio_event_remove(gpio);
 
     // clear detected flag
     event_occurred[gpio] = 0;
@@ -518,31 +553,35 @@ void event_cleanup(void)
 int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
 // standalone from all the event functions above
 {
-    int epfd, fd, n, i;
+    int fd = fd_lookup(gpio);
+    int epfd, n, i;
     struct epoll_event events, ev;
     char buf;
 
     if ((epfd = epoll_create(1)) == -1)
         return 1;
 
-    // check to see if this gpio has been added already
-    if (gpio_event_added(gpio) != 0)
+    // check to see if this gpio has been added already, if not, mark as added
+    if (gpio_event_add(gpio) != 0)
         return 2;
 
     // export /sys/class/gpio interface
     gpio_export(gpio);
     gpio_set_direction(gpio, 1); // 1=input
     gpio_set_edge(gpio, edge);
-    if ((fd = open_value_file(gpio)) == -1)
-        return 3;
+
+    if (!fd)
+    {
+        if ((fd = open_value_file(gpio)) == -1)
+            return 3;
+    }
 
     // add to epoll fd
     ev.events = EPOLLIN | EPOLLET | EPOLLPRI;
     ev.data.fd = fd;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev) == -1)
     {
-        gpio_unexport(gpio);
-        close(fd);
+        gpio_event_remove(gpio);
         return 4;
     }
 
@@ -550,8 +589,7 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
     for (i = 0; i<2; i++) // first time triggers with current state, so ignore
        if ((n = epoll_wait(epfd, &events, 1, -1)) == -1)
        {
-           gpio_unexport(gpio);
-           close(fd);
+           gpio_event_remove(gpio);
            return 5;
        }
 
@@ -560,21 +598,17 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
         lseek(events.data.fd, 0, SEEK_SET);
         if (read(events.data.fd, &buf, 1) != 1)
         {
-            gpio_unexport(gpio);
-            close(fd);
+            gpio_event_remove(gpio);
             return 6;
         }
         if (events.data.fd != fd)
         {
-            gpio_unexport(gpio);
-            close(fd);
+            gpio_event_remove(gpio);
             return 7;
         }
     }
 
-    // clean up
-    gpio_unexport(gpio);
-    close(fd);
+    gpio_event_remove(gpio);
     close(epfd);
     return 0;
 }

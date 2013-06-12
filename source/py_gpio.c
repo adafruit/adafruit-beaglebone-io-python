@@ -31,8 +31,6 @@ static int init_module(void)
 // python function cleanup()
 static PyObject *py_cleanup(PyObject *self, PyObject *args)
 {
-    int i;
-
     // clean up any /sys/class exports
     event_cleanup();
 
@@ -227,7 +225,7 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
       return NULL;
    }
 
-   if (!gpio_event_added(gpio))
+   if (!gpio_is_evented(gpio))
    {
       PyErr_SetString(PyExc_RuntimeError, "Add event detection using add_event_detect first before adding a callback");
       return NULL;
