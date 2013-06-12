@@ -1,4 +1,4 @@
-## BeagleBone IO Python Library
+## Adafruit's BeagleBone IO Python Library
 
 This is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
 
@@ -91,4 +91,6 @@ The BeagleBone IO Python library was originally forked from the excellent MIT Li
 
 ## License
 
+
+Written by Justin Cooper, Adafruit Industries.
 BeagleBone IO Python library is released under the [MIT License](http://www.opensource.org/licenses/MIT).
