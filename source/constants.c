@@ -1,6 +1,5 @@
 #include "Python.h"
 #include "constants.h"
-#include "c_gpio.h"
 #include "event_gpio.h"
 #include "common.h"
 
