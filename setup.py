@@ -1,7 +1,7 @@
 # Some Angstrom images are missing the py_compile module; get it if not
 # present:
 # Fix credit:https://github.com/alexanderhiam/PyBBIO/blob/master/setup.py
-import random
+import random, os
 python_lib_path = random.__file__.split('random')[0]
 if not os.path.exists(python_lib_path + 'py_compile.py'):
   print "py_compile module missing; installing to %spy_compile.py" %\
