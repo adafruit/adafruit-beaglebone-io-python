@@ -2,7 +2,7 @@
 
 This is a set of Python tools to allow GPIO, PWM, and ADC (coming soon) access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
 
-It has been tested on the 5-20 Angstrom image on the BeagleBone Black.
+It has been tested on the 5-20 and 6-6 Angstrom image on the BeagleBone Black.
 
 ## Installation
 
