@@ -7,6 +7,7 @@ It has been tested on the 5-20 Angstrom image on the BeagleBone Black.
 ## Installation
 
     git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git
+    opkg update && opkg install python-distutils
     cd adafruit-beaglebone-io-python
     python setup.py install
 
