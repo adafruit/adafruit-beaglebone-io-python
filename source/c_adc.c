@@ -141,9 +141,7 @@ int read_value(unsigned int ain, float *value)
     FILE * fh;
     char ain_path[40];
     snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
-    fprintf(stderr, "adc_prefix_dir path %s\n", adc_prefix_dir);
-    fprintf(stderr, "ain path %s\n", ain_path);
-
+    
     fh = fopen(ain_path, "r");
 
     fseek(fh, 0, SEEK_SET);
