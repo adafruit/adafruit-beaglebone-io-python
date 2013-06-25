@@ -30,9 +30,9 @@ SOFTWARE.
 #include <unistd.h>
 #include "c_adc.h"
 
-char ctrl_dir[30];
-char adc_prefix_dir[30];
-char ocp_dir[22];
+char ctrl_dir[35];
+char adc_prefix_dir[40];
+char ocp_dir[25];
 
 adc_initialized = 0;
 
