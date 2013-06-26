@@ -4,7 +4,15 @@ This is a set of Python tools to allow GPIO, PWM, and ADC (coming soon) access o
 
 It has been tested on the 5-20 and 6-6 Angstrom image on the BeagleBone Black.
 
-**Installation**::
+**Installation on Angstrom**
+
+Easiest::
+
+    /usr/bin/ntpdate -b -s -u pool.ntp.org
+    opkg update && opkg install python-pip python-setuptools
+    pip install Adafruit_BBIO
+    
+Manual::
 
     git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git 
     #set the date and time 
@@ -14,6 +22,26 @@ It has been tested on the 5-20 and 6-6 Angstrom image on the BeagleBone Black.
     cd adafruit-beaglebone-io-python 
     python setup.py install
 
+**Installation on Ubuntu**
+
+Easiest::
+
+    sudo ntpdate pool.ntp.org
+    sudo apt-get update
+    sudo apt-get install build-essential python-dev python-pip -y
+    sudo pip install Adafruit_BBIO
+    
+Manual::
+
+    sudo ntpdate pool.ntp.org
+    sudo apt-get update
+    sudo apt-get install build-essential python-dev python-pip -y
+    git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git
+    cd adafruit-beaglebone-io-python
+    sudo python setup.py install
+    cd ..
+    sudo rm -rf adafruit-beaglebone-io-python
+    
 **Usage**
 
 Using the library is very similar to the excellent RPi.GPIO library used on the Raspberry Pi. Below are some examples.
