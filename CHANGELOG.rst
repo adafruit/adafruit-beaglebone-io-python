@@ -1,3 +1,7 @@
+0.0.4
+----
+* Support for pip and easy_install
+
 0.0.3
 ____
 * ADC enabled

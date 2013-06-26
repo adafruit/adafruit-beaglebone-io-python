@@ -35,8 +35,8 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: Home Automation',
                'Topic :: System :: Hardware']
 
-setup(name             = 'BBIO',
-      version          = '0.0.7',
+setup(name             = 'Adafruit_BBIO',
+      version          = '0.0.4',
       author           = 'Justin Cooper',
       author_email     = 'justin@adafruit.com',
       description      = 'A module to control BeagleBone IO channels',
