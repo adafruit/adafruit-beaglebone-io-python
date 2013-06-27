@@ -36,7 +36,7 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: System :: Hardware']
 
 setup(name             = 'Adafruit_BBIO',
-      version          = '0.0.4',
+      version          = '0.0.5',
       author           = 'Justin Cooper',
       author_email     = 'justin@adafruit.com',
       description      = 'A module to control BeagleBone IO channels',
@@ -46,6 +46,6 @@ setup(name             = 'Adafruit_BBIO',
       url              = 'https://github.com/adafruit/adafruit-beaglebone-io-python/',
       classifiers      = classifiers,
       packages         = find_packages(),
-      ext_modules      = [Extension('BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c']), 
-                          Extension('BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c']),
-                          Extension('BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'])])
+      ext_modules      = [Extension('Adafruit_BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c']), 
+                          Extension('Adafruit_BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c']),
+                          Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'])])
