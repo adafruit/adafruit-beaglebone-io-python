@@ -1,3 +1,7 @@
+0.0.5
+----
+* Rename from BBIO to Adafruit_BBIO to reduce library conflicts and confusion.
+
 0.0.4
 ----
 * Support for pip and easy_install
