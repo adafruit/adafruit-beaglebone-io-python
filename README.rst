@@ -1,8 +1,10 @@
 **Adafruit's BeagleBone IO Python Library**
 
-This is a set of Python tools to allow GPIO, PWM, and ADC (coming soon) access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
+This is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
 
 It has been tested on the 5-20 and 6-6 Angstrom image on the BeagleBone Black.
+
+**Note: BBIO has been renamed to Adafruit_BBIO.**
 
 **Installation on Angstrom**
 
@@ -50,7 +52,7 @@ Using the library is very similar to the excellent RPi.GPIO library used on the 
 
 Import the library, and setup as GPIO.OUT or GPIO.IN::
 
-    import BBIO.GPIO as GPIO
+    import Adafruit_BBIO.GPIO as GPIO
     GPIO.setup("P8_14", GPIO.OUT)
 
 You can also refer to the pin names::
@@ -61,14 +63,14 @@ You can also refer to the pin names::
 
 Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0.::
 
-    import BBIO.GPIO as GPIO
+    import Adafruit_BBIO.GPIO as GPIO
     GPIO.setup("P8_14", GPIO.OUT) GPIO.output("P8_14", GPIO.HIGH)
     
 **GPIO Input**
 
 Inputs work similarly to outputs.::
 
-    import BBIO.GPIO as GPIO
+    import Adafruit_BBIO.GPIO as GPIO
     GPIO.setup("P8_14", GPIO.IN)
     
 Polling inputs::
@@ -92,7 +94,7 @@ Detecting events::
 
 **PWM**::
 
-    import BBIO.PWM as PWM 
+    import Adafruit_BBIO.PWM as PWM 
     #PWM.start(channel, duty, freq=2000) 
     #duty values are valid 0-100 
     PWM.start("P9_14", 50)
@@ -103,7 +105,7 @@ Detecting events::
 
 **ADC**::
 
-    import BBIO.ADC as ADC
+    import Adafruit_BBIO.ADC as ADC
     ADC.setup()
 
     #read returns values 0-1.0 
