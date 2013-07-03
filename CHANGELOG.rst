@@ -1,3 +1,7 @@
+0.0.8
+____
+* Temp remove overlay compilation.  Ubuntu failures.
+
 0.0.7
 ____
 * Refactor and clean up adc and pwm
