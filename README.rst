@@ -100,7 +100,7 @@ Detecting events::
     PWM.start("P9_14", 50)
     PWM.set_duty_cycle("P9_14", 25.5) PWM.set_frequency("P9_14", 10)
 
-    PWM.disable("P9_14")
+    PWM.stop("P9_14")
     PWM.cleanup()
 
 **ADC**::
