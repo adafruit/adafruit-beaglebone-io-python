@@ -58,7 +58,7 @@ int read_value(unsigned int ain, float *value)
 
     fseek(fh, 0, SEEK_SET);
     fscanf(fh, "%f", value);
- 
+    fclose(fh);
     return 1;
 }
 

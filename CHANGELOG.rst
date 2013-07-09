@@ -1,3 +1,6 @@
+0.0.9
+* Fix for ADC Segmentation Faults
+
 0.0.8
 ____
 * Temp remove overlay compilation.  Ubuntu failures.

@@ -40,3 +40,14 @@ class TestAdc:
         value = ADC.read_raw("P9_40")
 
         assert value != -1
+
+    def test_many_read_adc(self):
+        import time
+
+        ADC.setup()
+
+        for x in range(0,10000):
+            start = time.time() 
+            value = -1
+            value = ADC.read("AIN1")
+            assert value != -1
