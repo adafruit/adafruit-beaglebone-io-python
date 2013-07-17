@@ -689,7 +689,7 @@ static PyObject *
 SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 {
 	int bus, device;
-	int max_dt_length = 17;
+	int max_dt_length = 15;
 	char device_tree_name[max_dt_length];
 	char path[MAXPATH];
 	uint8_t tmp8;
@@ -697,7 +697,7 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 	static char *kwlist[] = {"bus", "device", NULL};
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii:open", kwlist, &bus, &device))
 		return NULL;
-	if (snprintf(device_tree_name, max_dt_length, "ADAFRUIT-SPI%d-0%d", bus, device) >= max_dt_length) {
+	if (snprintf(device_tree_name, max_dt_length, "ADAFRUIT-SPI%d", bus) >= max_dt_length) {
 		PyErr_SetString(PyExc_OverflowError,
 			"Bus and/or device number is invalid.");
 		return NULL;

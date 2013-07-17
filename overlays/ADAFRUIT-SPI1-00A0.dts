@@ -1,0 +1,60 @@
+/* DTS File modified from http://hipstercircuits.com/enable-spi-with-device-tree-on-beaglebone-black-copy-paste/ */
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "ti,beaglebone", "ti,beaglebone-black";
+
+    /* identification */
+    part-number = "ADAFRUIT-SPI1";
+
+    /* version */
+    version = "00A0";
+
+    /* state the resources this cape uses */
+    exclusive-use =
+        /* the pin header uses */
+        "P9.31",
+        "P9.29",
+        "P9.30",
+        "P9.28",
+        "P9.13",
+        "P9.12", 
+        "spi1";
+
+    fragment@0 {
+        target = <&am33xx_pinmux>;
+        __overlay__ {
+            pinctrl_spi1: pinctrl_spi1_pins {
+                pinctrl-single,pins = <                                        
+                    0x190 0x33    /* P9_31 = mcasp0_aclkx.spi1_sclk                 , INPUT_PULLUP | MODE3 */
+                    0x194 0x33    /* P9_29 = mcasp0_fsx.spi1_d0                     , INPUT_PULLUP  | MODE3 */
+                    0x198 0x13    /* P9_30 = mcasp0_axr0.spi1_d1                     , OUTPUT_PULLUP | MODE3 */
+                    0x19c 0x13    /* P9_28 = mcasp0_ahclkr.spi1_cs0                 , OUTPUT_PULLUP | MODE3 */                    
+                >;
+            };
+        };
+    };
+
+    fragment@1 {
+        target = <&spi1>;
+        __overlay__ {
+            #address-cells     = <1>;
+            #size-cells     = <0>;
+            status            = "okay";
+            pinctrl-names    = "default";
+            pinctrl-0        = <&pinctrl_spi1>;    
+
+            spidev@0{
+                compatible           = "spidev";
+                reg               = <0>;
+                spi-max-frequency = <24000000>;
+            };
+            spidev@1{
+                compatible           = "spidev";
+                reg               = <1>;
+                spi-max-frequency = <24000000>;
+            };            
+        };
+    };
+};
