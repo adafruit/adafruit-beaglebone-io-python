@@ -50,10 +50,10 @@ static int init_module(void)
 {
     int i;
 
-    module_setup = 0;
-
     for (i=0; i<120; i++)
         gpio_direction[i] = -1;
+
+    module_setup = 1;
 
     return 0;
 }
@@ -61,11 +61,8 @@ static int init_module(void)
 // python function cleanup()
 static PyObject *py_cleanup(PyObject *self, PyObject *args)
 {
-    // clean up any /sys/class exports
+    // clean up any exports
     event_cleanup();
-
-    // unexport the GPIO
-    exports_cleanup();
 
     Py_RETURN_NONE;
 }
@@ -82,6 +79,11 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
 
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|ii", kwlist, &channel, &direction, &pud, &initial))
       return NULL;
+
+   if (!module_setup) {
+      init_module();
+   }
+   
 
    if (direction != INPUT && direction != OUTPUT)
    {
@@ -125,9 +127,9 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
     if (get_gpio_number(channel, &gpio))
         return NULL;      
 
-    if (gpio_direction[gpio] != OUTPUT)
+    if (!module_setup || gpio_direction[gpio] != OUTPUT)
     {
-        PyErr_SetString(PyExc_RuntimeError, "The GPIO channel has not been set up as an OUTPUT");
+        PyErr_SetString(PyExc_RuntimeError, "The GPIO channel has not been setup() as an OUTPUT");
         return NULL;
     }
 
@@ -151,7 +153,7 @@ static PyObject *py_input_gpio(PyObject *self, PyObject *args)
         return NULL;
 
    // check channel is set up as an input or output
-    if (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT)
+    if (!module_setup || (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT))
     {
         PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel first");
         return NULL;
@@ -183,6 +185,7 @@ static void run_py_callbacks(unsigned int gpio)
             gstate = PyGILState_Ensure();
             //result = PyObject_CallFunction(cb->py_cb, "i", chan_from_gpio(gpio));
             result = PyObject_CallFunction(cb->py_cb, "i", gpio);
+
             if (result == NULL && PyErr_Occurred())
             {
                PyErr_Print();
@@ -249,7 +252,7 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
        return NULL;
 
    // check channel is set up as an input
-   if (gpio_direction[gpio] != INPUT)
+   if (!module_setup || gpio_direction[gpio] != INPUT)
    {
       PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel as an input first");
       return NULL;
@@ -290,7 +293,7 @@ static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *k
        return NULL;
 
    // check channel is set up as an input
-   if (gpio_direction[gpio] != INPUT)
+   if (!module_setup || gpio_direction[gpio] != INPUT)
    {
       PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel as an input first");
       return NULL;
@@ -394,7 +397,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
       return NULL;
 
    // check channel is setup as an input
-   if (gpio_direction[gpio] != INPUT)
+   if (!module_setup || gpio_direction[gpio] != INPUT)
    {
       PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel as an input first");
       return NULL;
@@ -507,6 +510,19 @@ PyMODINIT_FUNC initGPIO(void)
 
    define_constants(module);
 
+   if (!PyEval_ThreadsInitialized())
+      PyEval_InitThreads();
+
+   if (Py_AtExit(event_cleanup) != 0)
+   {
+      setup_error = 1;
+      event_cleanup();
+#if PY_MAJOR_VERSION > 2
+      return NULL;
+#else
+      return;
+#endif
+   }
 
 #if PY_MAJOR_VERSION > 2
    return module;

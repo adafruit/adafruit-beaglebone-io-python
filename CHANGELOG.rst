@@ -1,4 +1,10 @@
 0.0.9
+____
+* Fix direction for event detection code
+* Fix for segmentation faults on add_event_detect
+
+0.0.9
+____
 * Fix for ADC Segmentation Faults
 
 0.0.8

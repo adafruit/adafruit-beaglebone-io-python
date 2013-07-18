@@ -513,7 +513,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
 
     // export /sys/class/gpio interface
     gpio_export(gpio);
-    gpio_set_direction(gpio, 1); // 1=input
+    gpio_set_direction(gpio, 0); // 0=input
     gpio_set_edge(gpio, edge);
 
     if (!fd)
@@ -597,7 +597,7 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
 
     // export /sys/class/gpio interface
     gpio_export(gpio);
-    gpio_set_direction(gpio, 1); // 1=input
+    gpio_set_direction(gpio, 0); // 0=input
     gpio_set_edge(gpio, edge);
 
     if (!fd)
