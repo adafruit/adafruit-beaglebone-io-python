@@ -20,12 +20,12 @@ if not os.path.exists(python_lib_path + 'py_compile.py'):
     print "*Exception raised:"
     raise e
 
-#try:
-#    from overlays import builder
-#    builder.compile()
-#    builder.copy()
-#except:
-#    pass
+try:
+    from overlays import builder
+    builder.compile()
+    builder.copy()
+except:
+    pass
 
 import distribute_setup
 distribute_setup.use_setuptools()
