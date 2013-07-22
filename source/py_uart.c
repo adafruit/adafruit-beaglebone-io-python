@@ -40,9 +40,8 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 // python function setup()
 static PyObject *py_setup_uart(PyObject *self, PyObject *args)
 {
-    char dt[8];
+    char dt[9];
     char *channel;
-    static char *kwlist[] = {"channel", NULL};
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
@@ -52,7 +51,12 @@ static PyObject *py_setup_uart(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    setup_uart(dt);
+    fprintf(stderr, "dt: %s\n", dt);
+
+    if (!uart_setup(dt)) {
+        PyErr_SetString(PyExc_ValueError, "Unable to export UART channel.");
+        return NULL;        
+    }
 
     Py_RETURN_NONE;
 }
