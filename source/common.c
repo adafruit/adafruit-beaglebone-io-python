@@ -144,6 +144,22 @@ pins_t table[] = {
     { NULL, NULL, 0 }
 };
 
+typedef struct uart_t { 
+    const char *name; 
+    const char *path; 
+    const char *dt; 
+    const char *rx;
+    const char *tx;
+} uart_t;
+
+uart_t uart_table[] = {
+  { "UART1", "/dev/ttyO1", "BB-UART1", "P9_26", "P9_24"},
+  { "UART2", "/dev/ttyO2", "BB_UART2", "P9_22", "P9_21"},
+  { "UART4", "/dev/ttyO4", "BB_UART4", "P9_11", "P9_13"},
+  { "UART5", "/dev/ttyO5", "BB_UART5", "P8_38", "P8_37"},
+  { NULL, NULL, 0 }
+};
+
 int lookup_gpio_by_key(const char *key)
 {
   pins_t *p;
@@ -194,6 +210,19 @@ int lookup_ain_by_name(const char *name)
       }
   }
   return -1;
+}
+
+int lookup_uart_by_name(const char *input_name, char *dt)
+{
+    pins_t *p;
+    for (p = table; p->name != NULL; ++p) {
+        if (strcmp(p->name, input_name) == 0) {
+            strncpy(dt, p->dt, 7);
+            dt[7] = '\0';
+            return 1;                
+        }
+    }
+    return 0;
 }
 
 int copy_pwm_key_by_key(const char *input_key, char *key)
@@ -260,6 +289,15 @@ int get_adc_ain(const char *key, unsigned int *ain)
         if (*ain == -1) {
           return 0;
         }
+    }
+
+    return 1;
+}
+
+int get_uart_device_tree_name(const char *name, char *dt)
+{
+    if (!lookup_uart_by_name(name, dt)) {
+        return -1;
     }
 
     return 1;
