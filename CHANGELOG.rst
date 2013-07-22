@@ -1,4 +1,8 @@
-0.0.9
+0.0.11
+----
+* Alpha support for SPI
+
+0.0.10
 ____
 * Fix direction for event detection code
 * Fix for segmentation faults on add_event_detect
