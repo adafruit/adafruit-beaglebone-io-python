@@ -1,5 +1,6 @@
 0.0.11
 ----
+* New UART module to export UART overlays
 * Alpha support for SPI
 
 0.0.10
