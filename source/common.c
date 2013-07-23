@@ -155,6 +155,7 @@ typedef struct uart_t {
 uart_t uart_table[] = {
   { "UART1", "/dev/ttyO1", "BB-UART1", "P9_26", "P9_24"},
   { "UART2", "/dev/ttyO2", "BB-UART2", "P9_22", "P9_21"},
+  { "UART3", "/dev/ttyO3", "BB-UART3", "P9_42", ""},
   { "UART4", "/dev/ttyO4", "BB-UART4", "P9_11", "P9_13"},
   { "UART5", "/dev/ttyO5", "BB-UART5", "P8_38", "P8_37"},
   { NULL, NULL, 0 }
@@ -217,11 +218,8 @@ int lookup_uart_by_name(const char *input_name, char *dt)
     uart_t *p;
     for (p = uart_table; p->name != NULL; ++p) {
         if (strcmp(p->name, input_name) == 0) {
-            fprintf(stderr, "found name: %s\n", input_name);
-            fprintf(stderr, "found name: %s\n", p->name);
             strncpy(dt, p->dt, 8);
             dt[8] = '\0';
-            fprintf(stderr, "lookup_uart_by_name dt: %s\n", p->dt);
             return 1;                
         }
     }

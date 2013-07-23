@@ -51,8 +51,6 @@ static PyObject *py_setup_uart(PyObject *self, PyObject *args)
         return NULL;
     }
 
-    fprintf(stderr, "dt: %s\n", dt);
-
     if (!uart_setup(dt)) {
         PyErr_SetString(PyExc_ValueError, "Unable to export UART channel.");
         return NULL;        

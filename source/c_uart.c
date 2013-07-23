@@ -32,8 +32,6 @@ SOFTWARE.
 
 int uart_setup(const char *dt)
 {
-    fprintf(stderr, "uart_setup dt: %s\n", dt);
-
     if (load_device_tree(dt)) {
         return 1;
     }
@@ -45,6 +43,7 @@ void uart_cleanup(void)
 {
     unload_device_tree("BB-UART1");
     unload_device_tree("BB-UART2");
+    unload_device_tree("BB-UART3");
     unload_device_tree("BB-UART4");
     unload_device_tree("BB-UART5");
 }
