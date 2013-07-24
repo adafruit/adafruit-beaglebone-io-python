@@ -2,6 +2,7 @@
 ----
 * New UART module to export UART overlays
 * Alpha support for SPI
+* Add small delay after loading any device tree overlays
 
 0.0.10
 ____
