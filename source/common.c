@@ -30,6 +30,7 @@ SOFTWARE.
 
 #include "Python.h"
 #include <dirent.h>
+#include <time.h>
 #include "common.h"
 
 int setup_error = 0;
@@ -352,6 +353,9 @@ int load_device_tree(const char *name)
     //if the device isn't already loaded, load it, and return
     fprintf(file, name);
     fclose(file);
+
+    //0.2 second delay
+    nanosleep((struct timespec[]){{0, 200000000}}, NULL);
 
     return 1;
 }
