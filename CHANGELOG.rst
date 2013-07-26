@@ -1,3 +1,7 @@
+0.0.13
+----
+* Remove the gpio parameter from callbacks
+
 0.0.12
 ----
 * Bump version due to pypi issues
