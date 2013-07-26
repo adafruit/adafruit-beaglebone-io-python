@@ -184,8 +184,7 @@ static void run_py_callbacks(unsigned int gpio)
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
             // run callback
             gstate = PyGILState_Ensure();
-            //result = PyObject_CallFunction(cb->py_cb, "i", chan_from_gpio(gpio));
-            result = PyObject_CallFunction(cb->py_cb, "is", gpio, cb->channel);
+            result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
 
             if (result == NULL && PyErr_Occurred())
             {
