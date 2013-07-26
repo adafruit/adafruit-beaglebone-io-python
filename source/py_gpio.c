@@ -185,7 +185,7 @@ static void run_py_callbacks(unsigned int gpio)
             // run callback
             gstate = PyGILState_Ensure();
             //result = PyObject_CallFunction(cb->py_cb, "i", chan_from_gpio(gpio));
-            result = PyObject_CallFunction(cb->py_cb, "i", gpio, cb->channel);
+            result = PyObject_CallFunction(cb->py_cb, "is", gpio, cb->channel);
 
             if (result == NULL && PyErr_Occurred())
             {
