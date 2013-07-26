@@ -38,6 +38,7 @@ static int gpio_warnings = 1;
 
 struct py_callback
 {
+   char channel[32];
    unsigned int gpio;
    PyObject *py_cb;
    unsigned long long lastcall;
@@ -183,8 +184,7 @@ static void run_py_callbacks(unsigned int gpio)
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
             // run callback
             gstate = PyGILState_Ensure();
-            //result = PyObject_CallFunction(cb->py_cb, "i", chan_from_gpio(gpio));
-            result = PyObject_CallFunction(cb->py_cb, "i", gpio);
+            result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
 
             if (result == NULL && PyErr_Occurred())
             {
@@ -200,7 +200,7 @@ static void run_py_callbacks(unsigned int gpio)
    }
 }
 
-static int add_py_callback(unsigned int gpio, unsigned int bouncetime, PyObject *cb_func)
+static int add_py_callback(char *channel, unsigned int gpio, unsigned int bouncetime, PyObject *cb_func)
 {
    struct py_callback *new_py_cb;
    struct py_callback *cb = py_callbacks;
@@ -214,6 +214,8 @@ static int add_py_callback(unsigned int gpio, unsigned int bouncetime, PyObject 
    }
    new_py_cb->py_cb = cb_func;
    Py_XINCREF(cb_func);         // Add a reference to new callback
+   memset(new_py_cb->channel, 0, sizeof(new_py_cb->channel));
+   strncpy(new_py_cb->channel, channel, sizeof(new_py_cb->channel) - 1);
    new_py_cb->gpio = gpio;
    new_py_cb->lastcall = 0;
    new_py_cb->bouncetime = bouncetime;
@@ -264,7 +266,7 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
       return NULL;
    }
 
-   if (add_py_callback(gpio, bouncetime, cb_func) != 0)
+   if (add_py_callback(channel, gpio, bouncetime, cb_func) != 0)
       return NULL;
 
    Py_RETURN_NONE;
@@ -319,7 +321,7 @@ static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *k
    }
 
    if (cb_func != NULL)
-      if (add_py_callback(gpio, bouncetime, cb_func) != 0)
+      if (add_py_callback(channel, gpio, bouncetime, cb_func) != 0)
          return NULL;
 
    Py_RETURN_NONE;
