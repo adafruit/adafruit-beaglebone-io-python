@@ -1,3 +1,7 @@
+0.0.12
+----
+* Bump version due to pypi issues
+
 0.0.11
 ----
 * New UART module to export UART overlays
