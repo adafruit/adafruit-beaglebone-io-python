@@ -215,8 +215,8 @@ static int add_py_callback(char *channel, unsigned int gpio, unsigned int bounce
    }
    new_py_cb->py_cb = cb_func;
    Py_XINCREF(cb_func);         // Add a reference to new callback
-   memset(new_py_cb->channel, 0, sizeof(channel));
-   strncpy(new_py_cb->channel, channel, sizeof(channel) - 1);
+   memset(new_py_cb->channel, 0, sizeof(new_py_cb->channel));
+   strncpy(new_py_cb->channel, channel, sizeof(new_py_cb->channel) - 1);
    new_py_cb->gpio = gpio;
    new_py_cb->lastcall = 0;
    new_py_cb->bouncetime = bouncetime;
