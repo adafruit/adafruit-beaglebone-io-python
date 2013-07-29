@@ -235,16 +235,16 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
 
 int gpio_get_direction(unsigned int gpio, unsigned int *value)
 {
-    int fd = fd_lookup(gpio);
+    int fd;
     char direction[4];
+    char filename[34];
 
-    if (!fd)
-    {
-        if ((fd = open_value_file(gpio)) == -1)
-            return -1;        
-    }
+    snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
+    if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0)
+        return -1;
+
     lseek(fd, 0, SEEK_SET);
-    read(fd, &direction, 4);
+    read(fd, &direction, 3);
 
     if (strcmp(direction, "out") == 0) {
         *value = OUTPUT;
