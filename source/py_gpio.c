@@ -437,8 +437,13 @@ static PyObject *py_gpio_function(PyObject *self, PyObject *args)
     unsigned int gpio;
     unsigned int value;
     PyObject *func;
+    char *channel;
 
-    if (!PyArg_ParseTuple(args, "i", &gpio))
+
+    if (!PyArg_ParseTuple(args, "s", &channel))
+       return NULL;
+
+    if (get_gpio_number(channel, &gpio))
         return NULL;
 
     if (setup_error)

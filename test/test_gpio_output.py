@@ -21,6 +21,10 @@ class TestGPIOOutput:
         assert not int(value)
         GPIO.cleanup()
 
+    def test_direction_readback(self):
+        GPIO.setup("P8_10", GPIO.OUT)
+        direction = GPIO.gpio_function("P8_10")
+        assert direction == GPIO.OUT
     def test_output_greater_than_one(self):
         GPIO.setup("P8_10", GPIO.OUT)
         GPIO.output("P8_10", 2)

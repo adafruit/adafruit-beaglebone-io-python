@@ -15,3 +15,8 @@ class TestGPIOInput:
         value = open('/sys/class/gpio/gpio68/value').read()
         assert int(value) == input_value
         GPIO.cleanup()
+
+    def test_direction_readback(self):
+        GPIO.setup("P8_10", GPIO.IN)
+        direction = GPIO.gpio_function("P8_10")
+        assert direction == GPIO.IN
