@@ -43,8 +43,10 @@ static PyObject *py_setup_uart(PyObject *self, PyObject *args)
     char dt[9];
     char *channel;
 
-    if (!PyArg_ParseTuple(args, "s", &channel))
+    if (!PyArg_ParseTuple(args, "s", &channel)) {
+        PyErr_SetString(PyExc_ValueError, "Invalid UART channel.");
         return NULL;
+    }
 
     if (!get_uart_device_tree_name(channel, dt)) {
         PyErr_SetString(PyExc_ValueError, "Invalid UART channel.");
@@ -52,7 +54,7 @@ static PyObject *py_setup_uart(PyObject *self, PyObject *args)
     }
 
     if (!uart_setup(dt)) {
-        PyErr_SetString(PyExc_ValueError, "Unable to export UART channel.");
+        PyErr_SetString(PyExc_RuntimeError, "Unable to export UART channel.");
         return NULL;        
     }
 

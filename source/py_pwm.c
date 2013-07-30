@@ -76,7 +76,8 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
         return NULL;
     }
 
-    pwm_start(key, duty_cycle, frequency);
+    if (!pwm_start(key, duty_cycle, frequency))
+        return NULL;
 
     Py_RETURN_NONE;
 }

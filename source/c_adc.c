@@ -37,7 +37,11 @@ int adc_initialized = 0;
 
 int initialize_adc(void)
 {
-    if (!adc_initialized && load_device_tree("cape-bone-iio")) {
+    if (adc_initialized) {
+        return 1;
+    }
+
+    if (load_device_tree("cape-bone-iio")) {
         build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
         build_path(ocp_dir, "helper", adc_prefix_dir, sizeof(adc_prefix_dir));
         strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
@@ -45,7 +49,7 @@ int initialize_adc(void)
         return 1;
     }
 
-    return 0;   
+    return 0;
 }
 
 int read_value(unsigned int ain, float *value)

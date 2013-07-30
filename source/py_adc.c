@@ -38,9 +38,9 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 // python function setup()
 static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 {
-    adc_setup();
-
-    Py_RETURN_NONE;
+    if (adc_setup())
+        Py_RETURN_NONE;
+    return NULL;
 }
 
 // python function read(channel)

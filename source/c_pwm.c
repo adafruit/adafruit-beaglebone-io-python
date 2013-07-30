@@ -194,7 +194,7 @@ int pwm_start(const char *key, float duty, float freq)
     pwm_set_frequency(key, freq);
     pwm_set_duty_cycle(key, duty);
 
-    return 0;
+    return 1;
 }
 
 int pwm_disable(const char *key)

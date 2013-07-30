@@ -221,9 +221,11 @@ int lookup_uart_by_name(const char *input_name, char *dt)
         if (strcmp(p->name, input_name) == 0) {
             strncpy(dt, p->dt, 8);
             dt[8] = '\0';
+            fprintf(stderr, "return 1 lookup_uart_by_name");
             return 1;                
         }
     }
+    fprintf(stderr, "return 0 lookup_uart_by_name");
     return 0;
 }
 
@@ -299,7 +301,8 @@ int get_adc_ain(const char *key, unsigned int *ain)
 int get_uart_device_tree_name(const char *name, char *dt)
 {
     if (!lookup_uart_by_name(name, dt)) {
-        return -1;
+      fprintf(stderr, "return 0 get_uart");
+        return 0;
     }
 
     return 1;
@@ -339,7 +342,8 @@ int load_device_tree(const char *name)
 
     file = fopen(slots, "r+");
     if (!file) {
-        return -1;
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
+        return 0;
     }
 
     while (fgets(line, sizeof(line), file)) {
@@ -371,7 +375,8 @@ int unload_device_tree(const char *name)
 
     file = fopen(slots, "r+");
     if (!file) {
-        return -1;
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
+        return 0;
     }
 
     while (fgets(line, sizeof(line), file)) {
