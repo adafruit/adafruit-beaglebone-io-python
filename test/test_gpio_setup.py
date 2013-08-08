@@ -64,3 +64,9 @@ class TestSetup:
         with pytest.raises(ValueError):
             GPIO.setup("P8_10", 3)
             GPIO.cleanup()
+
+    def test_setup_three_digit_gpio(self):
+        GPIO.setup("P9_31", GPIO.OUT)
+        assert os.path.exists('/sys/class/gpio/gpio110')
+        GPIO.cleanup()
+        assert not os.path.exists('/sys/class/gpio/gpio110')
