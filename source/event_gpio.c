@@ -169,7 +169,7 @@ int add_fd_list(unsigned int gpio, int fd)
 int open_value_file(unsigned int gpio)
 {
     int fd;
-    char filename[30];
+    char filename[40];
 
     // create file descriptor of value file
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
@@ -218,7 +218,7 @@ int gpio_unexport(unsigned int gpio)
 int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
 {
         int fd;
-        char filename[34];
+        char filename[40];
 
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
         if ((fd = open(filename, O_WRONLY)) < 0)
@@ -237,7 +237,7 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
 {
     int fd;
     char direction[4];
-    char filename[34];
+    char filename[40];
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0)
@@ -258,7 +258,7 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
 int gpio_set_value(unsigned int gpio, unsigned int value)
 {
     int fd;
-    char filename[30];
+    char filename[40];
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
 
@@ -300,7 +300,7 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
 int gpio_set_edge(unsigned int gpio, unsigned int edge)
 {
         int fd;
-        char filename[29];
+        char filename[40];
 
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/edge", gpio);
 
