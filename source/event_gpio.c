@@ -75,7 +75,7 @@ int epfd = -1;
 int gpio_export(unsigned int gpio)
 {
     int fd, len;
-    char str_gpio[3];
+    char str_gpio[10];
     struct gpio_exp *new_gpio, *g;
 
     if ((fd = open("/sys/class/gpio/export", O_WRONLY)) < 0)
@@ -182,7 +182,7 @@ int open_value_file(unsigned int gpio)
 int gpio_unexport(unsigned int gpio)
 {
     int fd, len;
-    char str_gpio[3];
+    char str_gpio[10];
     struct gpio_exp *g, *temp, *prev_g = NULL;
 
     close_value_fd(gpio);
