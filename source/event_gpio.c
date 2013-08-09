@@ -36,6 +36,7 @@ SOFTWARE.
 #include <unistd.h>
 #include <string.h>
 #include "event_gpio.h"
+#include "common.h"
 
 const char *stredge[4] = {"none", "rising", "falling", "both"};
 
