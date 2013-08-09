@@ -263,7 +263,7 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
 {
     int fd;
     char filename[40];
-    char value[10];
+    char vstr[10];
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
 
@@ -271,12 +271,12 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
         return -1;
 
     if (value) {
-        strncpy(value, "1", ARRAY_SIZE(value) - 1);
+        strncpy(vstr, "1", ARRAY_SIZE(vstr) - 1);
     } else {
-        strncpy(value, "0", ARRAY_SIZE(value) - 1);
+        strncpy(vstr, "0", ARRAY_SIZE(vstr) - 1);
     }
 
-    write(fd, value, strlen(value));
+    write(fd, vstr, strlen(vstr));
     close(fd);
     return 0;
 }
