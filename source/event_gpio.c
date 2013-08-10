@@ -36,6 +36,7 @@ SOFTWARE.
 #include <unistd.h>
 #include <string.h>
 #include "event_gpio.h"
+#include "common.h"
 
 const char *stredge[4] = {"none", "rising", "falling", "both"};
 
@@ -219,16 +220,19 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
 {
         int fd;
         char filename[40];
+        char direction[10] = { 0 };
 
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
         if ((fd = open(filename, O_WRONLY)) < 0)
             return -1;
 
-        if (in_flag)
-            write(fd, "out", 3);
-        else
-            write(fd, "in", 4);
+        if (in_flag) {
+            strncpy(direction, "out", ARRAY_SIZE(direction) - 1);
+        } else {
+            strncpy(direction, "in", ARRAY_SIZE(direction) - 1);
+        }
 
+        write(fd, direction, strlen(direction));
         close(fd);
         return 0;
 }
@@ -236,7 +240,7 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
 int gpio_get_direction(unsigned int gpio, unsigned int *value)
 {
     int fd;
-    char direction[4];
+    char direction[4] = { 0 };
     char filename[40];
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
@@ -244,7 +248,7 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
         return -1;
 
     lseek(fd, 0, SEEK_SET);
-    read(fd, &direction, 3);
+    read(fd, &direction, sizeof(direction) - 1);
 
     if (strcmp(direction, "out") == 0) {
         *value = OUTPUT;
@@ -259,17 +263,20 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
 {
     int fd;
     char filename[40];
+    char vstr[10];
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
 
     if ((fd = open(filename, O_WRONLY)) < 0)
         return -1;
 
-    if (value)
-        write(fd, "1", 2);
-    else
-        write(fd, "0", 2);
+    if (value) {
+        strncpy(vstr, "1", ARRAY_SIZE(vstr) - 1);
+    } else {
+        strncpy(vstr, "0", ARRAY_SIZE(vstr) - 1);
+    }
 
+    write(fd, vstr, strlen(vstr));
     close(fd);
     return 0;
 }
@@ -286,7 +293,7 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
     }    
 
     lseek(fd, 0, SEEK_SET);
-    read(fd, &ch, 1);
+    read(fd, &ch, sizeof(ch));
 
     if (ch != '0') {
         *value = 1;
@@ -626,7 +633,7 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
     if (n > 0)
     {
         lseek(events.data.fd, 0, SEEK_SET);
-        if (read(events.data.fd, &buf, 1) != 1)
+        if (read(events.data.fd, &buf, sizeof(buf)) != 1)
         {
             gpio_event_remove(gpio);
             return 6;
