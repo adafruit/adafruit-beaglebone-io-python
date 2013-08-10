@@ -32,6 +32,8 @@ SOFTWARE.
 #define BOARD        10
 #define BCM          11
 
+#define ARRAY_SIZE(a)  (sizeof(a) / sizeof(a[0]))
+
 int gpio_mode;
 int gpio_direction[120];
 int pwm_pins[120];
