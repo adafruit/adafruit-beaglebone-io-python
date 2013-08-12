@@ -103,6 +103,22 @@ int pwm_set_frequency(const char *key, float freq) {
     return 1;
 }
 
+int pwm_set_polarity(const char *key) {
+    int len;
+    char buffer[2];
+    struct pwm_exp *pwm;
+
+    pwm = lookup_exported_pwm(key);
+
+    if (pwm == NULL) {
+        return -1;
+    }
+
+    write(pwm->duty_fd, "0", 1);
+
+    return 0;
+}
+
 int pwm_set_duty_cycle(const char *key, float duty) {
     int len;
     char buffer[20];
@@ -192,6 +208,7 @@ int pwm_start(const char *key, float duty, float freq)
     }
 
     pwm_set_frequency(key, freq);
+    pwm_set_polarity(key);
     pwm_set_duty_cycle(key, duty);
 
     return 1;
