@@ -104,8 +104,6 @@ int pwm_set_frequency(const char *key, float freq) {
 }
 
 int pwm_set_polarity(const char *key) {
-    int len;
-    char buffer[2];
     struct pwm_exp *pwm;
 
     pwm = lookup_exported_pwm(key);
