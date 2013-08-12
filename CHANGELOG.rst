@@ -1,6 +1,18 @@
+0.0.15
+* Fix PWM duty cycle so 0 is off and 100 is on.  Set polarity to 0 by default.
+* Give extra buffer space in export, and unexport functions for gpio that are more than 2 digits (Chris Desjardins)
+* Add new test case for 3 digit gpio (Chris Desjardins)
+* Fix for test_direction_readback. gpio_get_direction wasn't properly null terminating the direction string (Chris Desjardins)
+
+0.0.14
+----
+* Fix GPIO.gpio_function to work with the IO name (zthorson)
+* Fix IOErrors not getting raised when fopen fails while loading overlays into device tree (bradfordboyle, jwcooper)
+* Add new UART tests
+
 0.0.13
 ----
-* Remove the gpio parameter from callbacks
+* Remove the gpio parameter from callbacks (cdesjardins)
 
 0.0.12
 ----
