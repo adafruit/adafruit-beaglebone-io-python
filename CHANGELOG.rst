@@ -1,4 +1,5 @@
 0.0.15
+----
 * Fix PWM duty cycle so 0 is off and 100 is on.  Set polarity to 0 by default.
 * Give extra buffer space in export, and unexport functions for gpio that are more than 2 digits (Chris Desjardins)
 * Add new test case for 3 digit gpio (Chris Desjardins)
