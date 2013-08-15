@@ -1,6 +1,6 @@
 0.0.16
 ----
-* Add polarity as optional third parameter to PWM.start().  Valid values are 0 and 1.  Default is still 0.
+* Add polarity as optional fourth parameter to PWM.start().  Valid values are 0 and 1.  Default is still 0.
 * Fix for actually setting the polarity in start.
 * Add new unit tests to check that the polarity is being set properly, and valid values passed in.
 
