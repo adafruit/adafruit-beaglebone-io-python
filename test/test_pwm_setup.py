@@ -22,6 +22,57 @@ class TestPwmSetup:
         assert int(period) == 500000
         PWM.cleanup()
 
+    def test_start_pwm_with_polarity_one(self):
+        PWM.start("P9_14", 0, 2000, 1)
+
+        files = os.listdir('/sys/devices')
+        ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+        files = os.listdir(ocp)
+        pwm_test = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+
+        assert os.path.exists(pwm_test)
+        duty = open(pwm_test + '/duty').read()
+        period = open(pwm_test + '/period').read()
+        polarity = open(pwm_test + '/polarity').read()
+        assert int(duty) == 0
+        assert int(period) == 500000
+        assert int(polarity) == 1
+        PWM.cleanup()      
+
+    def test_start_pwm_with_polarity_default(self):
+        PWM.start("P9_14", 0, 2000, 0)
+
+        files = os.listdir('/sys/devices')
+        ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+        files = os.listdir(ocp)
+        pwm_test = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+
+        assert os.path.exists(pwm_test)
+        duty = open(pwm_test + '/duty').read()
+        period = open(pwm_test + '/period').read()
+        polarity = open(pwm_test + '/polarity').read()
+        assert int(duty) == 0
+        assert int(period) == 500000
+        assert int(polarity) == 0
+        PWM.cleanup()         
+
+    def test_start_pwm_with_polarity_zero(self):
+        PWM.start("P9_14", 0, 2000, 0)
+
+        files = os.listdir('/sys/devices')
+        ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+        files = os.listdir(ocp)
+        pwm_test = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+
+        assert os.path.exists(pwm_test)
+        duty = open(pwm_test + '/duty').read()
+        period = open(pwm_test + '/period').read()
+        polarity = open(pwm_test + '/polarity').read()
+        assert int(duty) == 0
+        assert int(period) == 500000
+        assert int(polarity) == 0
+        PWM.cleanup()  
+
     def test_pwm_start_invalid_pwm_key(self):
         with pytest.raises(ValueError):   
             PWM.start("P8_25", -1)             
@@ -54,7 +105,19 @@ class TestPwmSetup:
 
     def test_pwm_start_invalid_frequency_string(self):
         with pytest.raises(TypeError):   
-            PWM.start("P9_14", 0, "1")              
+            PWM.start("P9_14", 0, "1")      
+
+    def test_pwm_start_negative_polarity(self):
+        with pytest.raises(ValueError):   
+            PWM.start("P9_14", 0, 100, -1)     
+
+    def test_pwm_start_invalid_positive_polarity(self):
+        with pytest.raises(ValueError):   
+            PWM.start("P9_14", 0, 100, 2)       
+
+    def test_pwm_start_invalid_polarity_type(self):
+        with pytest.raises(TypeError):   
+            PWM.start("P9_14", 0, 100, "1")                                            
 
     def test_pwm_duty_modified(self):
         PWM.start("P9_14", 0)

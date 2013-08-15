@@ -44,6 +44,7 @@ struct pwm_exp
     char key[KEYLEN];
     int period_fd;
     int duty_fd;
+    int polarity_fd;
     unsigned long duty;
     unsigned long period_ns;
     struct pwm_exp *next;
@@ -103,7 +104,9 @@ int pwm_set_frequency(const char *key, float freq) {
     return 1;
 }
 
-int pwm_set_polarity(const char *key) {
+int pwm_set_polarity(const char *key, int polarity) {
+    int len;
+    char buffer[5];
     struct pwm_exp *pwm;
 
     pwm = lookup_exported_pwm(key);
@@ -112,7 +115,8 @@ int pwm_set_polarity(const char *key) {
         return -1;
     }
 
-    write(pwm->duty_fd, "0", 1);
+    len = snprintf(buffer, sizeof(buffer), "%d", polarity);
+    write(pwm->polarity_fd, buffer, len);
 
     return 0;
 }
@@ -139,14 +143,15 @@ int pwm_set_duty_cycle(const char *key, float duty) {
     return 0;
 }
 
-int pwm_start(const char *key, float duty, float freq)
+int pwm_start(const char *key, float duty, float freq, int polarity)
 {
     char fragment[18];
     char pwm_test_fragment[20];
     char pwm_test_path[45];
     char period_path[50];
     char duty_path[50];
-    int period_fd, duty_fd;
+    char polarity_path[55];
+    int period_fd, duty_fd, polarity_fd;
     struct pwm_exp *new_pwm, *pwm;
 
     if(!pwm_initialized) {
@@ -170,6 +175,7 @@ int pwm_start(const char *key, float duty, float freq)
     //create the path for the period and duty
     snprintf(period_path, sizeof(period_path), "%s/period", pwm_test_path);
     snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_test_path);
+    snprintf(polarity_path, sizeof(polarity_path), "%s/polarity", pwm_test_path);
 
     //add period and duty fd to pwm list    
     if ((period_fd = open(period_path, O_RDWR)) < 0)
@@ -182,6 +188,13 @@ int pwm_start(const char *key, float duty, float freq)
         return -1;
     }
 
+    if ((polarity_fd = open(polarity_path, O_RDWR)) < 0) {
+        //error, close already opened period_fd and duty_fd.
+        close(period_fd);
+        close(duty_fd);
+        return -1;
+    }    
+
     // add to list
     new_pwm = malloc(sizeof(struct pwm_exp));
     if (new_pwm == 0) {
@@ -191,6 +204,7 @@ int pwm_start(const char *key, float duty, float freq)
     strncpy(new_pwm->key, key, KEYLEN);
     new_pwm->period_fd = period_fd;
     new_pwm->duty_fd = duty_fd;
+    new_pwm->polarity_fd = polarity_fd;
     new_pwm->next = NULL;
 
     if (exported_pwms == NULL)
@@ -206,7 +220,7 @@ int pwm_start(const char *key, float duty, float freq)
     }
 
     pwm_set_frequency(key, freq);
-    pwm_set_polarity(key);
+    pwm_set_polarity(key, polarity);
     pwm_set_duty_cycle(key, duty);
 
     return 1;
@@ -229,6 +243,7 @@ int pwm_disable(const char *key)
             //close the fd
             close(pwm->period_fd);
             close(pwm->duty_fd);
+            close(pwm->polarity_fd);
             if (prev_pwm == NULL)
                 exported_pwms = pwm->next;
             else

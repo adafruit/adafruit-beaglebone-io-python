@@ -1,3 +1,9 @@
+0.0.16
+----
+* Add polarity as optional third parameter to PWM.start().  Valid values are 0 and 1.  Default is still 0.
+* Fix for actually setting the polarity in start.
+* Add new unit tests to check that the polarity is being set properly, and valid values passed in.
+
 0.0.15
 ----
 * Fix PWM duty cycle so 0 is off and 100 is on.  Set polarity to 0 by default.

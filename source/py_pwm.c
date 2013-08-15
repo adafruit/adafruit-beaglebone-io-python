@@ -54,9 +54,10 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     char *channel;
     float frequency = 2000.0;
     float duty_cycle = 0.0;
-    static char *kwlist[] = {"channel", "duty_cycle", "frequency", NULL};
+    int polarity = 0;
+    static char *kwlist[] = {"channel", "duty_cycle", "frequency", "polarity", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ff", kwlist, &channel, &duty_cycle, &frequency))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ffi", kwlist, &channel, &duty_cycle, &frequency, &polarity))
         return NULL;
 
     if (!get_pwm_key(channel, key)) {
@@ -76,7 +77,12 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
         return NULL;
     }
 
-    if (!pwm_start(key, duty_cycle, frequency))
+    if (polarity < 0 || polarity > 1) {
+        PyErr_SetString(PyExc_ValueError, "polarity must be either 0 or 1");
+        return NULL;        
+    }
+
+    if (!pwm_start(key, duty_cycle, frequency, polarity))
         return NULL;
 
     Py_RETURN_NONE;
