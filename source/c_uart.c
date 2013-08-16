@@ -37,7 +37,7 @@ int uart_setup(const char *dt)
         return 1;
     }
 
-fprintf(stderr, "return 1 uart_setup");
+fprintf(stderr, "return 0 uart_setup"); /* bit-hacker: changing text string to match code */
     return 0;
 }
 
