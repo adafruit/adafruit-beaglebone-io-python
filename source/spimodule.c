@@ -64,7 +64,6 @@ SPI_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
 	self->bpw = 0;
 	self->msh = 0;
 
-	Py_INCREF(self);
 	return (PyObject *)self;
 }
 
@@ -84,7 +83,7 @@ SPI_close(SPI *self)
 	self->mode = 0;
 	self->bpw = 0;
 	self->msh = 0;
-
+	
 	Py_INCREF(Py_None);
 	return Py_None;
 }
@@ -195,7 +194,6 @@ SPI_readbytes(SPI *self, PyObject *args)
 		PyList_SET_ITEM(list, ii, val);
 	}
 
-	Py_INCREF(list);
 	return list;
 }
 
@@ -272,7 +270,6 @@ SPI_xfer(SPI *self, PyObject *args)
 	free(rxbuf);
 	free(xferptr);
 
-	Py_INCREF(list);
 	return list;
 }
 
@@ -343,7 +340,6 @@ SPI_xfer2(SPI *self, PyObject *args)
 	free(txbuf);
 	free(rxbuf);
 
-	Py_INCREF(list);
 	return list;
 }
 
@@ -368,7 +364,7 @@ static PyObject *
 SPI_get_mode(SPI *self, void *closure)
 {
 	PyObject *result = Py_BuildValue("i", (self->mode & (SPI_CPHA | SPI_CPOL) ) );
-	Py_INCREF(result);
+
 	return result;
 }
 
@@ -382,7 +378,6 @@ SPI_get_cshigh(SPI *self, void *closure)
 	else
 		result = Py_False;
 
-	Py_INCREF(result);
 	return result;
 }
 
@@ -396,7 +391,6 @@ SPI_get_lsbfirst(SPI *self, void *closure)
 	else
 		result = Py_False;
 
-	Py_INCREF(result);
 	return result;
 }
 
@@ -410,7 +404,6 @@ SPI_get_3wire(SPI *self, void *closure)
 	else
 		result = Py_False;
 
-	Py_INCREF(result);
 	return result;
 }
 
@@ -424,7 +417,6 @@ SPI_get_loop(SPI *self, void *closure)
 	else
 		result = Py_False;
 
-	Py_INCREF(result);
 	return result;
 }
 
@@ -580,7 +572,6 @@ static PyObject *
 SPI_get_bpw(SPI *self, void *closure)
 {
 	PyObject *result = Py_BuildValue("i", self->bpw);
-	Py_INCREF(result);
 	return result;
 }
 
@@ -622,7 +613,6 @@ static PyObject *
 SPI_get_msh(SPI *self, void *closure)
 {
 	PyObject *result = Py_BuildValue("i", self->msh);
-	Py_INCREF(result);
 	return result;
 }
 
