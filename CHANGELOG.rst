@@ -1,3 +1,9 @@
+0.0.17
+----
+* Fix SPI memory leaks
+* Clean up of PWM code (bit-hacker)
+* Remove UART debug statements
+
 0.0.16
 ----
 * Add polarity as optional fourth parameter to PWM.start().  Valid values are 0 and 1.  Default is still 0.
