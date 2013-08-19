@@ -202,7 +202,7 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     }
 
     strncpy(new_pwm->key, key, KEYLEN);  /* can leave string unterminated */
-    new_pwm>key[KEYLEN+1] = '\0'; /* terminate string */
+    new_pwm->key[KEYLEN+1] = '\0'; /* terminate string */
     new_pwm->period_fd = period_fd;
     new_pwm->duty_fd = duty_fd;
     new_pwm->polarity_fd = polarity_fd;
@@ -245,11 +245,15 @@ int pwm_disable(const char *key)
             close(pwm->period_fd);
             close(pwm->duty_fd);
             close(pwm->polarity_fd);
+
             if (prev_pwm == NULL)
+            {
                 exported_pwms = pwm->next;
-                prev_pwm = pwm; /* bit-hacker: set prev_pwm regardless */
-            else
+                prev_pwm = pwm;
+            } else {
                 prev_pwm->next = pwm->next;
+            }
+
             temp = pwm;
             pwm = pwm->next;
             free(temp);
