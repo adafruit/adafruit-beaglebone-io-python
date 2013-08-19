@@ -43,7 +43,7 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: System :: Hardware']
 
 setup(name             = 'Adafruit_BBIO',
-      version          = '0.0.16',
+      version          = '0.0.17',
       author           = 'Justin Cooper',
       author_email     = 'justin@adafruit.com',
       description      = 'A module to control BeagleBone IO channels',
