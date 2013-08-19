@@ -33,11 +33,9 @@ SOFTWARE.
 int uart_setup(const char *dt)
 {
     if (load_device_tree(dt)) {
-        fprintf(stderr, "return 1 uart_setup");
         return 1;
     }
 
-fprintf(stderr, "return 1 uart_setup");
     return 0;
 }
 
