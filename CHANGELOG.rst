@@ -1,7 +1,7 @@
 0.0.17
 ----
 * Fix SPI memory leaks
-* Clean up of PWM code (bit-hacker)
+* Clean up of PWM code (bit-hacker, jwcooper)
 * Remove UART debug statements
 
 0.0.16
