@@ -41,7 +41,7 @@ int pwm_initialized = 0;
 // pwm exports
 struct pwm_exp
 {
-    char key[KEYLEN];
+    char key[KEYLEN+1]; /* leave room for terminating NUL byte */
     int period_fd;
     int duty_fd;
     int polarity_fd;
@@ -63,7 +63,7 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
         pwm = pwm->next;
     }
 
-    return 0;
+    return NULL; /* standard for pointers */
 }
 
 int initialize_pwm(void)
@@ -106,7 +106,7 @@ int pwm_set_frequency(const char *key, float freq) {
 
 int pwm_set_polarity(const char *key, int polarity) {
     int len;
-    char buffer[5];
+    char buffer[7]; /* allow room for trailing NUL byte */
     struct pwm_exp *pwm;
 
     pwm = lookup_exported_pwm(key);
@@ -201,7 +201,8 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
         return -1; // out of memory
     }
 
-    strncpy(new_pwm->key, key, KEYLEN);
+    strncpy(new_pwm->key, key, KEYLEN);  /* can leave string unterminated */
+    new_pwm>key[KEYLEN+1] = '\0'; /* terminate string */
     new_pwm->period_fd = period_fd;
     new_pwm->duty_fd = duty_fd;
     new_pwm->polarity_fd = polarity_fd;
@@ -246,6 +247,7 @@ int pwm_disable(const char *key)
             close(pwm->polarity_fd);
             if (prev_pwm == NULL)
                 exported_pwms = pwm->next;
+                prev_pwm = pwm; /* bit-hacker: set prev_pwm regardless */
             else
                 prev_pwm->next = pwm->next;
             temp = pwm;
