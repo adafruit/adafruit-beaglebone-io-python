@@ -1,3 +1,10 @@
+0.0.18
+----
+* UART - Include UART overlays, and compile upon installation
+* UART - Rename UART overlays
+* Adafruit_I2C - Remove readU16Rev and readS16Rev
+* Adafruit_I2C - Updated readU16/readS16 for correct 16-bit reads
+
 0.0.17
 ----
 * Fix SPI memory leaks
