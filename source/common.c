@@ -219,9 +219,8 @@ int lookup_uart_by_name(const char *input_name, char *dt)
     uart_t *p;
     for (p = uart_table; p->name != NULL; ++p) {
         if (strcmp(p->name, input_name) == 0) {
-            strncpy(dt, p->dt, 8);
-            dt[8] = '\0';
-            fprintf(stderr, "return 1 lookup_uart_by_name");
+            strncpy(dt, p->dt, FILENAME_BUFFER_SIZE);
+            dt[FILENAME_BUFFER_SIZE - 1] = '\0';
             return 1;                
         }
     }
