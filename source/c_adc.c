@@ -56,13 +56,27 @@ int read_value(unsigned int ain, float *value)
 {
     FILE * fh;
     char ain_path[40];
+    int err, error, err_count=0;
     snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
+ 
+ retry:
+    error = 0;
     
     fh = fopen(ain_path, "r");
 
     fseek(fh, 0, SEEK_SET);
-    fscanf(fh, "%f", value);
+    err = fscanf(fh, "%f", value);
+    if (err == EOF) {
+//	    perror("AIN read error: ");
+	    err_count++;
+	    error++;
+    }
+
     fclose(fh);
+
+    if (err_count == 3) return -1;
+    if (error) goto retry;
+
     return 1;
 }
 
