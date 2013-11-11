@@ -28,13 +28,14 @@ Manual::
     cd adafruit-beaglebone-io-python 
     python setup.py install
 
-**Installation on Ubuntu**
+**Installation on Ubuntu/Debian**
 
 Easiest::
 
     sudo ntpdate pool.ntp.org
     sudo apt-get update
     sudo apt-get install build-essential python-dev python-pip -y
+    #easy_install -U distribute  //debian only
     sudo pip install Adafruit_BBIO
     
 Manual::
