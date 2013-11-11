@@ -34,6 +34,8 @@ SOFTWARE.
 
 #define ARRAY_SIZE(a)  (sizeof(a) / sizeof(a[0]))
 
+#define FILENAME_BUFFER_SIZE 128
+
 int gpio_mode;
 int gpio_direction[120];
 int pwm_pins[120];

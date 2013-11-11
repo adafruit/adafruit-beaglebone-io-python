@@ -40,7 +40,7 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 // python function setup()
 static PyObject *py_setup_uart(PyObject *self, PyObject *args)
 {
-    char dt[9];
+    char dt[FILENAME_BUFFER_SIZE];
     char *channel;
 
     if (!PyArg_ParseTuple(args, "s", &channel)) {
