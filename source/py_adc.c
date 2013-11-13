@@ -40,6 +40,10 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 {
     if (adc_setup())
         Py_RETURN_NONE;
+    
+    PyErr_SetString(PyExc_RuntimeError, "Unable to setup ADC system. Possible causes are: \n"
+                                        "  - A cape with a conflicting pin mapping is loaded \n"
+                                        "  - A device tree object is loaded that uses the same name for a fragment: helper");
     return NULL;
 }
 
@@ -67,6 +71,10 @@ static PyObject *py_read(PyObject *self, PyObject *args)
     }
 
     read_value(ain, &value);
+
+    if (value == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Invalid AIN file read.  Check for conflicting device tree overlays.");
+    }
 
     //scale modifier
     value = value / 1800.0;
@@ -100,6 +108,10 @@ static PyObject *py_read_raw(PyObject *self, PyObject *args)
     }
 
     read_value(ain, &value);
+
+    if (value == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Invalid AIN file read.  Check for conflicting device tree overlays.");
+    }
 
     py_value = Py_BuildValue("f", value);
 

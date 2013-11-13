@@ -41,10 +41,22 @@ int initialize_adc(void)
         return 1;
     }
 
+
     if (load_device_tree("cape-bone-iio")) {
-        build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
-        build_path(ocp_dir, "helper", adc_prefix_dir, sizeof(adc_prefix_dir));
+        build_path("/sys/devices", "ocp.", ocp_dir, sizeof(ocp_dir));
+        build_path(ocp_dir, "helper.", adc_prefix_dir, sizeof(adc_prefix_dir));
         strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
+
+        // Test that the directory has an AIN entry (found correct devicetree)
+        char test_path[40];
+        snprintf(test_path, sizeof(test_path), "%s%d", adc_prefix_dir, 0);
+
+        FILE *fh = fopen(test_path, "r");
+        if (!fh) {
+            return 0; 
+        }
+        fclose(fh);
+
         adc_initialized = 1;
         return 1;
     }
@@ -59,7 +71,11 @@ int read_value(unsigned int ain, float *value)
     snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
     
     fh = fopen(ain_path, "r");
-
+    // Likely a bad path to the ocp device driver 
+    if (!fh) {
+        return -1;
+    }
+    
     fseek(fh, 0, SEEK_SET);
     fscanf(fh, "%f", value);
     fclose(fh);

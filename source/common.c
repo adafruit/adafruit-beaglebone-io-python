@@ -315,7 +315,10 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
     dp = opendir (partial_path);
     if (dp != NULL) {
         while ((ep = readdir (dp))) {
-            if (strstr(ep->d_name, prefix)) {
+            // Enforce that the prefix must be the first part of the file
+            char* found_string = strstr(ep->d_name, prefix);
+
+            if (found_string != NULL && (ep->d_name - found_string) == 0) {
                 snprintf(full_path, full_path_len, "%s/%s", partial_path, ep->d_name);
                 (void) closedir (dp);
                 return 1;
