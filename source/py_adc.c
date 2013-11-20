@@ -52,6 +52,7 @@ static PyObject *py_read(PyObject *self, PyObject *args)
 {
     unsigned int ain;
     float value;
+    int success;
     char *channel;
     PyObject *py_value;
 
@@ -70,10 +71,11 @@ static PyObject *py_read(PyObject *self, PyObject *args)
         return NULL;    
     }
 
-    read_value(ain, &value);
+    success = read_value(ain, &value);
 
-    if (value == -1) {
-        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Invalid AIN file read.  Check for conflicting device tree overlays.");
+    if (success == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Error while reading AIN port. Invalid or locked AIN file.");
+        return NULL;
     }
 
     //scale modifier
@@ -88,6 +90,7 @@ static PyObject *py_read(PyObject *self, PyObject *args)
 static PyObject *py_read_raw(PyObject *self, PyObject *args)
 {
     unsigned int ain;
+    int success;
     float value;
     char *channel;
     PyObject *py_value;
@@ -107,10 +110,11 @@ static PyObject *py_read_raw(PyObject *self, PyObject *args)
         return NULL;    
     }
 
-    read_value(ain, &value);
+    success = read_value(ain, &value);
 
-    if (value == -1) {
-        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Invalid AIN file read.  Check for conflicting device tree overlays.");
+    if (success == -1) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Error while reading AIN port. Invalid or locked AIN file.");
+        return NULL;
     }
 
     py_value = Py_BuildValue("f", value);
