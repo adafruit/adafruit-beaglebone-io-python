@@ -238,6 +238,9 @@ SPI_xfer(SPI *self, PyObject *args)
 	for (ii = 0; ii < len; ii++) {
 		PyObject *val = PyList_GET_ITEM(list, ii);
 		if (!PyInt_Check(val)) {
+			free(txbuf);
+			free(rxbuf);
+			free(xferptr);
 			PyErr_SetString(PyExc_TypeError, wrmsg);
 			return NULL;
 		}
@@ -252,6 +255,9 @@ SPI_xfer(SPI *self, PyObject *args)
 
 	status = ioctl(self->fd, SPI_IOC_MESSAGE(len), xferptr);
 	if (status < 0) {
+		free(txbuf);
+		free(rxbuf);
+		free(xferptr);
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
 	}
@@ -270,6 +276,7 @@ SPI_xfer(SPI *self, PyObject *args)
 	free(rxbuf);
 	free(xferptr);
 
+	Py_INCREF(list);
 	return list;
 }
 
@@ -309,6 +316,8 @@ SPI_xfer2(SPI *self, PyObject *args)
 	for (ii = 0; ii < len; ii++) {
 		PyObject *val = PyList_GET_ITEM(list, ii);
 		if (!PyInt_Check(val)) {
+			free(txbuf);
+			free(rxbuf);
 			PyErr_SetString(PyExc_TypeError, msg);
 			return NULL;
 		}
@@ -324,6 +333,8 @@ SPI_xfer2(SPI *self, PyObject *args)
 	
 	status = ioctl(self->fd, SPI_IOC_MESSAGE(1), &xfer);
 	if (status < 0) {
+		free(txbuf);
+		free(rxbuf);
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
 	}
@@ -340,6 +351,7 @@ SPI_xfer2(SPI *self, PyObject *args)
 	free(txbuf);
 	free(rxbuf);
 
+	Py_INCREF(list);
 	return list;
 }
 
