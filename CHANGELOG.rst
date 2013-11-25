@@ -1,4 +1,5 @@
 0.0.19
+----
 * Fix for SPI.xfer crashes python after 3 calls
 * Added a retry to reading for the analog inputs to avoid a bug where reading back and forth between two analog inputs would cause the resource to be unavailable every 16 scans (zthorson)
 * Updated the build_path to be more selective over what paths it chooses (zthorson)
