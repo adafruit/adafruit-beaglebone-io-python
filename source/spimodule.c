@@ -390,6 +390,7 @@ SPI_get_cshigh(SPI *self, void *closure)
 	else
 		result = Py_False;
 
+	Py_INCREF(result);
 	return result;
 }
 
