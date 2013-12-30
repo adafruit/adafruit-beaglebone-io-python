@@ -404,6 +404,7 @@ SPI_get_lsbfirst(SPI *self, void *closure)
 	else
 		result = Py_False;
 
+        Py_INCREF(result);
 	return result;
 }
 
@@ -417,6 +418,7 @@ SPI_get_3wire(SPI *self, void *closure)
 	else
 		result = Py_False;
 
+        Py_INCREF(result);
 	return result;
 }
 
@@ -430,6 +432,7 @@ SPI_get_loop(SPI *self, void *closure)
 	else
 		result = Py_False;
 
+        Py_INCREF(result);
 	return result;
 }
 
