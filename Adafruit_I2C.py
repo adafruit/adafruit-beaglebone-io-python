@@ -4,6 +4,10 @@ import smbus
 
 # ===========================================================================
 # Adafruit_I2C Class
+# Adafruit_I2C.py is essentially a fork of the Adafruit Raspberry Pi I2C module. 
+# Any pull requests for this module should be directed to the following, and I 
+# can pull them. I'd rather not deviate from the original:
+# https://github.com/adafruit/Adafruit-Raspberry-Pi-Python-Code/tree/master/Adafruit_I2C
 # ===========================================================================
 
 class Adafruit_I2C :
