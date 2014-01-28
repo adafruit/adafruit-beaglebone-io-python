@@ -112,7 +112,7 @@ static PyObject *
 SPI_writebytes(SPI *self, PyObject *args)
 {
 	int		status;
-	uint8_t	ii, len;
+	uint16_t	ii, len;
 	uint8_t	buf[MAXMSGLEN];
 	PyObject	*list;
 
@@ -206,7 +206,7 @@ PyDoc_STRVAR(SPI_xfer_doc,
 static PyObject *
 SPI_xfer(SPI *self, PyObject *args)
 {
-	uint8_t ii, len;
+	uint16_t ii, len;
 	int status;
 	int delay = -1;
 	//uint8_t ret = 0;
@@ -292,7 +292,7 @@ SPI_xfer2(SPI *self, PyObject *args)
 	static char *msg = "Argument must be a list of at least one, "
 				"but not more than 1024 integers";
 	int status;	
-	uint8_t ii, len;
+	uint16_t ii, len;
 	PyObject *list;
 	struct spi_ioc_transfer	xfer;
 	uint8_t *txbuf, *rxbuf;
