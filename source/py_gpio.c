@@ -75,7 +75,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    char *channel;
    int direction;
    int pud = PUD_OFF;
-   int initial = -1;
+   int initial = 0;
    static char *kwlist[] = {"channel", "direction", "pull_up_down", "initial", NULL};
 
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|ii", kwlist, &channel, &direction, &pud, &initial))
@@ -108,7 +108,11 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
 
    gpio_export(gpio);
    gpio_set_direction(gpio, direction);
-   gpio_set_value(gpio, pud);
+   if (direction == OUTPUT) {
+       gpio_set_value(gpio, initial);
+   } else {
+       gpio_set_value(gpio, pud);
+   }
 
    gpio_direction[gpio] = direction;
 
