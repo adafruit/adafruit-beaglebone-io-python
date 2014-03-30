@@ -392,10 +392,11 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
    char *channel;
    char error[30];
 
-   if (!PyArg_ParseTuple(args, "sii", &channel, &edge, &timeout))
-      timeout = -1
+   if (!PyArg_ParseTuple(args, "sii", &channel, &edge, &timeout)){
+      timeout = -1;
       if (!PyArg_ParseTuple(args, "si", &channel, &edge))
          return NULL;
+   }
 
    if (get_gpio_number(channel, &gpio))
       return NULL;
@@ -422,7 +423,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
       Py_INCREF(Py_None);
       return Py_None;
    }else if (result == -1){
-      Py_RETURN_FALSE
+      Py_RETURN_FALSE;
    } else if (result == 2) {
       PyErr_SetString(PyExc_RuntimeError, "Edge detection events already enabled for this GPIO channel");
       return NULL;
