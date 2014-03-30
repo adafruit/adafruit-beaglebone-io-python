@@ -89,6 +89,10 @@ Waiting for an edge (GPIO.RISING, GPIO.FALLING, or GPIO.BOTH::
 
     GPIO.wait_for_edge(channel, GPIO.RISING)
 
+    or
+    
+    GPIO.wait_for_edge(channel, GPIO.RISING, timeout)
+
 Detecting events::
 
     GPIO.add_event_detect("P9_12", GPIO.FALLING) 
