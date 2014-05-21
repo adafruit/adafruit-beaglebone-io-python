@@ -106,13 +106,28 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (get_gpio_number(channel, &gpio))
        return NULL;
 
-   gpio_export(gpio);
-   gpio_set_direction(gpio, direction);
-   if (direction == OUTPUT) {
-       gpio_set_value(gpio, initial);
-   } else {
-       gpio_set_value(gpio, pud);
-   }
+   unsigned int count = 100000;
+   int res = -1;
+   do 
+   {   // wait until gpio file appears on the filesystem
+       res = gpio_export(gpio);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+
+   count = 100000;
+   do {
+       res = gpio_set_direction(gpio, direction);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+  
+   count = 100000;
+   do {
+      res = gpio_set_value(gpio, direction == OUTPUT ? initial : pud);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+      return NULL;
 
    gpio_direction[gpio] = direction;
 
