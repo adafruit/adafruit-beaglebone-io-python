@@ -398,6 +398,7 @@ int unload_device_tree(const char *name)
     char line[256];
     char *slot_line;
 
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
