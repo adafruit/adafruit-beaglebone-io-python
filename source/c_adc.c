@@ -36,6 +36,8 @@ int adc_initialized = 0;
 
 int initialize_adc(void)
 {
+    char test_path[40];
+    FILE *fh;
     if (adc_initialized) {
         return 1;
     }
@@ -46,10 +48,9 @@ int initialize_adc(void)
         strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
 
         // Test that the directory has an AIN entry (found correct devicetree)
-        char test_path[40];
         snprintf(test_path, sizeof(test_path), "%s%d", adc_prefix_dir, 0);
         
-        FILE *fh = fopen(test_path, "r");
+        fh = fopen(test_path, "r");
 
         if (!fh) {
             return 0; 
