@@ -695,6 +695,7 @@ static PyObject *
 SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 {
 	int bus, device;
+	int bus_path;
 	int max_dt_length = 15;
 	char device_tree_name[max_dt_length];
 	char path[MAXPATH];
@@ -703,7 +704,7 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 	static char *kwlist[] = {"bus", "device", NULL};
 	if (!PyArg_ParseTupleAndKeywords(args, kwds, "ii:open", kwlist, &bus, &device))
 		return NULL;
-	if (snprintf(device_tree_name, max_dt_length, "ADAFRUIT-SPI%d", bus) >= max_dt_length) {
+	if (snprintf(device_tree_name, max_dt_length, "BB-SPIDEV%d", bus) >= max_dt_length) {
 		PyErr_SetString(PyExc_OverflowError,
 			"Bus and/or device number is invalid.");
 		return NULL;
@@ -713,7 +714,14 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 		return NULL;
 	}
 
-	if (snprintf(path, MAXPATH, "/dev/spidev%d.%d", bus+1, device) >= MAXPATH) {
+	bus_path = get_spi_bus_path_number(bus);
+	if (bus_path == -1) {
+		PyErr_SetString(PyExc_OverflowError,
+			"Unable to find loaded spi bus path.");
+		return NULL;
+	}
+
+	if (snprintf(path, MAXPATH, "/dev/spidev%d.%d", bus_path, device) >= MAXPATH) {
 		PyErr_SetString(PyExc_OverflowError,
 			"Bus and/or device number is invalid.");
 		return NULL;

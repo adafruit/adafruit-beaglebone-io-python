@@ -35,7 +35,6 @@ SOFTWARE.
 #define PERIOD 0
 #define DUTY 1
 
-char ocp_dir[22];
 int pwm_initialized = 0;
 
 // pwm exports

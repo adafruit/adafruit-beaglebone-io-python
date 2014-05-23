@@ -31,7 +31,6 @@ SOFTWARE.
 #include "common.h"
 
 char adc_prefix_dir[40];
-char ocp_dir[25];
 
 int adc_initialized = 0;
 
