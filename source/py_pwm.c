@@ -26,18 +26,6 @@ SOFTWARE.
 #include "common.h"
 #include "c_pwm.h"
 
-static int init_module(void)
-{
-    int i;
-
-    module_setup = 0;
-
-    for (i=0; i<120; i++)
-        pwm_pins[i] = -1;
-
-    return 0;
-}
-
 // python function cleanup()
 static PyObject *py_cleanup(PyObject *self, PyObject *args)
 {
@@ -57,8 +45,9 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     int polarity = 0;
     static char *kwlist[] = {"channel", "duty_cycle", "frequency", "polarity", NULL};
 
-    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ffi", kwlist, &channel, &duty_cycle, &frequency, &polarity))
+    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ffi", kwlist, &channel, &duty_cycle, &frequency, &polarity)) {
         return NULL;
+    }   
 
     if (!get_pwm_key(channel, key)) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
