@@ -1,3 +1,9 @@
+0.0.20
+----
+* Fix for SPI not loading spidevX.X correctly based on load order
+* Initialize ctrl_dir in unload_device_tree #63
+* Clean up unused/dead code
+
 0.0.19
 ----
 * Fix for SPI.xfer crashes python after 3 calls
