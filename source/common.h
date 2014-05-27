@@ -38,7 +38,6 @@ SOFTWARE.
 
 int gpio_mode;
 int gpio_direction[120];
-int pwm_pins[120];
 
 char ctrl_dir[35];
 char ocp_dir[25];
