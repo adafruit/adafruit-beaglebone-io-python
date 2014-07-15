@@ -587,7 +587,7 @@ void event_cleanup(void)
     exports_cleanup();
 }
 
-int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
+int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, int timeout)
 // standalone from all the event functions above
 {
     int fd = fd_lookup(gpio);
@@ -624,7 +624,7 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
 
     // epoll for event
     for (i = 0; i<2; i++) // first time triggers with current state, so ignore
-       if ((n = epoll_wait(epfd, &events, 1, -1)) == -1)
+       if ((n = epoll_wait(epfd, &events, 1, timeout)) == -1)
        {
            gpio_event_remove(gpio);
            return 5;

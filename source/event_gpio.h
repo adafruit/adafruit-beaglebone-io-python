@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -61,4 +61,4 @@ int gpio_event_remove(unsigned int gpio);
 int gpio_is_evented(unsigned int gpio);
 int event_initialise(void);
 void event_cleanup(void);
-int blocking_wait_for_edge(unsigned int gpio, unsigned int edge);
+int blocking_wait_for_edge_timeout(unsigned int gpio, unsigned int edge, int timeout);
