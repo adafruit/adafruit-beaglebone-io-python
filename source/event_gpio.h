@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and
+This file incorporates work covered by the following copyright and 
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
