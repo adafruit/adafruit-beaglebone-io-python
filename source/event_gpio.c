@@ -647,5 +647,5 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, int timeout)
 
     gpio_event_remove(gpio);
     close(epfd);
-    return 0;
+    return (n == 1) ? 0 : -1;
 }
