@@ -26,14 +26,17 @@ SOFTWARE.
 #include "common.h"
 #include "c_adc.h"
 
+// Cleanup function commented out because it is currently disabled and this
+// generates unused method warnings. See adc_methods[] definition further 
+// below for reason for disabling the cleanup function.
 // python function cleanup()
-static PyObject *py_cleanup(PyObject *self, PyObject *args)
-{
-    // unexport the ADC
-    adc_cleanup();
-
-    Py_RETURN_NONE;
-}
+//static PyObject *py_cleanup(PyObject *self, PyObject *args)
+//{
+//    // unexport the ADC
+//    adc_cleanup();
+//
+//    Py_RETURN_NONE;
+//}
 
 // python function setup()
 static PyObject *py_setup_adc(PyObject *self, PyObject *args)

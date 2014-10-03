@@ -33,7 +33,6 @@ SOFTWARE.
 #include "common.h"
 #include "event_gpio.h"
 
-static PyObject *bb_revision;
 static int gpio_warnings = 1;
 
 struct py_callback

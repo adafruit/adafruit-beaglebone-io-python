@@ -201,7 +201,7 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     }
 
     strncpy(new_pwm->key, key, KEYLEN);  /* can leave string unterminated */
-    new_pwm->key[KEYLEN+1] = '\0'; /* terminate string */
+    new_pwm->key[KEYLEN] = '\0'; /* terminate string */
     new_pwm->period_fd = period_fd;
     new_pwm->duty_fd = duty_fd;
     new_pwm->polarity_fd = polarity_fd;
