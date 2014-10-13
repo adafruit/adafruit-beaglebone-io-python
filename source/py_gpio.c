@@ -185,6 +185,10 @@ static void run_py_callbacks(unsigned int gpio)
          gettimeofday(&tv_timenow, NULL);
          timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
+            
+            // save lastcall before calling func to prevent reentrant bounce
+            cb->lastcall = timenow;
+            
             // run callback
             gstate = PyGILState_Ensure();
             result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
