@@ -4,20 +4,20 @@
 import random, os
 python_lib_path = random.__file__.split('random')[0]
 if not os.path.exists(python_lib_path + 'py_compile.py'):
-  print "py_compile module missing; installing to %spy_compile.py" %\
-                                                          python_lib_path
-  import urllib2
+  print("py_compile module missing; installing to %spy_compile.py" %\
+                                                          python_lib_path)
+  import urllib.request, urllib.error, urllib.parse
   url = "http://hg.python.org/cpython/raw-file/4ebe1ede981e/Lib/py_compile.py"
-  py_compile = urllib2.urlopen(url)
+  py_compile = urllib.request.urlopen(url)
   with open(python_lib_path+'py_compile.py', 'w') as f:
     f.write(py_compile.read())
-  print "testing py_compile..."
+  print("testing py_compile...")
   try:
     import py_compile
-    print "py_compile installed successfully"
-  except Exception, e:
-    print "*py_compile install failed, could not import"
-    print "*Exception raised:"
+    print("py_compile installed successfully")
+  except Exception as e:
+    print("*py_compile install failed, could not import")
+    print("*Exception raised:")
     raise e
 
 try:
@@ -57,5 +57,5 @@ setup(name             = 'Adafruit_BBIO',
       ext_modules      = [Extension('Adafruit_BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']), 
                           Extension('Adafruit_BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
                           Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
-                          Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
+#                          Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
                           Extension('Adafruit_BBIO.UART', ['source/py_uart.c', 'source/c_uart.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'])])
