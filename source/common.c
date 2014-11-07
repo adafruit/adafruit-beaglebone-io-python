@@ -335,7 +335,7 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
 int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
-  
+  DIR* dir;
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
 
   if (spi == 0) {
@@ -344,7 +344,7 @@ int get_spi_bus_path_number(unsigned int spi)
     snprintf(path, sizeof(path), "%s/481a0000.spi/spi_master/spi1", ocp_dir);
   }
   
-  DIR* dir = opendir(path);
+  dir = opendir(path);
   if (dir) {
     closedir(dir);
     //device is using /dev/spidev1.x
