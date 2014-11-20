@@ -10,6 +10,14 @@
     /* version */
     version = "00A0";
 
+    exclusive-use =
+        /* the pin header uses */
+        "P9.17",
+        "P9.18",
+        "P9.21",
+        "P9.22",
+        "spi0";
+
     fragment@0 {
         target = <&am33xx_pinmux>;
         __overlay__ {
