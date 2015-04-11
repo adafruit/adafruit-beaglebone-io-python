@@ -709,10 +709,10 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 			"Bus and/or device number is invalid.");
 		return NULL;
 	}
-	if (load_device_tree(device_tree_name) == -1) {
+	/*if (load_device_tree(device_tree_name) == -1) {
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
-	}
+	}*/
 
 	bus_path = get_spi_bus_path_number(bus);
 	if (bus_path == -1) {

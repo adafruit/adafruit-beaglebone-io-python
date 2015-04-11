@@ -40,7 +40,7 @@ int gpio_mode;
 int gpio_direction[120];
 
 char ctrl_dir[35];
-char ocp_dir[25];
+char ocp_dir[35];
 
 int get_gpio_number(const char *key, unsigned int *gpio);
 int get_pwm_key(const char *input, char *key);

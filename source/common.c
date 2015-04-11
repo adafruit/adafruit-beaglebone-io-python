@@ -336,7 +336,7 @@ int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
   
-  build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+  build_path("/sys/devices/platform", "ocp", ocp_dir, sizeof(ocp_dir));
 
   if (spi == 0) {
     snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
