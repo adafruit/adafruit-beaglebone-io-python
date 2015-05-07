@@ -1,3 +1,8 @@
+0.0.30
+---
+* Merge Python 3 compatibility fixes from Github user westphahl.
+* Moved old Angstrom build fix for missing py_compile from setup.py to separate file.
+
 0.0.20
 ----
 * Fix for SPI not loading spidevX.X correctly based on load order
