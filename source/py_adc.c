@@ -45,8 +45,8 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
         Py_RETURN_NONE;
     
     PyErr_SetString(PyExc_RuntimeError, "Unable to setup ADC system. Possible causes are: \n"
-                                        "  - A cape with a conflicting pin mapping is loaded \n"
-                                        "  - A device tree object is loaded that uses the same name for a fragment: helper");
+                                        "  - Module 'ti_am335x_adc' is not loaded \n"
+                                        "  - ADC channels are not enabled in the overlay \n");
     return NULL;
 }
 
@@ -82,7 +82,7 @@ static PyObject *py_read(PyObject *self, PyObject *args)
     }
 
     //scale modifier
-    value = value / 1800.0;
+    value = value / 4095.0;
 
     py_value = Py_BuildValue("f", value);
 
