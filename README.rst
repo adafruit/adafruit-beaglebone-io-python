@@ -70,6 +70,28 @@ Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0
 
     import Adafruit_BBIO.GPIO as GPIO
     GPIO.setup("P8_14", GPIO.OUT) GPIO.output("P8_14", GPIO.HIGH)
+
+**On-Board LEDs**
+
+On-board LEDs (USR0-USR3) are handled by LED class driver rather than the GPIO pin driver.
+
+They have a different path in the /sys/ filesystem.
+
+Setup the pin for output and write GPIO.HIGH or GPIO.LOW.
+
+    import Adafruit_BBIO.GPIO as GPIO
+    import time
+    
+    for i in range(4):
+        GPIO.setup("USR%d" % i, GPIO.OUT)
+
+    while True:
+        for i in range(4):
+            GPIO.output("USR%d" % i, GPIO.HIGH)
+            time.sleep(1)
+        for i in range(4):
+            GPIO.output("USR%d" % i, GPIO.LOW)
+            time.sleep(1)
     
 **GPIO Input**
 

@@ -170,12 +170,17 @@ int add_fd_list(unsigned int gpio, int fd)
 int open_value_file(unsigned int gpio)
 {
     int fd;
-    char filename[40];
+    char filename[MAX_FILENAME];
 
     // create file descriptor of value file
-    snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+    if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
+        snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
+    } else {
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+    }
+
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0)
-        return -1;
+    return -1;
     add_fd_list(gpio, fd);
     return fd;
 }
@@ -262,10 +267,14 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
 int gpio_set_value(unsigned int gpio, unsigned int value)
 {
     int fd;
-    char filename[40];
+    char filename[MAX_FILENAME];
     char vstr[10];
 
-    snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+    if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
+        snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
+    } else {
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+    }
 
     if ((fd = open(filename, O_WRONLY)) < 0)
         return -1;
