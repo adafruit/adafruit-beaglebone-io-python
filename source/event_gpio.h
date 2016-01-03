@@ -40,6 +40,11 @@ SOFTWARE.
 #define HIGH 1
 #define LOW  0
 
+#define MAX_FILENAME 50
+
+#define USR_LED_GPIO_MIN 53
+#define USR_LED_GPIO_MAX 56
+
 #define PUD_OFF  0
 #define PUD_DOWN 1
 #define PUD_UP   2
