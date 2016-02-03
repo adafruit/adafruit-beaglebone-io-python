@@ -30,29 +30,28 @@ SOFTWARE.
 #include "c_adc.h"
 #include "common.h"
 
-char adc_prefix_dir[40];
+char adc_prefix_dir[49];
 
 int adc_initialized = 0;
 
 int initialize_adc(void)
 {
-    char test_path[40];
+    char test_path[49];
     FILE *fh;
     if (adc_initialized) {
         return 1;
     }
 
-    if (load_device_tree("cape-bone-iio")) {
-        build_path("/sys/devices", "ocp.", ocp_dir, sizeof(ocp_dir));
-        build_path(ocp_dir, "helper.", adc_prefix_dir, sizeof(adc_prefix_dir));
-        strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
-
+    if (load_device_tree("BB-ADC")) {
+        strncat(adc_prefix_dir, "/sys/bus/iio/devices/iio:device0/in_voltage", sizeof(adc_prefix_dir));
+        
         // Test that the directory has an AIN entry (found correct devicetree)
-        snprintf(test_path, sizeof(test_path), "%s%d", adc_prefix_dir, 0);
+        snprintf(test_path, sizeof(test_path), "%s%d_raw", adc_prefix_dir, 1);
         
         fh = fopen(test_path, "r");
 
         if (!fh) {
+            puts("wiiii");
             return 0; 
         }
         fclose(fh);
@@ -67,10 +66,10 @@ int initialize_adc(void)
 int read_value(unsigned int ain, float *value)
 {
     FILE * fh;
-    char ain_path[40];
+    char ain_path[49];
     int err, try_count=0;
     int read_successful;
-    snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
+    snprintf(ain_path, sizeof(ain_path), "%s%d_raw", adc_prefix_dir, ain);
     
     read_successful = 0;
 
@@ -106,5 +105,5 @@ int adc_setup()
 
 void adc_cleanup(void)
 {
-    unload_device_tree("cape-bone-iio");
+    unload_device_tree("BB-ADC");
 }

@@ -361,12 +361,14 @@ int get_spi_bus_path_number(unsigned int spi)
 int load_device_tree(const char *name)
 {
     FILE *file = NULL;
-    char slots[40];
+    char slots[41];
     char line[256];
 
-    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
-    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+    // build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+    
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
@@ -394,11 +396,12 @@ int load_device_tree(const char *name)
 int unload_device_tree(const char *name)
 {
     FILE *file = NULL;
-    char slots[40];
+    char slots[41];
     char line[256];
     char *slot_line;
 
-    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    // build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
