@@ -37,7 +37,13 @@ SOFTWARE.
 #define FILENAME_BUFFER_SIZE 128
 
 int gpio_mode;
-int gpio_direction[120];
+#ifdef BBBVERSION41
+    char ctrl_dir[43];
+    char ocp_dir[33];
+#else
+    char ctrl_dir[35];
+    char ocp_dir[25];
+#endif
 
 char ctrl_dir[43];
 char ocp_dir[33];

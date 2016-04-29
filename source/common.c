@@ -33,6 +33,11 @@ SOFTWARE.
 #include <time.h>
 #include "common.h"
 
+#include <linux/version.h>
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
+    #define BBBVERSION41
+#endif
+
 int setup_error = 0;
 int module_setup = 0;
 
@@ -361,7 +366,16 @@ int get_spi_bus_path_number(unsigned int spi)
 int load_device_tree(const char *name)
 {
     FILE *file = NULL;
+#ifdef BBBVERSION41
     char slots[41];
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+#else
+     char slots[40];
+     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+#endif
+
     char line[256];
 
     // build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
@@ -396,13 +410,16 @@ int load_device_tree(const char *name)
 int unload_device_tree(const char *name)
 {
     FILE *file = NULL;
+#ifdef BBBVERSION41
     char slots[41];
-    char line[256];
-    char *slot_line;
-
-    // build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+#else
+    char slots[40];
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+#endif
+     char line[256];
+     char *slot_line;
 
     file = fopen(slots, "r+");
     if (!file) {
