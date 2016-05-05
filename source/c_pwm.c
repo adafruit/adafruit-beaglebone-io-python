@@ -67,8 +67,10 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
 
 int initialize_pwm(void)
 {
+    char devices_path[32];
     if  (!pwm_initialized && load_device_tree("am33xx_pwm")) {
-        build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+        lookup_devices_path(devices_path, sizeof(devices_path));
+        build_path(devices_path, "ocp", ocp_dir, sizeof(ocp_dir));
         pwm_initialized = 1;
         return 1;
     }

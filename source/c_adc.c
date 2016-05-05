@@ -36,14 +36,16 @@ int adc_initialized = 0;
 
 int initialize_adc(void)
 {
-    char test_path[40];
+    char devices_path[32];
+    char test_path[64];
     FILE *fh;
     if (adc_initialized) {
         return 1;
     }
 
     if (load_device_tree("cape-bone-iio")) {
-        build_path("/sys/devices", "ocp.", ocp_dir, sizeof(ocp_dir));
+        lookup_devices_path(devices_path, sizeof(devices_path));
+        build_path(devices_path, "ocp.", ocp_dir, sizeof(ocp_dir));
         build_path(ocp_dir, "helper.", adc_prefix_dir, sizeof(adc_prefix_dir));
         strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
 

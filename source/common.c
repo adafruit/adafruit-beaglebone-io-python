@@ -31,6 +31,7 @@ SOFTWARE.
 #include "Python.h"
 #include <dirent.h>
 #include <time.h>
+#include <sys/utsname.h>
 #include "common.h"
 
 int setup_error = 0;
@@ -332,11 +333,31 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
     return 0;
 }
 
+int lookup_devices_path(char *devices_path, size_t devices_path_len)
+{
+  struct utsname uts;
+  int err = uname(&uts);
+
+  if (0 != err) {
+    return 0;
+  }
+
+  if (0 == strncmp(uts.release, "4", 1)) {
+    snprintf(devices_path, devices_path_len, "/sys/devices/platform");
+  }
+  else {
+    snprintf(devices_path, devices_path_len, "/sys/devices");
+  }
+  return 1;
+}
+
 int get_spi_bus_path_number(unsigned int spi)
 {
-  char path[50];
-  
-  build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+  char devices_path[32];
+  char path[64];
+
+  lookup_devices_path(devices_path, sizeof(devices_path));
+  build_path(devices_path, "ocp", ocp_dir, sizeof(ocp_dir));
 
   if (spi == 0) {
     snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
@@ -357,14 +378,15 @@ int get_spi_bus_path_number(unsigned int spi)
   }
 }
 
-
 int load_device_tree(const char *name)
 {
     FILE *file = NULL;
-    char slots[40];
+    char devices_path[32];
+    char slots[64];
     char line[256];
 
-    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    lookup_devices_path(devices_path, sizeof(devices_path));
+    build_path(devices_path, "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
@@ -394,11 +416,13 @@ int load_device_tree(const char *name)
 int unload_device_tree(const char *name)
 {
     FILE *file = NULL;
-    char slots[40];
+    char devices_path[32];
+    char slots[64];
     char line[256];
     char *slot_line;
 
-    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    lookup_devices_path(devices_path, sizeof(devices_path));
+    build_path(devices_path, "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
