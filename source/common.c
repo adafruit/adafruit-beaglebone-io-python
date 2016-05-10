@@ -379,7 +379,7 @@ int load_device_tree(const char *name)
     char line[256];
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
- 
+
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
