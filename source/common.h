@@ -37,6 +37,8 @@ SOFTWARE.
 #define FILENAME_BUFFER_SIZE 128
 
 int gpio_mode;
+int gpio_direction[120];
+
 #ifdef BBBVERSION41
     char ctrl_dir[43];
     char ocp_dir[33];
@@ -44,10 +46,7 @@ int gpio_mode;
     char ctrl_dir[35];
     char ocp_dir[25];
 #endif
-
-char ctrl_dir[43];
-char ocp_dir[33];
-
+ 
 int get_gpio_number(const char *key, unsigned int *gpio);
 int get_pwm_key(const char *input, char *key);
 int get_adc_ain(const char *key, unsigned int *ain);
