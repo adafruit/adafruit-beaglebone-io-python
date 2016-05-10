@@ -3,6 +3,8 @@ Copyright (c) 2013 Adafruit
 
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
+Modified for 4.1+ kernels by Grizmio
+Unified for 3.8 and 4.1+ kernels by Peter Lawler <relwalretep@gmail.com>
 
 This file incorporates work covered by the following copyright and 
 permission notice, all modified code adopts the original license:
