@@ -371,17 +371,12 @@ int load_device_tree(const char *name)
 #ifdef BBBVERSION41
     char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
-    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 #else
      char slots[40];
      build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
-     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 #endif
 
     char line[256];
-
-    // build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
-    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
     
