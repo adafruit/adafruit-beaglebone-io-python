@@ -99,7 +99,6 @@ int read_value(unsigned int ain, float *value)
 
     int err, try_count=0;
     int read_successful;
-    snprintf(ain_path, sizeof(ain_path), "%s%d_raw", adc_prefix_dir, ain);
     
     read_successful = 0;
 
