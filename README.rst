@@ -71,6 +71,17 @@ Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0
     import Adafruit_BBIO.GPIO as GPIO
     GPIO.setup("P8_14", GPIO.OUT) GPIO.output("P8_14", GPIO.HIGH)
 
+**GPIO softPWM**
+
+Setup the pin for output,set value and range.
+	import Adafruit_BBIO.GPIO as GPIO
+	GPIO.setup("P9_27",GPIO.OUT)
+	GPIO.soft_pwm_create("P9_27",50,100)
+	GPIO.soft_pwm_write("P9_27",90);
+	GPIO.soft_pwm_write("P9_27",10);
+	GPIO.soft_pwm_stop("P9_27")
+	
+
 **On-Board LEDs**
 
 On-board LEDs (USR0-USR3) are handled by LED class driver rather than the GPIO pin driver.
