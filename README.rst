@@ -78,14 +78,21 @@ THis function is inspired by https://github.com/WiringPi/WiringPi
 Setup the pin for output,set value and range.
 
 Adafruit_BBIO.GPIO.soft_pwm_create(GPIO,unsingned int initialvalue,unsingned int range)
+
 Adafruit_BBIO.GPIO.soft_pwm_write(GPIO,unsingned int value)
+
 Adafruit_BBIO.GPIO.soft_pwm_stop(GPIO)
 
 	import Adafruit_BBIO.GPIO as GPIO
+	
 	GPIO.setup("P9_27",GPIO.OUT)
+	
 	GPIO.soft_pwm_create("P9_27",50,100)
+	
 	GPIO.soft_pwm_write("P9_27",90);
+	
 	GPIO.soft_pwm_write("P9_27",10);
+	
 	GPIO.soft_pwm_stop("P9_27")
 	
 
