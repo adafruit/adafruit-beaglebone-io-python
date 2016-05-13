@@ -72,8 +72,15 @@ Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0
     GPIO.setup("P8_14", GPIO.OUT) GPIO.output("P8_14", GPIO.HIGH)
 
 **GPIO softPWM**
+PWM for normal GPIO pin.100HZ 100 precision.
+THis function is inspired by https://github.com/WiringPi/WiringPi
 
 Setup the pin for output,set value and range.
+
+Adafruit_BBIO.GPIO.soft_pwm_create(GPIO,unsingned int initialvalue,unsingned int range)
+Adafruit_BBIO.GPIO.soft_pwm_write(GPIO,unsingned int value)
+Adafruit_BBIO.GPIO.soft_pwm_stop(GPIO)
+
 	import Adafruit_BBIO.GPIO as GPIO
 	GPIO.setup("P9_27",GPIO.OUT)
 	GPIO.soft_pwm_create("P9_27",50,100)
