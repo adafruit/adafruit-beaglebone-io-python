@@ -63,7 +63,7 @@ static volatile int newPin = -1;
  *********************************************************************************
  */
 
-static PI_THREAD( softPwmThread) {
+static BB_THREAD( softPwmThread) {
 	int pin, mark, space;
 	struct sched_param param;
 

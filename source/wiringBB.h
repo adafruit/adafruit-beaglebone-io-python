@@ -1,19 +1,13 @@
-#ifndef	__BBduino_H__
-#define	__BBduino_H__
+#ifndef	__WIRINGBB_H__
+#define	__WIRINGBB_H__
 
-#define BBNAME "BBDuino"
+
+
 #define MAXGPIO 16
-
-#define GPIO_DIR "/sys/class/gpio/"
-#define GPIO_SUB "gpio"
-#define GPIO_EXPORRT "export"
-#define GPIO_DIRECTION "direction"
-#define GPIO_VLUE "vlue"
-
 
 // Threads
 
-#define	PI_THREAD(X)	void *X (void *dummy)
+#define	BB_THREAD(X)	void *X (void *dummy)
 
 extern void testPrint(void);
 
@@ -45,4 +39,4 @@ extern unsigned int micros(void);
 }
 #endif
 
-#endif//end of __BBduino_H__
+#endif//end of __WIRINGBB_H__

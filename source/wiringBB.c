@@ -10,7 +10,7 @@
 #include "wiringBB.h"
 
 static uint64_t epochMilli, epochMicro;
-bool error;
+char error = 0;
 int* myGPIO;
 int myNumOfPin;
 
@@ -20,7 +20,7 @@ void testPrint() {
 
 void initialBBduino(int* GPIO, int NumOfPin) {
 	printf("BBduino initial! Number of GPIOs is %d\n", NumOfPin);
-	error = false;
+	error = 0;
 	myGPIO = GPIO;
 	myNumOfPin = NumOfPin;
 	printf("GPIO is %d\n", myGPIO[0]);
@@ -29,10 +29,11 @@ void initialBBduino(int* GPIO, int NumOfPin) {
 		printf(
 				"BBduino error! the max number of GPIOs if %d \nNumber of GPIOs is %d\n",
 				MAXGPIO, NumOfPin);
-		error = true;
+		error = 1;
 		return;
 	}
-	for (int i = 0; i < NumOfPin; i++) {
+	int i = 0;
+	for (i = 0; i < NumOfPin; i++) {
 		printf("GPIO is %d\n", myGPIO[i]);
 		gpio_export(myGPIO[i]);
 //		gpio_set_direction(myGPIO[i], OUTPUT);
@@ -43,7 +44,8 @@ void exitBBduino() {
 	if (myGPIO == NULL)
 		return;
 	if (!error) {
-		for (int i = 0; i < myNumOfPin; i++) {
+		int i = 0;
+		for (i = 0; i < myNumOfPin; i++) {
 			gpio_unexport(myGPIO[i]);
 		}
 	}
