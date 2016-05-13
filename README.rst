@@ -73,7 +73,7 @@ Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0
 
 **GPIO softPWM**
 PWM for normal GPIO pin.100HZ 100 precision.
-THis function is inspired by https://github.com/WiringPi/WiringPi
+This function is inspired by https://github.com/WiringPi/WiringPi
 
 Setup the pin for output,set value and range.
 
