@@ -16,18 +16,9 @@ kernel = platform.release()
 print "DEBUG: kernel=" + kernel
 
 if kernel >= '4.1.0':
-    print "> 4.1.0"
-    kernel41 = True
+    kernel41 = [('BBBVERSION41', None)]
 else:
-    print "NOT 4.1.0+"
-    kernel41 = False
-
-kernel41 = [('BBBVERSION41', None)]
-print "kernel41:" 
-print kernel41
-
-if kernel41:
-    print "kernel41"
+    kernel41 = None
 
 classifiers = ['Development Status :: 3 - Alpha',
                'Operating System :: POSIX :: Linux',
