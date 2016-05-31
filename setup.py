@@ -30,7 +30,6 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: Home Automation',
                'Topic :: System :: Hardware']
 
-
 setup(name             = 'Adafruit_BBIO',
       version          = '0.0.30',
       author           = 'Justin Cooper',
@@ -48,5 +47,4 @@ setup(name             = 'Adafruit_BBIO',
                           Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
                           Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
                           Extension('Adafruit_BBIO.UART', ['source/py_uart.c', 'source/c_uart.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41)] )
-    
 
