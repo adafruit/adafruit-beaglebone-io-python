@@ -8,12 +8,10 @@ except:
 import distribute_setup
 import sys
 import platform
-# platform.release()
 distribute_setup.use_setuptools()
 from setuptools import setup, Extension, find_packages
 
 kernel = platform.release()
-print "DEBUG: kernel=" + kernel
 
 if kernel >= '4.1.0':
     kernel41 = [('BBBVERSION41', None)]
