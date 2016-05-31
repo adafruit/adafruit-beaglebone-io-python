@@ -6,8 +6,19 @@ except:
     pass
 
 import distribute_setup
+import sys
+import platform
+# platform.release()
 distribute_setup.use_setuptools()
 from setuptools import setup, Extension, find_packages
+
+kernel = platform.release()
+print "DEBUG: kernel=" + kernel
+
+if kernel >= '4.1.0':
+    kernel41 = [('BBBVERSION41', None)]
+else:
+    kernel41 = None
 
 classifiers = ['Development Status :: 3 - Alpha',
                'Operating System :: POSIX :: Linux',
@@ -18,6 +29,7 @@ classifiers = ['Development Status :: 3 - Alpha',
                'Topic :: Software Development',
                'Topic :: Home Automation',
                'Topic :: System :: Hardware']
+
 
 setup(name             = 'Adafruit_BBIO',
       version          = '0.0.30',
@@ -31,8 +43,10 @@ setup(name             = 'Adafruit_BBIO',
       classifiers      = classifiers,
       packages         = find_packages(),
       py_modules       = ['Adafruit_I2C'],
-      ext_modules      = [Extension('Adafruit_BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
-                          Extension('Adafruit_BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
-                          Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
-                          Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security']),
-                          Extension('Adafruit_BBIO.UART', ['source/py_uart.c', 'source/c_uart.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'])])
+      ext_modules      = [Extension('Adafruit_BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
+                          Extension('Adafruit_BBIO.PWM', ['source/py_pwm.c', 'source/c_pwm.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
+                          Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
+                          Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41),
+                          Extension('Adafruit_BBIO.UART', ['source/py_uart.c', 'source/c_uart.c', 'source/constants.c', 'source/common.c'], extra_compile_args=['-Wno-format-security'], define_macros=kernel41)] )
+    
+
