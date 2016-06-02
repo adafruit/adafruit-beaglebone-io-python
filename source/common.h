@@ -39,9 +39,14 @@ SOFTWARE.
 int gpio_mode;
 int gpio_direction[120];
 
-char ctrl_dir[35];
-char ocp_dir[25];
-
+#ifdef BBBVERSION41
+    char ctrl_dir[43];
+    char ocp_dir[33];
+#else
+    char ctrl_dir[35];
+    char ocp_dir[25];
+#endif
+ 
 int get_gpio_number(const char *key, unsigned int *gpio);
 int get_pwm_key(const char *input, char *key);
 int get_adc_ain(const char *key, unsigned int *ain);
