@@ -77,7 +77,7 @@ On-board LEDs (USR0-USR3) are handled by LED class driver rather than the GPIO p
 
 They have a different path in the /sys/ filesystem.
 
-Setup the pin for output and write GPIO.HIGH or GPIO.LOW.
+Setup the pin for output and write GPIO.HIGH or GPIO.LOW::
 
     import Adafruit_BBIO.GPIO as GPIO
     import time

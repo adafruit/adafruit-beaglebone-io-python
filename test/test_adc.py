@@ -1,7 +1,9 @@
+#debian@beaglebone:~/adafruit-beaglebone-io-python/test$ cat test_adc.py
 import pytest
 import os
-
+import platform
 import Adafruit_BBIO.ADC as ADC
+
 
 def teardown_module(module):
     pass
@@ -17,14 +19,20 @@ class TestAdc:
             ADC.read_raw("P9_40")
 
     def test_setup_adc(self):
+
         ADC.setup()
 
-        files = os.listdir('/sys/devices')
-        ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
-        files = os.listdir(ocp)
-        helper_path = ocp+'/'+[s for s in files if s.startswith('helper')][0]
+        kernel = platform.release()
+        if kernel >= '4.1.0':
+            test_path = "/sys/bus/iio/devices/iio:device0/in_voltage1_raw"
+        else:
+            files = os.listdir('/sys/devices')
+            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            files = os.listdir(ocp)
+            helper_path = ocp+'/'+[s for s in files if s.startswith('helper')][0]
+            test_path = helper_path + "/AIN1"
 
-        assert os.path.exists(helper_path + "/AIN1")
+        assert os.path.exists(test_path);
         #ADC.cleanup()
 
     def test_read_adc(self):
