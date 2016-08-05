@@ -23,9 +23,10 @@ SOFTWARE.
 #ifndef C_PWM_H
 #define C_PWM_H
 
-int pwm_start(const char *key, float duty, float freq, int polarity);
-int pwm_disable(const char *key);
-int pwm_set_frequency(const char *key, float freq);
-int pwm_set_duty_cycle(const char *key, float duty);
+BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
+BBIO_err pwm_disable(const char *key);
+BBIO_err pwm_set_frequency(const char *key, float freq);
+BBIO_err pwm_set_duty_cycle(const char *key, float duty);
+BBIO_err pwm_set_polarity(const char *key, int polarity);
 void pwm_cleanup(void);
 #endif

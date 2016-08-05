@@ -87,15 +87,18 @@ void export_pwm(struct pwm_exp *new_pwm)
 
 BBIO_err initialize_pwm(void)
 {
+    BBIO_err err;
 #ifdef BBBVERSION41  // don't load overlay in 4.1+
     if (!pwm_initialized) {
+        strncpy(ocp_dir, "/sys/devices/platform/ocp", sizeof(ocp_dir));
 #else
     if  (!pwm_initialized && load_device_tree("am33xx_pwm")) {
-#endif
-        if (!build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir)))
+        err = build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+        if (err != BBIO_OK)
         {
             return BBIO_SYSFS;
         }
+#endif
         pwm_initialized = 1;
         return BBIO_OK;
     }
@@ -398,7 +401,7 @@ BBIO_err pwm_disable(const char *key)
             pwm = pwm->next;
         }
     }
-    return BBIO_OK;    
+    return BBIO_OK;
 }
 
 void pwm_cleanup(void)
