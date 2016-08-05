@@ -65,6 +65,24 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
     return NULL; /* standard for pointers */
 }
 
+// Export PWM to the list
+void export_pwm(struct pwm_exp *new_pwm)
+{
+    struct pwm_exp *pwm;
+    
+    if (exported_pwms == NULL)
+    {
+        // create new list
+        exported_pwms = new_pwm;
+    } else {
+        // add to end of existing list
+        pwm = exported_pwms;
+        while (pwm->next != NULL)
+            pwm = pwm->next;
+        pwm->next = new_pwm;
+    }
+}
+
 int initialize_pwm(void)
 {
     if  (!pwm_initialized && load_device_tree("am33xx_pwm")) {
@@ -207,17 +225,7 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     new_pwm->polarity_fd = polarity_fd;
     new_pwm->next = NULL;
 
-    if (exported_pwms == NULL)
-    {
-        // create new list
-        exported_pwms = new_pwm;
-    } else {
-        // add to end of existing list
-        pwm = exported_pwms;
-        while (pwm->next != NULL)
-            pwm = pwm->next;
-        pwm->next = new_pwm;
-    }
+    export_pwm(new_pwm);
 
     pwm_set_frequency(key, freq);
     pwm_set_polarity(key, polarity);
