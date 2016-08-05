@@ -43,13 +43,15 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     float frequency = 2000.0;
     float duty_cycle = 0.0;
     int polarity = 0;
+    int err;
     static char *kwlist[] = {"channel", "duty_cycle", "frequency", "polarity", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ffi", kwlist, &channel, &duty_cycle, &frequency, &polarity)) {
         return NULL;
     }   
 
-    if (!get_pwm_key(channel, key)) {
+    err = get_pwm_key(channel, key)
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
         return NULL;    
     }
@@ -71,10 +73,35 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
         return NULL;        
     }
 
-    if (!pwm_start(key, duty_cycle, frequency, polarity))
-        return NULL;
+    err = pwm_start(key, duty_cycle, frequency, polarity);
+    switch (err) {
+        case BBIO_OK:
+            Py_RETURN_NONE;
+            break;
 
-    Py_RETURN_NONE;
+        case BBIO_ACCESS:
+            PyErr_SetString(PyExc_IOError, "could not access a necessary file");
+            return NULL;
+
+        case BBIO_SYSFS:
+            PyErr_SetString(PyExc_RuntimeError, "Problem with a sysfs file");
+            return NULL;
+
+        case BBIO_CAPE:
+            PyErr_SetString(PyExc_RuntimeError, "Problem with the cape manager");
+            return NULL;
+
+        case BBIO_INVARG:
+            PyErr_SetString(PyExc_ValueError, "Invalid argument");
+            return NULL;
+
+        case BBIO_MEM:
+            PyErr_SetString(PyExc_RuntimeError, "Out of memory");
+            return NULL;
+
+        case BBIO_GEN:
+            PyErr_SetString(PyExc_RuntimeError, "Unknown error");
+    }
 }
 
 // python function stop(channel)
@@ -82,6 +109,7 @@ static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwarg
 {
     char key[8];
     char *channel;
+    int err;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
@@ -91,9 +119,20 @@ static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwarg
         return NULL;    
     }
 
-    pwm_disable(key);
+    err = pwm_disable(key);
+    switch (err) {
+        case BBIO_OK:
+            Py_RETURN_NONE;
+            break;
 
-    Py_RETURN_NONE;
+        case BBIO_SYSFS:
+            PyErr_SetString(PyExc_RuntimeError, "Problem with sysfs files");
+            return NULL;
+
+        default:
+            PyErr_SetString(PyExc_RuntimeError, "Unknown error");
+            return NULL;
+    }
 }
 
 // python method PWM.set_duty_cycle(channel, duty_cycle)
@@ -113,12 +152,14 @@ static PyObject *py_set_duty_cycle(PyObject *self, PyObject *args, PyObject *kwa
         return NULL;
     }
 
-    if (!get_pwm_key(channel, key)) {
+    err = get_pwm_key(channel, key);
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
         return NULL;    
     }
 
-    if (pwm_set_duty_cycle(key, duty_cycle) == -1) {
+    err = pwm_set_duty_cycle(key, duty_cycle);
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_RuntimeError, "You must start() the PWM channel first");
         return NULL;
     }

@@ -38,7 +38,7 @@ SOFTWARE.
 
 int adc_initialized = 0;
 
-int initialize_adc(void)
+BBIO_err initialize_adc(void)
 {
 #ifdef BBBVERSION41
     char test_path[49];
@@ -47,7 +47,7 @@ int initialize_adc(void)
 #endif
     FILE *fh;
     if (adc_initialized) {
-        return 1;
+        return BBIO_OK;
     }
 
 #ifdef BBBVERSION41
@@ -57,13 +57,12 @@ int initialize_adc(void)
         fh = fopen(test_path, "r");
 
         if (!fh) {
-            puts("wiiii");
-            return 0;
+            return BBIO_SYSFS;
         }
         fclose(fh);
 
         adc_initialized = 1;
-        return 1;
+        return BBIO_OK;
     }
 #else
     if (load_device_tree("cape-bone-iio")) {
@@ -74,19 +73,19 @@ int initialize_adc(void)
         fh = fopen(test_path, "r");
 
         if (!fh) {
-            return 0;
+            return BBIO_SYSFS;
         }
         fclose(fh);
 
         adc_initialized = 1;
-        return 1;
+        return BBIO_OK;
     }
 #endif
 
-    return 0;
+    return BBIO_GEN;
 }
 
-int read_value(unsigned int ain, float *value)
+BBIO_err read_value(unsigned int ain, float *value)
 {
     FILE * fh;
 #ifdef BBBVERSION41
@@ -109,7 +108,7 @@ int read_value(unsigned int ain, float *value)
 
         // Likely a bad path to the ocp device driver 
         if (!fh) {
-            return -1;
+            return BBIO_SYSFS;
         }
 
         fseek(fh, 0, SEEK_SET);
@@ -121,22 +120,22 @@ int read_value(unsigned int ain, float *value)
         try_count++;
     }
 
-    if (read_successful) return 1;
+    if (read_successful) return BBIO_OK;
 
     // Fall through and fail
-    return -1;
+    return BBIO_GEN;
 }
 
-int adc_setup()
+BBIO_err adc_setup()
 {
     return initialize_adc();
 }
 
-void adc_cleanup(void)
+BBIO_err adc_cleanup(void)
 {
 #ifdef BBBVERSION41
-    unload_device_tree("BB-ADC");
+    return unload_device_tree("BB-ADC");
 #else
-    unload_device_tree("cape-bone-iio");
+    return unload_device_tree("cape-bone-iio");
 #endif
 }

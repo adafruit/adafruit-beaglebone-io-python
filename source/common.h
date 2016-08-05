@@ -39,6 +39,16 @@ SOFTWARE.
 
 #define FILENAME_BUFFER_SIZE 128
 
+typedef enum {
+	BBIO_OK, // No error
+	BBIO_ACCESS, // Error accessing a file
+	BBIO_SYSFS, // Some error with Sysfs files
+	BBIO_CAPE, // some error with capes
+	BBIO_INVARG, // Invalid argument
+	BBIO_MEM,
+	BBIO_GEN // General error
+} BBIO_err;
+
 int gpio_mode;
 int gpio_direction[120];
 
@@ -50,14 +60,14 @@ int gpio_direction[120];
     char ocp_dir[25];
 #endif
  
-int get_gpio_number(const char *key, unsigned int *gpio);
-int get_pwm_key(const char *input, char *key);
-int get_adc_ain(const char *key, unsigned int *ain);
-int get_uart_device_tree_name(const char *name, char *dt);
-int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len);
-int get_spi_bus_path_number(unsigned int spi);
-int load_device_tree(const char *name);
-int unload_device_tree(const char *name);
+BBIO_err get_gpio_number(const char *key, unsigned int *gpio);
+BBIO_err get_pwm_key(const char *input, char *key);
+BBIO_err get_adc_ain(const char *key, unsigned int *ain);
+BBIO_err get_uart_device_tree_name(const char *name, char *dt);
+BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len);
+BBIO_err get_spi_bus_path_number(unsigned int spi);
+BBIO_err load_device_tree(const char *name);
+BBIO_err unload_device_tree(const char *name);
 int setup_error;
 int module_setup;
 

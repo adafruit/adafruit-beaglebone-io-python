@@ -85,7 +85,7 @@ void export_pwm(struct pwm_exp *new_pwm)
     }
 }
 
-int initialize_pwm(void)
+BBIO_err initialize_pwm(void)
 {
 #ifdef BBBVERSION41  // don't load overlay in 4.1+
     if (!pwm_initialized) {
@@ -94,28 +94,28 @@ int initialize_pwm(void)
 #endif
         if (!build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir)))
         {
-            return -1;
+            return BBIO_SYSFS;
         }
         pwm_initialized = 1;
-        return 1;
+        return BBIO_OK;
     }
 
-    return 0;
+    return BBIO_OK;
 }
 
-int pwm_set_frequency(const char *key, float freq) {
+BBIO_err pwm_set_frequency(const char *key, float freq) {
     int len;
     char buffer[20];
     unsigned long period_ns;
     struct pwm_exp *pwm;
 
     if (freq <= 0.0)
-        return -1;
+        return BBIO_INVARG;
 
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
-        return -1;
+        return BBIO_GEN;
     }
 
     period_ns = (unsigned long)(1e9 / freq);
@@ -127,10 +127,10 @@ int pwm_set_frequency(const char *key, float freq) {
         write(pwm->period_fd, buffer, len);
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int pwm_set_polarity(const char *key, int polarity) {
+BBIO_err pwm_set_polarity(const char *key, int polarity) {
     int len;
     char buffer[7]; /* allow room for trailing NUL byte */
     struct pwm_exp *pwm;
@@ -138,27 +138,27 @@ int pwm_set_polarity(const char *key, int polarity) {
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
-        return -1;
+        return BBIO_GEN;
     }
 
     len = snprintf(buffer, sizeof(buffer), "%d", polarity);
     write(pwm->polarity_fd, buffer, len);
 
-    return 0;
+    return BBIO_OK;
 }
 
-int pwm_set_duty_cycle(const char *key, float duty) {
+BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
     int len;
     char buffer[20];
     struct pwm_exp *pwm;
 
     if (duty < 0.0 || duty > 100.0)
-        return -1;
+        return BBIO_INVARG;
 
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
-        return -1;
+        return BBIO_GEN;
     }    
 
     pwm->duty = (unsigned long)(pwm->period_ns * (duty / 100.0));
@@ -166,11 +166,13 @@ int pwm_set_duty_cycle(const char *key, float duty) {
     len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty);
     write(pwm->duty_fd, buffer, len);
 
-    return 0;
+    return BBIO_OK;
 }
 
-int pwm_start(const char *key, float duty, float freq, int polarity)
+BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
+    int err;
+
 #ifdef BBBVERSION41
     char pwm_dev_path[45]; // "/sys/devices/platform/ocp/48300000.epwmss"
     char pwm_addr_path[60]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm"
@@ -185,13 +187,13 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     int period_fd, duty_fd, polarity_fd;
     struct pwm_exp *new_pwm, *pwm;
     struct stat s;
-    int err;
     FILE *f = NULL;
     pwm_t *p;
 
-    if(!pwm_initialized) {
-        if (initialize_pwm() < 0) {
-            return -1;
+    if (!pwm_initialized) {
+        err = initialize_pwm()
+        if (err != BBIO_OK) {
+            return err;
         }
     }
 
@@ -208,19 +210,28 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
         || device_tree_loaded("univ-hdmi")       // ""
         || device_tree_loaded("univ-nhdmi")))    // ""
     {
-        return -1;
+        return BBIO_CAPE;
     }
     // Do pinmuxing
     set_pin_mode(key, "pwm");
 
     // Get info for pwm
-    if (!get_pwm_by_key(key, &p)) {
-        return -1;
+    err = get_pwm_by_key(key, &p);
+    if (err != BBIO_OK) {
+        return err;
     }
 
-    build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
-    build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
-    build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
+    err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
+    if (err != BBIO_OK)
+        return err;
+
+    err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
+    if (err != BBIO_OK)
+        return err;
+
+    err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
+    if (err != BBIO_OK)
+        return err;
 
     snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
 
@@ -231,19 +242,19 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
             snprintf(pwm_export_path, sizeof(pwm_export_path), "%s/export", pwm_chip_path);
             f = fopen(pwm_export_path, "w");
             if (f == NULL) { // Can't open the export file
-                return -1;
+                return BBIO_ACCESS;
             }
             fprintf(f, "%d", p->index);
             fclose(f);
         } else {
             perror("stat");
-            return -1;
+            return BBIO_GEN;
         } else {
             if (S_ISDIR(s.st_mode)) {
                 /* It is a directory. Already exported */
             } else {
                 /* It's a file. Shouldn't ever happen */
-                return -1;
+                return BBIO_GEN;
             }
         }
     }
@@ -252,7 +263,7 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     if (-1 == err) {
         if (ENOENT == errno) {
             // Directory still doesn't exist, exit with error
-            return -1;
+            return BBIO_GEN;
         }
     }
 
@@ -268,23 +279,28 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     struct pwm_exp *new_pwm;
 
     if(!pwm_initialized) {
-        if (initialize_pwm() < 0) {
-            return -1;
+        err = initialize_pwm()
+        if (err != BBIO_OK) {
+            return err;
         }
     }
 
     // load tree
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
-    if (!load_device_tree(fragment)) {
+    err = load_device_tree(fragment);
+    if (err != BBIO_OK) {
         //error enabling pin for pwm
-        return -1;
+        return err;
     }
 
     //creates the fragment in order to build the pwm_test_filename, such as "pwm_test_P9_13"
     snprintf(pwm_fragment, sizeof(pwm_fragment), "pwm_test_%s", key);
 
     //finds and builds the pwm_path, as it can be variable...
-    build_path(ocp_dir, pwm_fragment, pwm_path, sizeof(pwm_path));
+    err = build_path(ocp_dir, pwm_fragment, pwm_path, sizeof(pwm_path));
+    if (err != BBIO_OK) {
+        return err;
+    }
 
     //create the path for duty
     snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_path);
@@ -296,26 +312,26 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
 
     //add period and duty fd to pwm list    
     if ((period_fd = open(period_path, O_RDWR)) < 0)
-        return -1;
+        return BBIO_SYSFS;
 
 
     if ((duty_fd = open(duty_path, O_RDWR)) < 0) {
         //error, close already opened period_fd.
         close(period_fd);
-        return -1;
+        return BBIO_SYSFS;
     }
 
     if ((polarity_fd = open(polarity_path, O_RDWR)) < 0) {
         //error, close already opened period_fd and duty_fd.
         close(period_fd);
         close(duty_fd);
-        return -1;
+        return BBIO_SYSFS;
     }    
 
     // add to list
     new_pwm = malloc(sizeof(struct pwm_exp));
     if (new_pwm == 0) {
-        return -1; // out of memory
+        return BBIO_MEM; // out of memory
     }
 
     strncpy(new_pwm->key, key, KEYLEN);  /* can leave string unterminated */
@@ -334,21 +350,26 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
 #ifdef BBBVERSION41  // Enable the PWM
     f = fopen(enable_path);
     if (f == NULL)
-        return -1;
+        return BBIO_SYSFS;
     fprintf(f, "1");
     fclose(f);
 #endif
 
-    return 1;
+    return BBIO_OK;
 }
 
-int pwm_disable(const char *key)
+BBIO_err pwm_disable(const char *key)
 {
     struct pwm_exp *pwm, *temp, *prev_pwm = NULL;
     char fragment[18];
+    int err;
 
+#ifndef BBBVERSION41
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
-    unload_device_tree(fragment);
+    err = unload_device_tree(fragment);
+    if (err != BBIO_OK)
+        return err;
+#endif
 
     // remove from list
     pwm = exported_pwms;
@@ -377,7 +398,7 @@ int pwm_disable(const char *key)
             pwm = pwm->next;
         }
     }
-    return 0;    
+    return BBIO_OK;    
 }
 
 void pwm_cleanup(void)

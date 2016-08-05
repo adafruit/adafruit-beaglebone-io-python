@@ -252,55 +252,55 @@ int lookup_ain_by_name(const char *name)
   return -1;
 }
 
-int lookup_uart_by_name(const char *input_name, char *dt)
+BBIO_err lookup_uart_by_name(const char *input_name, char *dt)
 {
     uart_t *p;
     for (p = uart_table; p->name != NULL; ++p) {
         if (strcmp(p->name, input_name) == 0) {
             strncpy(dt, p->dt, FILENAME_BUFFER_SIZE);
             dt[FILENAME_BUFFER_SIZE - 1] = '\0';
-            return 1;                
+            return BBIO_OK;
         }
     }
     fprintf(stderr, "return 0 lookup_uart_by_name");
-    return 0;
+    return BBIO_INVARG;
 }
 
-int copy_pwm_key_by_key(const char *input_key, char *key)
+BBIO_err copy_pwm_key_by_key(const char *input_key, char *key)
 {
     pins_t *p;
     for (p = table; p->key != NULL; ++p) {
         if (strcmp(p->key, input_key) == 0) {
             //validate it's a valid pwm pin
             if (p->pwm_mux_mode == -1)
-                return 0;
+                return BBIO_INVARG;
 
             strncpy(key, p->key, 7);
             key[7] = '\0';
-            return 1;                
+            return BBIO_OK;                
         }
     }
-    return 0;
+    return BBIO_INVARG;
 }
 
-int get_pwm_key_by_name(const char *name, char *key)
+BBIO_err get_pwm_key_by_name(const char *name, char *key)
 {
     pins_t *p;
     for (p = table; p->name != NULL; ++p) {
         if (strcmp(p->name, name) == 0) {
             //validate it's a valid pwm pin
             if (p->pwm_mux_mode == -1)
-                return 0;
+                return BBIO_INVARG;
 
             strncpy(key, p->key, 7);
             key[7] = '\0';
-            return 1;
+            return BBIO_OK;
         }
     }
-    return 0;
+    return BBIO_INVARG;
 }
 
-int get_gpio_number(const char *key, unsigned int *gpio)
+BBIO_err get_gpio_number(const char *key, unsigned int *gpio)
 {
     *gpio = lookup_gpio_by_key(key);
     
@@ -308,10 +308,14 @@ int get_gpio_number(const char *key, unsigned int *gpio)
         *gpio = lookup_gpio_by_name(key);
     }
 
-    return 0;
+    if (!*gpio) {
+        return BBIO_INVARG;
+    }
+
+    return BBIO_OK;
 }
 
-int get_pwm_by_key(const char *key, pwm_t **pwm)
+BBIO_err get_pwm_by_key(const char *key, pwm_t **pwm)
 {
     pwm_t *p;
     // Loop through the table
@@ -319,22 +323,22 @@ int get_pwm_by_key(const char *key, pwm_t **pwm)
         if (strcmp(p->key, key) == 0) {
             // Return the pwm_t struct
             *pwm = p;
-            return 1;
+            return BBIO_OK;
         }
     }
-    return 0;
+    return BBIO_INVARG;
 }
 
-int get_pwm_key(const char *input, char *key)
+BBIO_err get_pwm_key(const char *input, char *key)
 {
     if (!copy_pwm_key_by_key(input, key)) {
         return get_pwm_key_by_name(input, key);
     }
 
-    return 1;
+    return BBIO_INVARG;
 }
 
-int get_adc_ain(const char *key, unsigned int *ain)
+BBIO_err get_adc_ain(const char *key, unsigned int *ain)
 {
     *ain = lookup_ain_by_key(key);
     
@@ -342,24 +346,23 @@ int get_adc_ain(const char *key, unsigned int *ain)
         *ain = lookup_ain_by_name(key);
 
         if (*ain == -1) {
-          return 0;
+          return BBIO_INVARG;
         }
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int get_uart_device_tree_name(const char *name, char *dt)
+BBIO_err get_uart_device_tree_name(const char *name, char *dt)
 {
     if (!lookup_uart_by_name(name, dt)) {
-      fprintf(stderr, "return 0 get_uart");
-        return 0;
+        return BBIO_INVARG;
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
+BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
 {
     struct glob_t results;
     size_t len = strlen(partial_path) + strlen(prefix) + 5;
@@ -371,7 +374,11 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
                 glob_t *pglob); */
     int err = glob(pattern, 0, NULL, &results);
     if (err != 0) {
-        return 0;
+        globfree(&results);
+        if (err == GLOB_NOSPACE)
+            return BBIO_MEM;
+        else
+            return BBIO_GEN;
     }
 
     // We will return the first match
@@ -380,7 +387,7 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
     // Free memory
     globfree(&results);
 
-    return 1;
+    return BBIO_OK;
 }
 
 int get_spi_bus_path_number(unsigned int spi)
@@ -390,26 +397,26 @@ int get_spi_bus_path_number(unsigned int spi)
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
 
   if (spi == 0) {
-    snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
+      snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
   } else {
-    snprintf(path, sizeof(path), "%s/481a0000.spi/spi_master/spi1", ocp_dir);
+      snprintf(path, sizeof(path), "%s/481a0000.spi/spi_master/spi1", ocp_dir);
   }
   
   DIR* dir = opendir(path);
   if (dir) {
-    closedir(dir);
-    //device is using /dev/spidev1.x
-    return 1;
+      closedir(dir);
+      //device is using /dev/spidev1.x
+      return 1;
   } else if (ENOENT == errno) {
-    //device is using /dev/spidev2.x
-    return 2;
+      //device is using /dev/spidev2.x
+      return 2;
   } else {
-    return -1;
+      return -1;
   }
 }
 
 
-int load_device_tree(const char *name)
+BBIO_err load_device_tree(const char *name)
 {
     FILE *file = NULL;
 #ifdef BBBVERSION41
@@ -427,14 +434,14 @@ int load_device_tree(const char *name)
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
-        return 0;
+        return BBIO_CAPE;
     }
 
     while (fgets(line, sizeof(line), file)) {
         //the device is already loaded, return 1
         if (strstr(line, name)) {
             fclose(file);
-            return 1;
+            return BBIO_OK;
         }
     }
 
@@ -445,7 +452,7 @@ int load_device_tree(const char *name)
     //0.2 second delay
     nanosleep((struct timespec[]){{0, 200000000}}, NULL);
 
-    return 1;
+    return BBIO_OK;
 }
 
 // Find whether a device tree is loaded.
@@ -453,7 +460,7 @@ int load_device_tree(const char *name)
 int device_tree_loaded(const char *name)
 {
     FILE *file = NULL;
-    #ifdef BBBVERSION41
+#ifdef BBBVERSION41
     char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 #else
@@ -486,7 +493,7 @@ int device_tree_loaded(const char *name)
     return 0;
 }
 
-int unload_device_tree(const char *name)
+BBIO_err unload_device_tree(const char *name)
 {
     FILE *file = NULL;
 #ifdef BBBVERSION41
@@ -503,7 +510,7 @@ int unload_device_tree(const char *name)
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
-        return 0;
+        return BBIO_SYSFS;
     }
 
     while (fgets(line, sizeof(line), file)) {
@@ -516,12 +523,12 @@ int unload_device_tree(const char *name)
 
             fprintf(file, "-%s", slot_line);
             fclose(file);
-            return 1;
+            return BBIO_OK;
         }
     }
 
     //not loaded, close file
     fclose(file);
 
-    return 1;
+    return BBIO_OK;
 }

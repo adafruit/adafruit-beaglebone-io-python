@@ -24,6 +24,8 @@ SOFTWARE.
 #ifndef C_PINMUX_H
 #define C_PINMUX_H
 
-int set_pin_mode(const char *key, const char *mode);
+#include "common.h"
+
+BBIO_err set_pin_mode(const char *key, const char *mode);
 
 #endif

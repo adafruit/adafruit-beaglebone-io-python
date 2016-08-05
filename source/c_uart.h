@@ -22,6 +22,8 @@ SOFTWARE.
 */
 #ifndef C_UART_H
 #define C_UART_H
-int uart_setup(const char *dt);
-void uart_cleanup(void);
+#include "common.h"
+
+BBIO_err uart_setup(const char *dt);
+BBIO_err uart_cleanup(void);
 #endif

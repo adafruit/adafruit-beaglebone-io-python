@@ -30,20 +30,29 @@ SOFTWARE.
 #include "c_uart.h"
 #include "common.h"
 
-int uart_setup(const char *dt)
+BBIO_err uart_setup(const char *dt)
 {
-    if (load_device_tree(dt)) {
-        return 1;
-    }
-
-    return 0;
+    return load_device_tree(dt);
 }
 
-void uart_cleanup(void)
+BBIO_err uart_cleanup(void)
 {
-    unload_device_tree("BB-UART1");
-    unload_device_tree("BB-UART2");
-    unload_device_tree("BB-UART3");
-    unload_device_tree("BB-UART4");
-    unload_device_tree("BB-UART5");
+    BBIO_err e1, e2, e3, e4, e5;
+    e1 = unload_device_tree("BB-UART1");
+    e2 = unload_device_tree("BB-UART2");
+    e3 = unload_device_tree("BB-UART3");
+    e4 = unload_device_tree("BB-UART4");
+    e5 = unload_device_tree("BB-UART5");
+    if (e1 != BBIO_OK)
+        return e1;
+    if (e2 != BBIO_OK)
+        return e1;
+    if (e3 != BBIO_OK)
+        return e1;
+    if (e4 != BBIO_OK)
+        return e1;
+    if (e5 != BBIO_OK)
+        return e1;
+
+    return BBIO_OK;
 }

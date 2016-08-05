@@ -5,9 +5,7 @@
 #include "common.h"
 
 
-// 0 = success
-// non-zero = error
-int set_pin_mode(const char *key, const char *mode)
+BBIO_err set_pin_mode(const char *key, const char *mode)
 {
 	// char ocp_dir[30] "/sys/devices/platform/ocp"
 	char path[60]; // "/sys/devices/platform/ocp/ocp:P#_##_pinmux/state"
@@ -21,11 +19,11 @@ int set_pin_mode(const char *key, const char *mode)
 
 	f = fopen(path, "w");
 	if (NULL == f) {
-		return -1;
+		return BBIO_ACCESS;
 	} 
 
 	fprintf(f, "%s", mode);
 	fclose(f);
 
-	return 0;
+	return BBIO_OK;
 }
