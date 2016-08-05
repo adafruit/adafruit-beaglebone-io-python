@@ -41,9 +41,9 @@ int uart_setup(const char *dt)
 
 void uart_cleanup(void)
 {
-    unload_device_tree("ADAFRUIT-UART1");
-    unload_device_tree("ADAFRUIT-UART2");
-    unload_device_tree("ADAFRUIT-UART3");
-    unload_device_tree("ADAFRUIT-UART4");
-    unload_device_tree("ADAFRUIT-UART5");
+    unload_device_tree("BB-UART1");
+    unload_device_tree("BB-UART2");
+    unload_device_tree("BB-UART3");
+    unload_device_tree("BB-UART4");
+    unload_device_tree("BB-UART5");
 }
