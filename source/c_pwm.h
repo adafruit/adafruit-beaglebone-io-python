@@ -20,9 +20,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef C_PWM_H
+#define C_PWM_H
 
 int pwm_start(const char *key, float duty, float freq, int polarity);
 int pwm_disable(const char *key);
 int pwm_set_frequency(const char *key, float freq);
 int pwm_set_duty_cycle(const char *key, float duty);
 void pwm_cleanup(void);
+#endif

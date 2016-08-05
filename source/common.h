@@ -28,6 +28,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef COMMON_H
+#define COMMON_H
+
 #define MODE_UNKNOWN -1
 #define BOARD        10
 #define BCM          11
@@ -57,3 +60,5 @@ int load_device_tree(const char *name);
 int unload_device_tree(const char *name);
 int setup_error;
 int module_setup;
+
+#endif

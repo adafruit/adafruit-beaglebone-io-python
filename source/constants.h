@@ -1,3 +1,6 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
 PyObject *high;
 PyObject *low;
 PyObject *input;
@@ -12,3 +15,5 @@ PyObject *both_edge;
 PyObject *version;
 
 void define_constants(PyObject *module);
+
+#endif
