@@ -36,11 +36,6 @@ SOFTWARE.
 #include <glob.h>
 #include "common.h"
 
-#include <linux/version.h>
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,1,0)
-    #define BBBVERSION41
-#endif
-
 int setup_error = 0;
 int module_setup = 0;
 
