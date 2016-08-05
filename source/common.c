@@ -405,7 +405,6 @@ int unload_device_tree(const char *name)
 #ifdef BBBVERSION41
     char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
-    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 #else
     char slots[40];
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
@@ -413,6 +412,7 @@ int unload_device_tree(const char *name)
     char line[256];
     char *slot_line;
 
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
