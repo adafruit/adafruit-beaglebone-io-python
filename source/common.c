@@ -33,6 +33,7 @@ SOFTWARE.
 #include "Python.h"
 #include <dirent.h>
 #include <time.h>
+#include <string.h>
 #include <glob.h>
 #include "common.h"
 
@@ -165,6 +166,40 @@ uart_t uart_table[] = {
   { NULL, NULL, 0 }
 };
 
+// Modeled after "pwm": submap in bone.js from bonescript
+// https://github.com/jadonk/bonescript/blob/master/src/bone.js#L680
+typedef struct pwm_t {
+  const char *module;
+  const int sysfs;
+  const int index;
+  const int muxmode;
+  const char *path;
+  const char *name;
+  const char *chip;
+  const char *addr;
+  const char *key;  // Pin name eg P9_21
+} pwm_t;
+
+// Copied from https://github.com/jadonk/bonescript/blob/master/src/bone.js
+
+pwm_t pwm_table[] = {
+  { "ehrpwm2", 6, 1, 4, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_13"},
+  { "ehrpwm2", 5, 0, 4, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_19"},
+  { "ehrpwm1", 4, 1, 2, "ehrpwm.1:1", "EHRPWM1B", "48302000", "48302200", "P8_34"},
+  { "ehrpwm1", 3, 0, 2, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P8_36"},
+  { "ehrpwm2", 5, 0, 3, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_45"},
+  { "ehrpwm2", 6, 1, 3, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_46"},
+  { "ehrpwm1", 3, 0, 6, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P9_14"},
+  { "ehrpwm1", 4, 1, 6, "ehrpwm.1:1", "EHRPWM1B", "48302000", "48302200", "P9_16"},
+  { "ehrpwm0", 1, 1, 3, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_21"},
+  { "ehrpwm0", 0, 0, 3, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_22"},
+  { "ecap2", 7, 2, 4, "ecap.2", "ECAPPWM2", "", "", "P9_28"},
+  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_29"},
+  { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_31"},
+  { "ecap0", 2, 0, 0, "ecap.0", "ECAPPWM0", "", "", "P9_42"},
+  { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
+}
+
 int lookup_gpio_by_key(const char *key)
 {
   pins_t *p;
@@ -273,6 +308,20 @@ int get_gpio_number(const char *key, unsigned int *gpio)
         *gpio = lookup_gpio_by_name(key);
     }
 
+    return 0;
+}
+
+int get_pwm_by_key(const char *key, pwm_t **pwm)
+{
+    pwm_t *p;
+    // Loop through the table
+    for (p = pwm_table; p->key != NULL; ++p) {
+        if (strcmp(p->key, key) == 0) {
+            // Return the pwm_t struct
+            *pwm = p;
+            return 1;
+        }
+    }
     return 0;
 }
 
@@ -397,6 +446,44 @@ int load_device_tree(const char *name)
     nanosleep((struct timespec[]){{0, 200000000}}, NULL);
 
     return 1;
+}
+
+// Find whether a device tree is loaded.
+// Returns 1 if so, <0 if error, and 0 if not.
+int device_tree_loaded(const char *name)
+{
+    FILE *file = NULL;
+    #ifdef BBBVERSION41
+    char slots[41];
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
+#else
+    char slots[40];
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+#endif
+    char line[256];
+    char *slot_line;
+
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+
+
+    file = fopen(slots, "r+");
+    if (!file) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
+        return -1;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        //the device is loaded, close file and return true
+        if (strstr(line, name)) {
+            fclose(file);
+            return 1;
+        }
+    }
+
+    //not loaded, close file
+    fclose(file);
+
+    return 0;
 }
 
 int unload_device_tree(const char *name)

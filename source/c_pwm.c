@@ -23,6 +23,7 @@ SOFTWARE.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <string.h>
 #include <fcntl.h>
@@ -30,10 +31,11 @@ SOFTWARE.
 #include "c_pwm.h"
 #include "common.h"
 
-#define KEYLEN 7
+#ifdef BBBVERSION41
+#include "c_pinmux.h"
+#endif
 
-#define PERIOD 0
-#define DUTY 1
+#define KEYLEN 7
 
 int pwm_initialized = 0;
 
@@ -85,13 +87,20 @@ void export_pwm(struct pwm_exp *new_pwm)
 
 int initialize_pwm(void)
 {
+#ifdef BBBVERSION41  // don't load overlay in 4.1+
+    if (!pwm_initialized) {
+#else
     if  (!pwm_initialized && load_device_tree("am33xx_pwm")) {
-        build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+#endif
+        if (!build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir)))
+        {
+            return -1;
+        }
         pwm_initialized = 1;
         return 1;
     }
 
-    return 0;   
+    return 0;
 }
 
 int pwm_set_frequency(const char *key, float freq) {
@@ -162,37 +171,128 @@ int pwm_set_duty_cycle(const char *key, float duty) {
 
 int pwm_start(const char *key, float duty, float freq, int polarity)
 {
-    char fragment[18];
-    char pwm_test_fragment[20];
-    char pwm_test_path[45];
-    char period_path[50];
-    char duty_path[50];
-    char polarity_path[55];
+#ifdef BBBVERSION41
+    char pwm_dev_path[45]; // "/sys/devices/platform/ocp/48300000.epwmss"
+    char pwm_addr_path[60]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm"
+    char pwm_chip_path[75]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0"
+    char pwm_export_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/export"
+    char pwm_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1"
+    char duty_path[90]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1/duty_cycle"
+    char period_path[90];
+    char polarity_path[90];
+    char enable_path[90];
+
     int period_fd, duty_fd, polarity_fd;
     struct pwm_exp *new_pwm, *pwm;
+    struct stat s;
+    int err;
+    FILE *f = NULL;
+    pwm_t *p;
 
     if(!pwm_initialized) {
-        initialize_pwm();
+        if (initialize_pwm() < 0) {
+            return -1;
+        }
     }
 
-    snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
-    
+    // Make sure that one of the universal capes is loaded
+    if (!( device_tree_loaded("cape-univ-audio") // from cdsteinkuehler/beaglebone-universal-io
+        || device_tree_loaded("cape-univ-emmc")  // ""
+        || device_tree_loaded("cape-univ-hdmi")  // ""
+        || device_tree_loaded("cape-universal")  // ""
+        || device_tree_loaded("cape-universala") // ""
+        || device_tree_loaded("cape-universaln") // ""
+        || device_tree_loaded("univ-all")        // from latest BeagleBone Debian 8 images
+        || device_tree_loaded("univ-bbgw")       // ""
+        || device_tree_loaded("univ-emmc")       // ""
+        || device_tree_loaded("univ-hdmi")       // ""
+        || device_tree_loaded("univ-nhdmi")))    // ""
+    {
+        return -1;
+    }
+    // Do pinmuxing
+    set_pin_mode(key, "pwm");
 
+    // Get info for pwm
+    if (!get_pwm_by_key(key, &p)) {
+        return -1;
+    }
+
+    build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
+    build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
+    build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
+
+    snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
+
+    // Export PWM if hasn't already been
+    err = stat(pwm_path, &s);
+    if (-1 == err) {
+        if (ENOENT == errno) { // directory does not exist
+            snprintf(pwm_export_path, sizeof(pwm_export_path), "%s/export", pwm_chip_path);
+            f = fopen(pwm_export_path, "w");
+            if (f == NULL) { // Can't open the export file
+                return -1;
+            }
+            fprintf(f, "%d", p->index);
+            fclose(f);
+        } else {
+            perror("stat");
+            return -1;
+        } else {
+            if (S_ISDIR(s.st_mode)) {
+                /* It is a directory. Already exported */
+            } else {
+                /* It's a file. Shouldn't ever happen */
+                return -1;
+            }
+        }
+    }
+
+    err = stat(pwm_path, &s);
+    if (-1 == err) {
+        if (ENOENT == errno) {
+            // Directory still doesn't exist, exit with error
+            return -1;
+        }
+    }
+
+    snprintf(duty_path, sizeof(duty_path), "%s/duty_cycle", pwm_path);
+#else
+    char fragment[18];
+    char pwm_fragment[20];
+    char pwm_path[45];
+    char duty_path[56]
+    char period_path[50];
+    char polarity_path[55];
+    int period_fd, duty_fd, polarity_fd;
+    struct pwm_exp *new_pwm;
+
+    if(!pwm_initialized) {
+        if (initialize_pwm() < 0) {
+            return -1;
+        }
+    }
+
+    // load tree
+    snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
     if (!load_device_tree(fragment)) {
         //error enabling pin for pwm
         return -1;
     }
 
     //creates the fragment in order to build the pwm_test_filename, such as "pwm_test_P9_13"
-    snprintf(pwm_test_fragment, sizeof(pwm_test_fragment), "pwm_test_%s", key);
+    snprintf(pwm_fragment, sizeof(pwm_fragment), "pwm_test_%s", key);
 
-    //finds and builds the pwm_test_path, as it can be variable...
-    build_path(ocp_dir, pwm_test_fragment, pwm_test_path, sizeof(pwm_test_path));
+    //finds and builds the pwm_path, as it can be variable...
+    build_path(ocp_dir, pwm_fragment, pwm_path, sizeof(pwm_path));
 
-    //create the path for the period and duty
-    snprintf(period_path, sizeof(period_path), "%s/period", pwm_test_path);
-    snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_test_path);
-    snprintf(polarity_path, sizeof(polarity_path), "%s/polarity", pwm_test_path);
+    //create the path for duty
+    snprintf(duty_path, sizeof(duty_path), "%s/duty", pwm_path);
+#endif
+
+    // create the path for period and polarity
+    snprintf(period_path, sizeof(period_path), "%s/period", pwm_path);
+    snprintf(polarity_path, sizeof(polarity_path), "%s/polarity", pwm_path);
 
     //add period and duty fd to pwm list    
     if ((period_fd = open(period_path, O_RDWR)) < 0)
@@ -230,6 +330,14 @@ int pwm_start(const char *key, float duty, float freq, int polarity)
     pwm_set_frequency(key, freq);
     pwm_set_polarity(key, polarity);
     pwm_set_duty_cycle(key, duty);
+
+#ifdef BBBVERSION41  // Enable the PWM
+    f = fopen(enable_path);
+    if (f == NULL)
+        return -1;
+    fprintf(f, "1");
+    fclose(f);
+#endif
 
     return 1;
 }
