@@ -155,7 +155,7 @@ pins_t table[] = {
 
 typedef struct uart_t { 
     const char *name; 
-    const char *path; 
+    const char *path;
     const char *dt; 
     const char *rx;
     const char *tx;
@@ -342,7 +342,7 @@ int build_path(const char *partial_path, const char *prefix, char *full_path, si
 int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
-  
+
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
 
   if (spi == 0) {
@@ -415,8 +415,8 @@ int unload_device_tree(const char *name)
     char slots[40];
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
-     char line[256];
-     char *slot_line;
+    char line[256];
+    char *slot_line;
 
     file = fopen(slots, "r+");
     if (!file) {
