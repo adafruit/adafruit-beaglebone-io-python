@@ -33,6 +33,7 @@ SOFTWARE.
 #include "Python.h"
 #include <dirent.h>
 #include <time.h>
+#include <glob.h>
 #include "common.h"
 
 #include <linux/version.h>
@@ -316,27 +317,26 @@ int get_uart_device_tree_name(const char *name, char *dt)
 
 int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
 {
-    DIR *dp;
-    struct dirent *ep;
+    struct glob_t results;
+    size_t len = strlen(partial_path) + strlen(prefix) + 5;
+    char *pattern = malloc(len);
+    snprintf(pattern, len, "%s/%s*", partial_path, prefix);
 
-    dp = opendir (partial_path);
-    if (dp != NULL) {
-        while ((ep = readdir (dp))) {
-            // Enforce that the prefix must be the first part of the file
-            char* found_string = strstr(ep->d_name, prefix);
-
-            if (found_string != NULL && (ep->d_name - found_string) == 0) {
-                snprintf(full_path, full_path_len, "%s/%s", partial_path, ep->d_name);
-                (void) closedir (dp);
-                return 1;
-            }
-        }
-        (void) closedir (dp);
-    } else {
+/*  int glob(const char *pattern, int flags,
+                int (*errfunc) (const char *epath, int eerrno),
+                glob_t *pglob); */
+    int err = glob(pattern, 0, NULL, &results);
+    if (err != 0) {
         return 0;
     }
 
-    return 0;
+    // We will return the first match
+    strncpy(full_path, results.gl_pathv[0], full_path_len)
+
+    // Free memory
+    globfree(&results);
+
+    return 1;
 }
 
 int get_spi_bus_path_number(unsigned int spi)
