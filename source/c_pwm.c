@@ -48,7 +48,9 @@ struct pwm_exp
     int period_fd;
     int duty_fd;
     int polarity_fd;
+#ifdef BBBVERSION41
     int enable_fd;
+#endif
     float duty;
     unsigned long duty_ns;
     unsigned long period_ns;
@@ -179,7 +181,9 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     int len;
     char buffer[9]; /* allow room for trailing NUL byte */
     struct pwm_exp *pwm;
+#ifdef BBBVERSION41
     int enabled; /* Maintain original state */
+#endif
 
     pwm = lookup_exported_pwm(key);
 
@@ -270,7 +274,6 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
 
 BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
 {
-    int e;
     BBIO_err err;
 
 #ifdef BBBVERSION41
@@ -284,6 +287,7 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     char polarity_path[90];
     char enable_path[90];
 
+    int e;
     int period_fd, duty_fd, polarity_fd, enable_fd;
     struct pwm_exp *new_pwm;
     struct stat s;
@@ -382,8 +386,8 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     int period_fd, duty_fd, polarity_fd;
     struct pwm_exp *new_pwm;
 
-    if(!pwm_initialized) {
-        err = initialize_pwm()
+    if (!pwm_initialized) {
+        err = initialize_pwm();
         if (err != BBIO_OK) {
             return err;
         }
@@ -456,7 +460,11 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     new_pwm->period_fd = period_fd;
     new_pwm->duty_fd = duty_fd;
     new_pwm->polarity_fd = polarity_fd;
+
+#ifdef BBBVERSION41
     new_pwm->enable_fd = enable_fd;
+#endif
+
     new_pwm->next = NULL;
 
     export_pwm(new_pwm);
@@ -467,8 +475,10 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
 BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
     BBIO_err err;
+#ifdef BBBVERSION41
     char buffer[20];
     size_t len;
+#endif
 
     struct pwm_exp *pwm = lookup_exported_pwm(key);
     if (pwm == NULL) {
@@ -513,10 +523,11 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 BBIO_err pwm_disable(const char *key)
 {
     struct pwm_exp *pwm, *temp, *prev_pwm = NULL;
-    char buffer[2];
-    size_t len;
+    BBIO_err err;
 
 #ifdef BBBVERSION41
+    char buffer[2];
+    size_t len;
     pwm = lookup_exported_pwm(key);
     
     // Disable the PWM
