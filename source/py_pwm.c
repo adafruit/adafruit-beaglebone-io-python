@@ -41,7 +41,7 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     char key[8];
     char *channel;
     float frequency = 2000.0;
-    float duty_cycle = 50.0;
+    float duty_cycle = 0.0;
     int polarity = 0;
     BBIO_err err;
     static char *kwlist[] = {"channel", "duty_cycle", "frequency", "polarity", NULL};

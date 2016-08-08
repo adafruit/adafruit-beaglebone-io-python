@@ -46,12 +46,15 @@ BBIO_err initialize_adc(void)
     char test_path[40];
 #endif
     FILE *fh;
+    BBIO_err err;
+
     if (adc_initialized) {
         return BBIO_OK;
     }
 
 #ifdef BBBVERSION41
-    if (load_device_tree("BB-ADC")) {
+    err = load_device_tree("BB-ADC");
+    if (err == BBIO_OK) {
         strncat(adc_prefix_dir, "/sys/bus/iio/devices/iio:device0/in_voltage", sizeof(adc_prefix_dir));
         snprintf(test_path, sizeof(test_path), "%s%d_raw", adc_prefix_dir, 1);
         fh = fopen(test_path, "r");
