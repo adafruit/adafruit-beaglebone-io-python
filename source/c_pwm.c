@@ -150,6 +150,7 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         }
 
     } else if (period_ns > pwm->period_ns) {
+        pwm->period_ns = period_ns;
         // Ordinarily update the period first,
         // to avoid the opposite bug - kernel won't
         // let us set duty greater than period
