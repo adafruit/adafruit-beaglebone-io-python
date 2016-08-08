@@ -43,14 +43,15 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 {
     BBIO_err err;
 
-    err = adc_setup()
-    if (err == BBIO_OK)
-        Py_RETURN_NONE;
-
-    PyErr_SetString(PyExc_RuntimeError, "Unable to setup ADC system. Possible causes are: \n"
+    err = adc_setup();
+    if (err != BBIO_OK) {
+        PyErr_SetString(PyExc_RuntimeError, "Unable to setup ADC system. Possible causes are: \n"
                                         "  - A cape with a conflicting pin mapping is loaded \n"
                                         "  - A device tree object is loaded that uses the same name for a fragment: helper");
-    return NULL;
+        return NULL;
+    }
+
+    Py_RETURN_NONE;
 }
 
 // python function read(channel)
@@ -72,14 +73,13 @@ static PyObject *py_read(PyObject *self, PyObject *args)
         return NULL;
     }    
 
-    int err = get_adc_ain(channel, &ain);
+    err = get_adc_ain(channel, &ain);
     if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid AIN key or name.");
         return NULL;    
     }
 
     err = read_value(ain, &value);
-
     if (err != BBIO_OK) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, "Error while reading AIN port. Invalid or locked AIN file.");
         return NULL;

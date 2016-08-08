@@ -41,16 +41,16 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     char key[8];
     char *channel;
     float frequency = 2000.0;
-    float duty_cycle = 0.0;
+    float duty_cycle = 50.0;
     int polarity = 0;
-    int err;
+    BBIO_err err;
     static char *kwlist[] = {"channel", "duty_cycle", "frequency", "polarity", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|ffi", kwlist, &channel, &duty_cycle, &frequency, &polarity)) {
         return NULL;
     }   
 
-    err = get_pwm_key(channel, key)
+    err = get_pwm_key(channel, key);
     if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
         return NULL;    
@@ -76,7 +76,6 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
     err = pwm_start(key, duty_cycle, frequency, polarity);
     switch (err) {
         case BBIO_OK:
-            Py_RETURN_NONE;
             break;
 
         case BBIO_ACCESS:
@@ -101,7 +100,9 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
 
         case BBIO_GEN:
             PyErr_SetString(PyExc_RuntimeError, "Unknown error");
+            return NULL;
     }
+    Py_RETURN_NONE;
 }
 
 // python function stop(channel)
@@ -109,7 +110,7 @@ static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwarg
 {
     char key[8];
     char *channel;
-    int err;
+    BBIO_err err;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
@@ -141,6 +142,8 @@ static PyObject *py_set_duty_cycle(PyObject *self, PyObject *args, PyObject *kwa
     char key[8];
     char *channel;
     float duty_cycle = 0.0;
+    BBIO_err err;
+
     static char *kwlist[] = {"channel", "duty_cycle", NULL};
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|f", kwlist, &channel, &duty_cycle))
@@ -174,6 +177,7 @@ static PyObject *py_set_frequency(PyObject *self, PyObject *args, PyObject *kwar
     char *channel;
     float frequency = 1.0;
     static char *kwlist[] = {"channel", "frequency", NULL};
+    BBIO_err err;
 
     if (!PyArg_ParseTupleAndKeywords(args, kwargs, "s|f", kwlist, &channel, &frequency))
         return NULL;
@@ -184,13 +188,21 @@ static PyObject *py_set_frequency(PyObject *self, PyObject *args, PyObject *kwar
         return NULL;
     }
 
-    if (!get_pwm_key(channel, key)) {
+    err = get_pwm_key(channel, key);
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
         return NULL;    
     }
 
-    if (pwm_set_frequency(key, frequency) == -1) {
-        PyErr_SetString(PyExc_RuntimeError, "You must start() the PWM channel first");
+    err = pwm_set_frequency(key, frequency);
+    if (err == BBIO_GEN) {
+        PyErr_SetString(PyExc_RuntimeError, "You must start() the PWM channel first.");
+        return NULL;
+    } else if (err == BBIO_SYSFS) {
+        PyErr_SetString(PyExc_RuntimeError, "Could not write to the frequency file");
+        return NULL;
+    } else if (err != BBIO_OK) {
+        PyErr_SetString(PyExc_RuntimeError, "Other error");
         return NULL;
     }
 

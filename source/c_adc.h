@@ -23,6 +23,7 @@ SOFTWARE.
 
 #ifndef BBIO_C_ADC_H
 #define BBIO_C_ADC_H
+#include "common.h"
 
 extern int adc_initialized;
 

@@ -166,20 +166,6 @@ uart_t uart_table[] = {
   { NULL, NULL, 0 }
 };
 
-// Modeled after "pwm": submap in bone.js from bonescript
-// https://github.com/jadonk/bonescript/blob/master/src/bone.js#L680
-typedef struct pwm_t {
-  const char *module;
-  const int sysfs;
-  const int index;
-  const int muxmode;
-  const char *path;
-  const char *name;
-  const char *chip;
-  const char *addr;
-  const char *key;  // Pin name eg P9_21
-} pwm_t;
-
 // Copied from https://github.com/jadonk/bonescript/blob/master/src/bone.js
 
 pwm_t pwm_table[] = {
@@ -198,7 +184,7 @@ pwm_t pwm_table[] = {
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_31"},
   { "ecap0", 2, 0, 0, "ecap.0", "ECAPPWM0", "", "", "P9_42"},
   { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
-}
+};
 
 int lookup_gpio_by_key(const char *key)
 {
@@ -331,8 +317,14 @@ BBIO_err get_pwm_by_key(const char *key, pwm_t **pwm)
 
 BBIO_err get_pwm_key(const char *input, char *key)
 {
-    if (!copy_pwm_key_by_key(input, key)) {
-        return get_pwm_key_by_name(input, key);
+    BBIO_err err = copy_pwm_key_by_key(input, key);
+    if (err == BBIO_OK) {
+        return err;
+    }
+
+    err = get_pwm_key_by_name(input, key);
+    if (err == BBIO_OK) {
+        return err;
     }
 
     return BBIO_INVARG;
@@ -364,7 +356,7 @@ BBIO_err get_uart_device_tree_name(const char *name, char *dt)
 
 BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
 {
-    struct glob_t results;
+    glob_t results;
     size_t len = strlen(partial_path) + strlen(prefix) + 5;
     char *pattern = malloc(len);
     snprintf(pattern, len, "%s/%s*", partial_path, prefix);
@@ -373,7 +365,7 @@ BBIO_err build_path(const char *partial_path, const char *prefix, char *full_pat
                 int (*errfunc) (const char *epath, int eerrno),
                 glob_t *pglob); */
     int err = glob(pattern, 0, NULL, &results);
-    if (err != 0) {
+    if (err != BBIO_OK) {
         globfree(&results);
         if (err == GLOB_NOSPACE)
             return BBIO_MEM;
@@ -382,7 +374,7 @@ BBIO_err build_path(const char *partial_path, const char *prefix, char *full_pat
     }
 
     // We will return the first match
-    strncpy(full_path, results.gl_pathv[0], full_path_len)
+    strncpy(full_path, results.gl_pathv[0], full_path_len);
 
     // Free memory
     globfree(&results);
@@ -394,7 +386,11 @@ int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
 
+#ifdef BBBVERSION41
+  strncpy(ocp_dir, "/sys/devices/platform/ocp", sizeof(ocp_dir));
+#else
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+#endif
 
   if (spi == 0) {
       snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
@@ -456,7 +452,7 @@ BBIO_err load_device_tree(const char *name)
 }
 
 // Find whether a device tree is loaded.
-// Returns 1 if so, <0 if error, and 0 if not.
+// Returns 1 if so, 0 if not, and <0 if error
 int device_tree_loaded(const char *name)
 {
     FILE *file = NULL;
@@ -468,7 +464,6 @@ int device_tree_loaded(const char *name)
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
     char line[256];
-    char *slot_line;
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 

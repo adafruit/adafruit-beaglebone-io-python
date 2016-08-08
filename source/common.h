@@ -31,6 +31,8 @@ SOFTWARE.
 #ifndef COMMON_H
 #define COMMON_H
 
+#include <stddef.h>
+
 #define MODE_UNKNOWN -1
 #define BOARD        10
 #define BCM          11
@@ -49,6 +51,20 @@ typedef enum {
 	BBIO_GEN // General error
 } BBIO_err;
 
+// Modeled after "pwm": submap in bone.js from bonescript
+// https://github.com/jadonk/bonescript/blob/master/src/bone.js#L680
+typedef struct pwm_t {
+  const char *module;
+  const int sysfs;
+  const int index;
+  const int muxmode;
+  const char *path;
+  const char *name;
+  const char *chip;
+  const char *addr;
+  const char *key;  // Pin name eg P9_21
+} pwm_t;
+
 int gpio_mode;
 int gpio_direction[120];
 
@@ -65,9 +81,13 @@ BBIO_err get_pwm_key(const char *input, char *key);
 BBIO_err get_adc_ain(const char *key, unsigned int *ain);
 BBIO_err get_uart_device_tree_name(const char *name, char *dt);
 BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len);
-BBIO_err get_spi_bus_path_number(unsigned int spi);
+int get_spi_bus_path_number(unsigned int spi);
 BBIO_err load_device_tree(const char *name);
 BBIO_err unload_device_tree(const char *name);
+int device_tree_loaded(const char *name);
+BBIO_err get_pwm_by_key(const char *key, pwm_t **pwm);
+
+
 int setup_error;
 int module_setup;
 

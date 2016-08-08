@@ -126,7 +126,7 @@ BBIO_err read_value(unsigned int ain, float *value)
     return BBIO_GEN;
 }
 
-BBIO_err adc_setup()
+BBIO_err adc_setup(void)
 {
     return initialize_adc();
 }
