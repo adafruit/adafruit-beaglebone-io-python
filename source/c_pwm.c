@@ -127,8 +127,32 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
 
     period_ns = (unsigned long)(1e9 / freq);
 
-    if (period_ns != pwm->period_ns) {
+
+    // If we're going to a shorter period, update the
+    // duty cycle first, in order to avoid ever setting
+    // the period < duty cycle (which would throw error)
+    if (period_ns < pwm->period_ns) {
         pwm->period_ns = period_ns;
+
+        // Update duty ns
+        pwm->duty_ns = (unsigned long)(period_ns * (pwm->duty / 100.0));
+        len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty_ns);
+        lseek(pwm->duty_fd, 0, SEEK_SET); // Seek to beginning of file
+        if (write(pwm->duty_fd, buffer, len) < 0) {
+            return BBIO_SYSFS;
+        }
+
+        // Update period ns
+        len = snprintf(buffer, sizeof(buffer), "%lu", period_ns);
+        lseek(pwm->period_fd, 0, SEEK_SET); // Seek to beginning of file
+        if (write(pwm->period_fd, buffer, len) < 0) {
+            return BBIO_SYSFS;
+        }
+
+    } else if (period_ns > pwm->period_ns) {
+        // Ordinarily update the period first,
+        // to avoid the opposite bug - kernel won't
+        // let us set duty greater than period
 
         // Update period ns
         len = snprintf(buffer, sizeof(buffer), "%lu", period_ns);
@@ -138,13 +162,13 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         }
 
         // Update duty ns
-        pwm->duty_ns = (unsigned long)(pwm->period_ns * (pwm->duty / 100.0));
+        pwm->duty_ns = (unsigned long)(period_ns * (pwm->duty / 100.0));
         len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty_ns);
         lseek(pwm->duty_fd, 0, SEEK_SET); // Seek to beginning of file
         if (write(pwm->duty_fd, buffer, len) < 0) {
             return BBIO_SYSFS;
         }
-    }
+    } // else do nothing
 
     return BBIO_OK;
 }
@@ -154,6 +178,7 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     int len;
     char buffer[9]; /* allow room for trailing NUL byte */
     struct pwm_exp *pwm;
+    int enabled; /* Maintain original state */
 
     pwm = lookup_exported_pwm(key);
 
@@ -175,6 +200,7 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     // Can't set the polarity with device enabled
     // It will be reenabled after the parameters are set
     if (buffer[0] == '1') {
+        enabled = 1;
         lseek(pwm->enable_fd, 0, SEEK_SET);
         len = snprintf(buffer, sizeof(buffer), "0");
         if (write(pwm->enable_fd, buffer, len) < 0) {
@@ -200,6 +226,17 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     if (write(pwm->polarity_fd, buffer, len) < 0) {
         return BBIO_SYSFS;
     }
+
+    /* If we were enabled before, restore state */
+#ifdef BBBVERSION41
+    if (enabled) {
+        lseek(pwm->enable_fd, 0, SEEK_SET);
+        len = snprintf(buffer, sizeof(buffer), "1");
+        if (write(pwm->enable_fd, buffer, len) < 0) {
+            return BBIO_SYSFS;
+        }
+    }
+#endif
 
     return BBIO_OK;
 }
@@ -475,9 +512,23 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 BBIO_err pwm_disable(const char *key)
 {
     struct pwm_exp *pwm, *temp, *prev_pwm = NULL;
+    char buffer[2];
+    size_t len;
 
-#ifndef BBBVERSION41
-    BBIO_err err;
+#ifdef BBBVERSION41
+    pwm = lookup_exported_pwm(key);
+    
+    // Disable the PWM
+    lseek(pwm->enable_fd, 0, SEEK_SET);
+    len = snprintf(buffer, sizeof(buffer), "0");
+    if (write(pwm->enable_fd, buffer, len) < 0) {
+        return BBIO_SYSFS;
+    }
+
+    // Unexport the PWM
+    // TODO later
+
+#else
     char fragment[18];
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
     err = unload_device_tree(fragment);

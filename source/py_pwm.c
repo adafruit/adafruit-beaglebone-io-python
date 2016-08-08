@@ -115,7 +115,8 @@ static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwarg
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
 
-    if (!get_pwm_key(channel, key)) {
+    err = get_pwm_key(channel, key);
+    if (err == BBIO_INVARG) {
         PyErr_SetString(PyExc_ValueError, "Invalid PWM key or name.");
         return NULL;    
     }
