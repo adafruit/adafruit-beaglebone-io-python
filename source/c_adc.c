@@ -68,7 +68,8 @@ BBIO_err initialize_adc(void)
         return BBIO_OK;
     }
 #else
-    if (load_device_tree("cape-bone-iio")) {
+    err = load_device_tree("cape-bone-iio");
+    if (err == BBIO_OK) {
         build_path("/sys/devices", "ocp.", ocp_dir, sizeof(ocp_dir));
         build_path(ocp_dir, "helper.", adc_prefix_dir, sizeof(adc_prefix_dir));
         strncat(adc_prefix_dir, "/AIN", sizeof(adc_prefix_dir));
