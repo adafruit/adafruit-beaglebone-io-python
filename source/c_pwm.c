@@ -404,6 +404,12 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     //creates the fragment in order to build the pwm_test_filename, such as "pwm_test_P9_13"
     snprintf(pwm_fragment, sizeof(pwm_fragment), "pwm_test_%s", key);
 
+    // Initialize the ocp_dir
+    err = build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+    if (err != BBIO_OK) {
+        return err;
+    }
+
     //finds and builds the pwm_path, as it can be variable...
     err = build_path(ocp_dir, pwm_fragment, pwm_path, sizeof(pwm_path));
     if (err != BBIO_OK) {
