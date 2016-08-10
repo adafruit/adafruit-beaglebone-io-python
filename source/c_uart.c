@@ -38,11 +38,11 @@ BBIO_err uart_setup(const char *dt)
 BBIO_err uart_cleanup(void)
 {
     BBIO_err e1, e2, e3, e4, e5;
-    e1 = unload_device_tree("BB-UART1");
-    e2 = unload_device_tree("BB-UART2");
-    e3 = unload_device_tree("BB-UART3");
-    e4 = unload_device_tree("BB-UART4");
-    e5 = unload_device_tree("BB-UART5");
+    e1 = unload_device_tree("ADAFRUIT-UART1");
+    e2 = unload_device_tree("ADAFRUIT-UART2");
+    e3 = unload_device_tree("ADAFRUIT-UART3");
+    e4 = unload_device_tree("ADAFRUIT-UART4");
+    e5 = unload_device_tree("ADAFRUIT-UART5");
     if (e1 != BBIO_OK)
         return e1;
     if (e2 != BBIO_OK)
