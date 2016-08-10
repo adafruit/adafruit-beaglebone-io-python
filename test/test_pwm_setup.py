@@ -1,9 +1,9 @@
-import pytest
+import glob
 import os
 import platform
-import glob
 
 import Adafruit_BBIO.PWM as PWM
+import pytest
 
 kernel = platform.release()
 
@@ -14,6 +14,7 @@ def teardown_module(module):
 
 class TestPwmSetup:
     def test_start_pwm(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
 
         if kernel >= '4.1.0':
@@ -29,9 +30,9 @@ class TestPwmSetup:
             pwm_dir = results[0]
         else:
             files = os.listdir('/sys/devices')
-            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            ocp = '/sys/devices/' + [s for s in files if s.startswith('ocp')][0]
             files = os.listdir(ocp)
-            pwm_dir = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+            pwm_dir = ocp + '/' + [s for s in files if s.startswith('pwm_test_P9_14')][0]
 
         assert os.path.exists(pwm_dir)
         if kernel >= '4.1.0':
@@ -44,15 +45,16 @@ class TestPwmSetup:
         PWM.cleanup()
 
     def test_start_pwm_with_polarity_one(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0, 2000, 1)
 
         if kernel >= '4.1.0':
             pwm_dir = "/sys/devices/platform/ocp/48302000.epwmss/48302200.ehrpwm/pwm/pwmchip2/pwm0"
         else:
             files = os.listdir('/sys/devices')
-            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            ocp = '/sys/devices/' + [s for s in files if s.startswith('ocp')][0]
             files = os.listdir(ocp)
-            pwm_dir = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+            pwm_dir = ocp + '/' + [s for s in files if s.startswith('pwm_test_P9_14')][0]
 
         assert os.path.exists(pwm_dir)
         if kernel >= '4.1.0':
@@ -71,15 +73,16 @@ class TestPwmSetup:
         PWM.cleanup()
 
     def test_start_pwm_with_polarity_default(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0, 2000)
 
         if kernel >= '4.1.0':
             pwm_dir = "/sys/devices/platform/ocp/48302000.epwmss/48302200.ehrpwm/pwm/pwmchip2/pwm0"
         else:
             files = os.listdir('/sys/devices')
-            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            ocp = '/sys/devices/' + [s for s in files if s.startswith('ocp')][0]
             files = os.listdir(ocp)
-            pwm_dir = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+            pwm_dir = ocp + '/' + [s for s in files if s.startswith('pwm_test_P9_14')][0]
 
         assert os.path.exists(pwm_dir)
         if kernel >= '4.1.0':
@@ -98,15 +101,16 @@ class TestPwmSetup:
         PWM.cleanup()
 
     def test_start_pwm_with_polarity_zero(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0, 2000, 0)
 
         if kernel >= '4.1.0':
             pwm_dir = "/sys/devices/platform/ocp/48302000.epwmss/48302200.ehrpwm/pwm/pwmchip2/pwm0"
         else:
             files = os.listdir('/sys/devices')
-            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            ocp = '/sys/devices/' + [s for s in files if s.startswith('ocp')][0]
             files = os.listdir(ocp)
-            pwm_dir = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+            pwm_dir = ocp + '/' + [s for s in files if s.startswith('pwm_test_P9_14')][0]
 
         assert os.path.exists(pwm_dir)
         if kernel >= '4.1.0':
@@ -125,61 +129,73 @@ class TestPwmSetup:
         PWM.cleanup()
 
     def test_pwm_start_invalid_pwm_key(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P8_25", -1)
 
     def test_pwm_start_invalid_duty_cycle_negative(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P9_14", -1)
 
     def test_pwm_start_valid_duty_cycle_min(self):
+        PWM.cleanup()
         # testing an exception isn't thrown
         PWM.start("P9_14", 0)
         PWM.cleanup()
 
     def test_pwm_start_valid_duty_cycle_max(self):
+        PWM.cleanup()
         # testing an exception isn't thrown
         PWM.start("P9_14", 100)
         PWM.cleanup()
 
     def test_pwm_start_invalid_duty_cycle_high(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P9_14", 101)
 
     def test_pwm_start_invalid_duty_cycle_string(self):
+        PWM.cleanup()
         with pytest.raises(TypeError):
             PWM.start("P9_14", "1")
 
     def test_pwm_start_invalid_frequency_negative(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P9_14", 0, -1)
 
     def test_pwm_start_invalid_frequency_string(self):
+        PWM.cleanup()
         with pytest.raises(TypeError):
             PWM.start("P9_14", 0, "1")
 
     def test_pwm_start_negative_polarity(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P9_14", 0, 100, -1)
 
     def test_pwm_start_invalid_positive_polarity(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.start("P9_14", 0, 100, 2)
 
     def test_pwm_start_invalid_polarity_type(self):
+        PWM.cleanup()
         with pytest.raises(TypeError):
             PWM.start("P9_14", 0, 100, "1")
 
     def test_pwm_duty_modified(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
 
         if kernel >= '4.1.0':
             pwm_dir = "/sys/devices/platform/ocp/48302000.epwmss/48302200.ehrpwm/pwm/pwmchip2/pwm0"
         else:
             files = os.listdir('/sys/devices')
-            ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
+            ocp = '/sys/devices/' + [s for s in files if s.startswith('ocp')][0]
             files = os.listdir(ocp)
-            pwm_dir = ocp+'/'+[s for s in files if s.startswith('pwm_test_P9_14')][0]
+            pwm_dir = ocp + '/' + [s for s in files if s.startswith('pwm_test_P9_14')][0]
 
         assert os.path.exists(pwm_dir)
         if kernel >= '4.1.0':
@@ -201,54 +217,63 @@ class TestPwmSetup:
         PWM.cleanup()
 
     def test_pwm_duty_cycle_non_setup_key(self):
+        PWM.cleanup()
         with pytest.raises(RuntimeError):
             PWM.set_duty_cycle("P9_14", 100)
         PWM.cleanup()
 
     def test_pwm_duty_cycle_invalid_key(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.set_duty_cycle("P9_15", 100)
         PWM.cleanup()
 
     def test_pwm_duty_cycle_invalid_value_high(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
         with pytest.raises(ValueError):
             PWM.set_duty_cycle("P9_14", 101)
         PWM.cleanup()
 
     def test_pwm_duty_cycle_invalid_value_negative(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
         with pytest.raises(ValueError):
             PWM.set_duty_cycle("P9_14", -1)
         PWM.cleanup()
 
     def test_pwm_duty_cycle_invalid_value_string(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
         with pytest.raises(TypeError):
             PWM.set_duty_cycle("P9_14", "a")
         PWM.cleanup()
 
     def test_pwm_frequency_invalid_value_negative(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
         with pytest.raises(ValueError):
             PWM.set_frequency("P9_14", -1)
         PWM.cleanup()
 
     def test_pwm_frequency_invalid_value_string(self):
+        PWM.cleanup()
         PWM.start("P9_14", 0)
         with pytest.raises(TypeError):
             PWM.set_frequency("P9_14", "11")
         PWM.cleanup()
 
     def test_pwm_freq_non_setup_key(self):
+        PWM.cleanup()
         with pytest.raises(RuntimeError):
             PWM.set_frequency("P9_14", 100)
         PWM.cleanup()
 
     def test_pwm_freq_non_setup_invalid_key(self):
+        PWM.cleanup()
         with pytest.raises(ValueError):
             PWM.set_frequency("P9_15", 100)
-        PWM.cleanup()                            
+        PWM.cleanup()
 
     def test_stop_pwm(self):
         pass
@@ -256,5 +281,5 @@ class TestPwmSetup:
         # PWM.stop("P9_14")
         # assert os.path.exists('/sys/class/gpio/gpio68')
         # direction = open('/sys/class/gpio/gpio68/direction').read()
-        # assert direction == 'out\n'        
+        # assert direction == 'out\n'
         # PWM.cleanup()
