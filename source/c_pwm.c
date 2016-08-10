@@ -505,6 +505,8 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         return err;
     }
 
+    // Initialize pwm->duty to avoid weirdness
+    pwm->duty = duty;
     err = pwm_set_frequency(key, freq);
     if (err != BBIO_OK) {
         return err;
