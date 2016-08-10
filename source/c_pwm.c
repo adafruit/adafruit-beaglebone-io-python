@@ -275,6 +275,7 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
 BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
 {
     BBIO_err err;
+    struct pwm_exp *new_pwm;
 
 #ifdef BBBVERSION41
     char pwm_dev_path[45]; // "/sys/devices/platform/ocp/48300000.epwmss"
@@ -289,7 +290,6 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
 
     int e;
     int period_fd, duty_fd, polarity_fd, enable_fd;
-    struct pwm_exp *new_pwm;
     struct stat s;
     FILE *f = NULL;
     pwm_t *p;
@@ -384,7 +384,6 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     char period_path[50];
     char polarity_path[55];
     int period_fd, duty_fd, polarity_fd;
-    struct pwm_exp *new_pwm;
 
     if (!pwm_initialized) {
         err = initialize_pwm();
