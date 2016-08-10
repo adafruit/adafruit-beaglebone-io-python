@@ -1,6 +1,7 @@
 import pytest
 import os
 import platform
+import glob
 
 import Adafruit_BBIO.PWM as PWM
 
@@ -16,7 +17,16 @@ class TestPwmSetup:
         PWM.start("P9_14", 0)
 
         if kernel >= '4.1.0':
-            pwm_dir = "/sys/devices/platform/ocp/48302000.epwmss/48302200.ehrpwm/pwm/pwmchip2/pwm0"
+            # On 4.1+, the pwm subdirectory sometimes takes different names:
+            # .pwm or .ehrpwm, etc.
+            results = glob.glob(
+                "/sys/devices/platform/ocp/48302000.*/" +
+                "48302200.*/pwm/pwmchip2/pwm0")
+            # We expect that there will be a result (a directory fitting
+            # our path exists) so test that with an assertion.
+            assert len(results) > 0
+            # Continue with the pwm_dir found
+            pwm_dir = results[0]
         else:
             files = os.listdir('/sys/devices')
             ocp = '/sys/devices/'+[s for s in files if s.startswith('ocp')][0]
