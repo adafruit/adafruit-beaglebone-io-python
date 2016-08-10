@@ -495,6 +495,11 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         pwm = lookup_exported_pwm(key);
     }
 
+    // If we somehow didn't start successfully
+    if (pwm == NULL) {
+        return BBIO_GEN;
+    }
+
     err = pwm_set_polarity(key, polarity);
     if (err != BBIO_OK) {
         return err;
