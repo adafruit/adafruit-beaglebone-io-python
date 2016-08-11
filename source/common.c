@@ -248,7 +248,6 @@ BBIO_err lookup_uart_by_name(const char *input_name, char *dt)
             return BBIO_OK;
         }
     }
-    fprintf(stderr, "return 0 lookup_uart_by_name");
     return BBIO_INVARG;
 }
 
@@ -347,8 +346,10 @@ BBIO_err get_adc_ain(const char *key, unsigned int *ain)
 
 BBIO_err get_uart_device_tree_name(const char *name, char *dt)
 {
-    if (!lookup_uart_by_name(name, dt)) {
-        return BBIO_INVARG;
+    BBIO_err err;
+    err = lookup_uart_by_name(name, dt);
+    if (err != BBIO_OK) {
+        return err;
     }
 
     return BBIO_OK;
