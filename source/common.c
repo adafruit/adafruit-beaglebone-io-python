@@ -3,6 +3,8 @@ Copyright (c) 2013 Adafruit
 
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
+Modified for 4.1+ kernels by Grizmio
+Unified for 3.8 and 4.1+ kernels by Peter Lawler <relwalretep@gmail.com>
 
 This file incorporates work covered by the following copyright and 
 permission notice, all modified code adopts the original license:
@@ -31,6 +33,8 @@ SOFTWARE.
 #include "Python.h"
 #include <dirent.h>
 #include <time.h>
+#include <string.h>
+#include <glob.h>
 #include "common.h"
 
 int setup_error = 0;
@@ -147,7 +151,7 @@ pins_t table[] = {
 
 typedef struct uart_t { 
     const char *name; 
-    const char *path; 
+    const char *path;
     const char *dt; 
     const char *rx;
     const char *tx;
@@ -160,6 +164,26 @@ uart_t uart_table[] = {
   { "UART4", "/dev/ttyO4", "ADAFRUIT-UART4", "P9_11", "P9_13"},
   { "UART5", "/dev/ttyO5", "ADAFRUIT-UART5", "P8_38", "P8_37"},
   { NULL, NULL, 0 }
+};
+
+// Copied from https://github.com/jadonk/bonescript/blob/master/src/bone.js
+
+pwm_t pwm_table[] = {
+  { "ehrpwm2", 6, 1, 4, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_13"},
+  { "ehrpwm2", 5, 0, 4, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_19"},
+  { "ehrpwm1", 4, 1, 2, "ehrpwm.1:1", "EHRPWM1B", "48302000", "48302200", "P8_34"},
+  { "ehrpwm1", 3, 0, 2, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P8_36"},
+  { "ehrpwm2", 5, 0, 3, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_45"},
+  { "ehrpwm2", 6, 1, 3, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_46"},
+  { "ehrpwm1", 3, 0, 6, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P9_14"},
+  { "ehrpwm1", 4, 1, 6, "ehrpwm.1:1", "EHRPWM1B", "48302000", "48302200", "P9_16"},
+  { "ehrpwm0", 1, 1, 3, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_21"},
+  { "ehrpwm0", 0, 0, 3, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_22"},
+  { "ecap2", 7, 2, 4, "ecap.2", "ECAPPWM2", "", "", "P9_28"},
+  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_29"},
+  { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_31"},
+  { "ecap0", 2, 0, 0, "ecap.0", "ECAPPWM0", "", "", "P9_42"},
+  { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
 };
 
 int lookup_gpio_by_key(const char *key)
@@ -214,55 +238,54 @@ int lookup_ain_by_name(const char *name)
   return -1;
 }
 
-int lookup_uart_by_name(const char *input_name, char *dt)
+BBIO_err lookup_uart_by_name(const char *input_name, char *dt)
 {
     uart_t *p;
     for (p = uart_table; p->name != NULL; ++p) {
         if (strcmp(p->name, input_name) == 0) {
             strncpy(dt, p->dt, FILENAME_BUFFER_SIZE);
             dt[FILENAME_BUFFER_SIZE - 1] = '\0';
-            return 1;                
+            return BBIO_OK;
         }
     }
-    fprintf(stderr, "return 0 lookup_uart_by_name");
-    return 0;
+    return BBIO_INVARG;
 }
 
-int copy_pwm_key_by_key(const char *input_key, char *key)
+BBIO_err copy_pwm_key_by_key(const char *input_key, char *key)
 {
     pins_t *p;
     for (p = table; p->key != NULL; ++p) {
         if (strcmp(p->key, input_key) == 0) {
             //validate it's a valid pwm pin
             if (p->pwm_mux_mode == -1)
-                return 0;
+                return BBIO_INVARG;
 
             strncpy(key, p->key, 7);
             key[7] = '\0';
-            return 1;                
+            return BBIO_OK;                
         }
     }
-    return 0;
+    return BBIO_INVARG;
 }
 
-int get_pwm_key_by_name(const char *name, char *key)
+BBIO_err get_pwm_key_by_name(const char *name, char *key)
 {
     pins_t *p;
     for (p = table; p->name != NULL; ++p) {
         if (strcmp(p->name, name) == 0) {
             //validate it's a valid pwm pin
             if (p->pwm_mux_mode == -1)
-                return 0;
+                return BBIO_INVARG;
 
             strncpy(key, p->key, 7);
             key[7] = '\0';
-            return 1;
+            return BBIO_OK;
         }
     }
-    return 0;
+    return BBIO_INVARG;
 }
 
-int get_gpio_number(const char *key, unsigned int *gpio)
+BBIO_err get_gpio_number(const char *key, unsigned int *gpio)
 {
     *gpio = lookup_gpio_by_key(key);
     
@@ -270,19 +293,43 @@ int get_gpio_number(const char *key, unsigned int *gpio)
         *gpio = lookup_gpio_by_name(key);
     }
 
-    return 0;
-}
-
-int get_pwm_key(const char *input, char *key)
-{
-    if (!copy_pwm_key_by_key(input, key)) {
-        return get_pwm_key_by_name(input, key);
+    if (!*gpio) {
+        return BBIO_INVARG;
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int get_adc_ain(const char *key, unsigned int *ain)
+BBIO_err get_pwm_by_key(const char *key, pwm_t **pwm)
+{
+    pwm_t *p;
+    // Loop through the table
+    for (p = pwm_table; p->key != NULL; ++p) {
+        if (strcmp(p->key, key) == 0) {
+            // Return the pwm_t struct
+            *pwm = p;
+            return BBIO_OK;
+        }
+    }
+    return BBIO_INVARG;
+}
+
+BBIO_err get_pwm_key(const char *input, char *key)
+{
+    BBIO_err err = copy_pwm_key_by_key(input, key);
+    if (err == BBIO_OK) {
+        return err;
+    }
+
+    err = get_pwm_key_by_name(input, key);
+    if (err == BBIO_OK) {
+        return err;
+    }
+
+    return BBIO_INVARG;
+}
+
+BBIO_err get_adc_ain(const char *key, unsigned int *ain)
 {
     *ain = lookup_ain_by_key(key);
     
@@ -290,94 +337,117 @@ int get_adc_ain(const char *key, unsigned int *ain)
         *ain = lookup_ain_by_name(key);
 
         if (*ain == -1) {
-          return 0;
+          return BBIO_INVARG;
         }
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int get_uart_device_tree_name(const char *name, char *dt)
+BBIO_err get_uart_device_tree_name(const char *name, char *dt)
 {
-    if (!lookup_uart_by_name(name, dt)) {
-      fprintf(stderr, "return 0 get_uart");
-        return 0;
+    BBIO_err err;
+    err = lookup_uart_by_name(name, dt);
+    if (err != BBIO_OK) {
+        return err;
     }
 
-    return 1;
+    return BBIO_OK;
 }
 
-int build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
+BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len)
 {
-    DIR *dp;
-    struct dirent *ep;
+    glob_t results;
+    size_t len = strlen(partial_path) + strlen(prefix) + 5;
+    char *pattern = malloc(len);
+    snprintf(pattern, len, "%s/%s*", partial_path, prefix);
 
-    dp = opendir (partial_path);
-    if (dp != NULL) {
-        while ((ep = readdir (dp))) {
-            // Enforce that the prefix must be the first part of the file
-            char* found_string = strstr(ep->d_name, prefix);
-
-            if (found_string != NULL && (ep->d_name - found_string) == 0) {
-                snprintf(full_path, full_path_len, "%s/%s", partial_path, ep->d_name);
-                (void) closedir (dp);
-                return 1;
-            }
-        }
-        (void) closedir (dp);
-    } else {
-        return 0;
+/*  int glob(const char *pattern, int flags,
+                int (*errfunc) (const char *epath, int eerrno),
+                glob_t *pglob); */
+    int err = glob(pattern, 0, NULL, &results);
+    if (err != BBIO_OK) {
+        globfree(&results);
+        if (err == GLOB_NOSPACE)
+            return BBIO_MEM;
+        else
+            return BBIO_GEN;
     }
 
-    return 0;
+    // We will return the first match
+    strncpy(full_path, results.gl_pathv[0], full_path_len);
+
+    // Free memory
+    globfree(&results);
+
+    return BBIO_OK;
 }
 
 int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
+<<<<<<< HEAD
   
   build_path("/sys/devices/platform", "ocp", ocp_dir, sizeof(ocp_dir));
+=======
+
+#ifdef BBBVERSION41
+  strncpy(ocp_dir, "/sys/devices/platform/ocp", sizeof(ocp_dir));
+#else
+  build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
+#endif
+>>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
   if (spi == 0) {
-    snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
+      snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
   } else {
-    snprintf(path, sizeof(path), "%s/481a0000.spi/spi_master/spi1", ocp_dir);
+      snprintf(path, sizeof(path), "%s/481a0000.spi/spi_master/spi1", ocp_dir);
   }
   
   DIR* dir = opendir(path);
   if (dir) {
-    closedir(dir);
-    //device is using /dev/spidev1.x
-    return 1;
+      closedir(dir);
+      //device is using /dev/spidev1.x
+      return 1;
   } else if (ENOENT == errno) {
-    //device is using /dev/spidev2.x
-    return 2;
+      //device is using /dev/spidev2.x
+      return 2;
   } else {
-    return -1;
+      return -1;
   }
 }
 
 
-int load_device_tree(const char *name)
+BBIO_err load_device_tree(const char *name)
 {
     FILE *file = NULL;
-    char slots[40];
+#ifdef BBBVERSION41
+    char slots[41];
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
+#else
+     char slots[40];
+     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+#endif
+
     char line[256];
 
+<<<<<<< HEAD
     build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+=======
+>>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
-        return 0;
+        return BBIO_CAPE;
     }
 
     while (fgets(line, sizeof(line), file)) {
         //the device is already loaded, return 1
         if (strstr(line, name)) {
             fclose(file);
-            return 1;
+            return BBIO_OK;
         }
     }
 
@@ -388,23 +458,68 @@ int load_device_tree(const char *name)
     //0.2 second delay
     nanosleep((struct timespec[]){{0, 200000000}}, NULL);
 
-    return 1;
+    return BBIO_OK;
 }
 
-int unload_device_tree(const char *name)
+// Find whether a device tree is loaded.
+// Returns 1 if so, 0 if not, and <0 if error
+int device_tree_loaded(const char *name)
 {
     FILE *file = NULL;
+#ifdef BBBVERSION41
+    char slots[41];
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
+#else
     char slots[40];
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+#endif
     char line[256];
-    char *slot_line;
 
+<<<<<<< HEAD
     build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+=======
+>>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+
 
     file = fopen(slots, "r+");
     if (!file) {
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
-        return 0;
+        return -1;
+    }
+
+    while (fgets(line, sizeof(line), file)) {
+        //the device is loaded, close file and return true
+        if (strstr(line, name)) {
+            fclose(file);
+            return 1;
+        }
+    }
+
+    //not loaded, close file
+    fclose(file);
+
+    return 0;
+}
+
+BBIO_err unload_device_tree(const char *name)
+{
+    FILE *file = NULL;
+#ifdef BBBVERSION41
+    char slots[41];
+    snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
+#else
+    char slots[40];
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+#endif
+    char line[256];
+    char *slot_line;
+
+    snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+    file = fopen(slots, "r+");
+    if (!file) {
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, slots);
+        return BBIO_SYSFS;
     }
 
     while (fgets(line, sizeof(line), file)) {
@@ -417,12 +532,12 @@ int unload_device_tree(const char *name)
 
             fprintf(file, "-%s", slot_line);
             fclose(file);
-            return 1;
+            return BBIO_OK;
         }
     }
 
     //not loaded, close file
     fclose(file);
 
-    return 1;
+    return BBIO_OK;
 }

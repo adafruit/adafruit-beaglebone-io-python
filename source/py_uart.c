@@ -42,18 +42,21 @@ static PyObject *py_setup_uart(PyObject *self, PyObject *args)
 {
     char dt[FILENAME_BUFFER_SIZE];
     char *channel;
+    BBIO_err err;
 
     if (!PyArg_ParseTuple(args, "s", &channel)) {
         PyErr_SetString(PyExc_ValueError, "Invalid UART channel.");
         return NULL;
     }
 
-    if (!get_uart_device_tree_name(channel, dt)) {
+    err = get_uart_device_tree_name(channel, dt);
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_ValueError, "Invalid UART channel.");
         return NULL;
     }
 
-    if (!uart_setup(dt)) {
+    err = uart_setup(dt);
+    if (err != BBIO_OK) {
         PyErr_SetString(PyExc_RuntimeError, "Unable to export UART channel.");
         return NULL;        
     }
