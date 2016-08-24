@@ -870,7 +870,11 @@ initSPI(void)
 	PyObject* m;
 
 	if (PyType_Ready(&SPI_type) < 0)
+		#if PY_MAJOR_VERSION >= 3
+		return NULL;
+		#else
 		return;
+		#endif
 
 #if PY_MAJOR_VERSION >= 3
 	m = PyModule_Create(&moduledef);

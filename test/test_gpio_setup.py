@@ -1,10 +1,15 @@
 import pytest
 import os
+import platform
 
 import Adafruit_BBIO.GPIO as GPIO
 
+kernel = platform.release()
+
+
 def teardown_module(module):
     GPIO.cleanup()
+
 
 class TestSetup:
     def test_setup_output_key(self):
@@ -53,7 +58,10 @@ class TestSetup:
         GPIO.setup("P8_10", GPIO.OUT)
         assert os.path.exists('/sys/class/gpio/gpio68')
         GPIO.cleanup()
-        assert not os.path.exists('/sys/class/gpio/gpio68')
+        if kernel < '4.1.0':
+            assert not os.path.exists('/sys/class/gpio/gpio68')
+            # for later kernels, the universal capemanager always loads the
+            # UARTs.
 
     def test_setup_failed_type_error(self):
         with pytest.raises(TypeError):
@@ -69,4 +77,7 @@ class TestSetup:
         GPIO.setup("P9_31", GPIO.OUT)
         assert os.path.exists('/sys/class/gpio/gpio110')
         GPIO.cleanup()
-        assert not os.path.exists('/sys/class/gpio/gpio110')
+        if kernel < '4.1.0':
+            assert not os.path.exists('/sys/class/gpio/gpio110')
+            # for later kernels, the universal capemanager always loads the
+            # UARTs.
