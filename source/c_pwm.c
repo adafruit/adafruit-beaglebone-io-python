@@ -480,10 +480,8 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
 BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
     BBIO_err err;
-#ifdef BBBVERSION41
     char buffer[20];
-    size_t len;
-#endif
+    int len;
 
     struct pwm_exp *pwm = lookup_exported_pwm(key);
     if (pwm == NULL) {
@@ -504,6 +502,37 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     if (err != BBIO_OK) {
         return err;
     }
+
+    // Read out current period_ns from the file, in order for it to behave
+    // properly
+    memset(buffer, 0, sizeof(buffer));  // Initialize buffer
+    lseek(pwm->period_fd, 0, SEEK_SET);
+    len = read(pwm->period_fd, buffer, sizeof(buffer));
+    if (len < 0) {
+        return BBIO_SYSFS;
+    } else if (len >= sizeof(buffer)) {
+        // If this is the case, there's more in the file.
+        // This should never happen, as it would mean that
+        // the period is 10^8 seconds
+        return BBIO_SYSFS;
+    }
+    // Set the period_ns from the file
+    sscanf(buffer, "%lu", &(pwm->period_ns));
+
+    // Read out the current duty_ns from the file, in order for it to
+    // behave properly
+    memset(buffer, 0, sizeof(buffer));
+    lseek(pwm->duty_fd, 0, SEEK_SET);
+    if (len < 0) {
+        return BBIO_SYSFS;
+    } else if (len >= sizeof(buffer)) {
+        // If this is the case, there's more in the file.
+        // This should never happen, as it would mean that
+        // the period is 10^8 seconds
+        return BBIO_SYSFS;
+    }
+    // Set the duty_ns from the file
+    sscanf(buffer, "%lu", &(pwm->duty_ns));
 
     // Initialize pwm->duty to avoid weirdness
     pwm->duty = duty;
