@@ -522,6 +522,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     // behave properly
     memset(buffer, 0, sizeof(buffer));
     lseek(pwm->duty_fd, 0, SEEK_SET);
+    len = read(pwm->duty_fd, buffer, sizeof(buffer));
     if (len < 0) {
         return BBIO_SYSFS;
     } else if (len >= sizeof(buffer)) {
