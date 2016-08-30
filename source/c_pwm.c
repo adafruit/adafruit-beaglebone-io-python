@@ -58,7 +58,7 @@ struct pwm_exp
 };
 struct pwm_exp *exported_pwms = NULL;
 
-struct pwm_exp *lookup_exported_pwm(const char *key) 
+struct pwm_exp *lookup_exported_pwm(const char *key)
 {
     struct pwm_exp *pwm = exported_pwms;
 
@@ -77,7 +77,7 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
 void export_pwm(struct pwm_exp *new_pwm)
 {
     struct pwm_exp *pwm;
-    
+
     if (exported_pwms == NULL)
     {
         // create new list
@@ -128,7 +128,6 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
     }
 
     period_ns = (unsigned long)(1e9 / freq);
-
 
     // If we're going to a shorter period, update the
     // duty cycle first, in order to avoid ever setting
@@ -258,7 +257,7 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
 
     if (pwm == NULL) {
         return BBIO_GEN;
-    }    
+    }
 
     pwm->duty = duty;
     pwm->duty_ns = (unsigned long)(pwm->period_ns * (duty / 100.0));
@@ -356,7 +355,7 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
         } else {
             perror("stat");
             return BBIO_GEN;
-        } 
+        }
     } else {
         if (S_ISDIR(s.st_mode)) {
             /* It is a directory. Already exported */
@@ -423,7 +422,7 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     snprintf(period_path, sizeof(period_path), "%s/period", pwm_path);
     snprintf(polarity_path, sizeof(polarity_path), "%s/polarity", pwm_path);
 
-    //add period and duty fd to pwm list    
+    //add period and duty fd to pwm list
     if ((period_fd = open(period_path, O_RDWR)) < 0)
         return BBIO_SYSFS;
 
@@ -570,7 +569,7 @@ BBIO_err pwm_disable(const char *key)
     char buffer[2];
     size_t len;
     pwm = lookup_exported_pwm(key);
-    
+
     // Disable the PWM
     lseek(pwm->enable_fd, 0, SEEK_SET);
     len = snprintf(buffer, sizeof(buffer), "0");
