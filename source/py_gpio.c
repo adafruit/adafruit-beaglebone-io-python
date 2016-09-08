@@ -68,62 +68,6 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args) {
 }
 
 // python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None)
-<<<<<<< HEAD
-static PyObject *py_setup_channel(PyObject *self, PyObject *args,
-		PyObject *kwargs) {
-	unsigned int gpio;
-	char *channel;
-	int direction;
-	int pud = PUD_OFF;
-	int initial = 0;
-	static char *kwlist[] = { "channel", "direction", "pull_up_down", "initial",
-			NULL };
-
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|ii", kwlist, &channel,
-			&direction, &pud, &initial))
-		return NULL;
-
-	if (!module_setup) {
-		init_module();
-	}
-
-	if (direction != INPUT && direction != OUTPUT) {
-		PyErr_SetString(PyExc_ValueError,
-				"An invalid direction was passed to setup()");
-		return NULL;
-	}
-
-	if (direction == OUTPUT)
-		pud = PUD_OFF;
-
-	if (pud != PUD_OFF && pud != PUD_DOWN && pud != PUD_UP) {
-		PyErr_SetString(PyExc_ValueError,
-				"Invalid value for pull_up_down - should be either PUD_OFF, PUD_UP or PUD_DOWN");
-		return NULL;
-	}
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	gpio_export(gpio);
-	gpio_set_direction(gpio, direction);
-	if (direction == OUTPUT) {
-		gpio_set_value(gpio, initial);
-	} else {
-		gpio_set_value(gpio, pud);
-	}
-
-	gpio_direction[gpio] = direction;
-
-	Py_RETURN_NONE;
-}
-
-// python function output(channel, value)
-static PyObject *py_output_gpio(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	int value;
-	char *channel;
-=======
 static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
@@ -182,19 +126,14 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
     int value;
     char *channel;
     BBIO_err err;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	if (!PyArg_ParseTuple(args, "si", &channel, &value))
 		return NULL;
 
-<<<<<<< HEAD
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-=======
+
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
         return NULL;      
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	if (!module_setup || gpio_direction[gpio] != OUTPUT) {
 		PyErr_SetString(PyExc_RuntimeError,
@@ -208,13 +147,6 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
 }
 
 // python function value = input(channel)
-<<<<<<< HEAD
-static PyObject *py_input_gpio(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	char *channel;
-	unsigned int value;
-	PyObject *py_value;
-=======
 static PyObject *py_input_gpio(PyObject *self, PyObject *args)
 {
     unsigned int gpio;
@@ -222,19 +154,14 @@ static PyObject *py_input_gpio(PyObject *self, PyObject *args)
     unsigned int value;
     PyObject *py_value;
     BBIO_err err;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	if (!PyArg_ParseTuple(args, "s", &channel))
 		return NULL;
 
-<<<<<<< HEAD
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-=======
+
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
         return NULL;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	// check channel is set up as an input or output
 	if (!module_setup
@@ -318,142 +245,6 @@ static int add_py_callback(char *channel, unsigned int gpio,
 }
 
 // python function add_event_callback(gpio, callback, bouncetime=0)
-<<<<<<< HEAD
-static PyObject *py_add_event_callback(PyObject *self, PyObject *args,
-		PyObject *kwargs) {
-	unsigned int gpio;
-	char *channel;
-	unsigned int bouncetime = 0;
-	PyObject *cb_func;
-	char *kwlist[] = { "gpio", "callback", "bouncetime", NULL };
-
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO|i", kwlist, &channel,
-			&cb_func, &bouncetime))
-		return NULL;
-
-	if (!PyCallable_Check(cb_func)) {
-		PyErr_SetString(PyExc_TypeError, "Parameter must be callable");
-		return NULL;
-	}
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	// check channel is set up as an input
-	if (!module_setup || gpio_direction[gpio] != INPUT) {
-		PyErr_SetString(PyExc_RuntimeError,
-				"You must setup() the GPIO channel as an input first");
-		return NULL;
-	}
-
-	if (!gpio_is_evented(gpio)) {
-		PyErr_SetString(PyExc_RuntimeError,
-				"Add event detection using add_event_detect first before adding a callback");
-		return NULL;
-	}
-
-	if (add_py_callback(channel, gpio, bouncetime, cb_func) != 0)
-		return NULL;
-
-	Py_RETURN_NONE;
-}
-
-// python function add_event_detect(gpio, edge, callback=None, bouncetime=0
-static PyObject *py_add_event_detect(PyObject *self, PyObject *args,
-		PyObject *kwargs) {
-	unsigned int gpio;
-	char *channel;
-	int edge, result;
-	unsigned int bouncetime = 0;
-	PyObject *cb_func = NULL;
-	char *kwlist[] = { "gpio", "edge", "callback", "bouncetime", NULL };
-
-	if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|Oi", kwlist, &channel,
-			&edge, &cb_func, &bouncetime))
-		return NULL;
-
-	if (cb_func != NULL && !PyCallable_Check(cb_func)) {
-		PyErr_SetString(PyExc_TypeError, "Parameter must be callable");
-		return NULL;
-	}
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	// check channel is set up as an input
-	if (!module_setup || gpio_direction[gpio] != INPUT) {
-		PyErr_SetString(PyExc_RuntimeError,
-				"You must setup() the GPIO channel as an input first");
-		return NULL;
-	}
-
-	// is edge valid value
-	if (edge != RISING_EDGE && edge != FALLING_EDGE && edge != BOTH_EDGE) {
-		PyErr_SetString(PyExc_ValueError,
-				"The edge must be set to RISING, FALLING or BOTH");
-		return NULL;
-	}
-
-	if ((result = add_edge_detect(gpio, edge)) != 0)   // starts a thread
-			{
-		if (result == 1) {
-			PyErr_SetString(PyExc_RuntimeError,
-					"Edge detection already enabled for this GPIO channel");
-			return NULL;
-		} else {
-			PyErr_SetString(PyExc_RuntimeError, "Failed to add edge detection");
-			return NULL;
-		}
-	}
-
-	if (cb_func != NULL)
-		if (add_py_callback(channel, gpio, bouncetime, cb_func) != 0)
-			return NULL;
-
-	Py_RETURN_NONE;
-}
-
-// python function remove_event_detect(gpio)
-static PyObject *py_remove_event_detect(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	char *channel;
-	struct py_callback *cb = py_callbacks;
-	struct py_callback *temp;
-	struct py_callback *prev = NULL;
-
-	if (!PyArg_ParseTuple(args, "s", &channel))
-		return NULL;
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	// remove all python callbacks for gpio
-	while (cb != NULL) {
-		if (cb->gpio == gpio) {
-			Py_XDECREF(cb->py_cb);
-			if (prev == NULL)
-				py_callbacks = cb->next;
-			else
-				prev->next = cb->next;
-			temp = cb;
-			cb = cb->next;
-			free(temp);
-		} else {
-			prev = cb;
-			cb = cb->next;
-		}
-	}
-
-	remove_edge_detect(gpio);
-
-	Py_RETURN_NONE;
-}
-
-// python function value = event_detected(channel)
-static PyObject *py_event_detected(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	char *channel;
-=======
 static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
@@ -599,19 +390,14 @@ static PyObject *py_event_detected(PyObject *self, PyObject *args)
    unsigned int gpio;
    char *channel;
    BBIO_err err;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	if (!PyArg_ParseTuple(args, "s", &channel))
 		return NULL;
 
-<<<<<<< HEAD
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-=======
+
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
 
 	if (event_detected(gpio))
 		Py_RETURN_TRUE;
@@ -620,77 +406,6 @@ static PyObject *py_event_detected(PyObject *self, PyObject *args)
 }
 
 // python function py_wait_for_edge(gpio, edge)
-<<<<<<< HEAD
-static PyObject *py_wait_for_edge(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	int edge, result;
-	char *channel;
-	char error[30];
-
-	if (!PyArg_ParseTuple(args, "si", &channel, &edge))
-		return NULL;
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	// check channel is setup as an input
-	if (!module_setup || gpio_direction[gpio] != INPUT) {
-		PyErr_SetString(PyExc_RuntimeError,
-				"You must setup() the GPIO channel as an input first");
-		return NULL;
-	}
-
-	// is edge a valid value?
-	if (edge != RISING_EDGE && edge != FALLING_EDGE && edge != BOTH_EDGE) {
-		PyErr_SetString(PyExc_ValueError,
-				"The edge must be set to RISING, FALLING or BOTH");
-		return NULL;
-	}
-
-	Py_BEGIN_ALLOW_THREADS // disable GIL
-	result = blocking_wait_for_edge(gpio, edge);
-	Py_END_ALLOW_THREADS
-	// enable GIL
-
-	if (result == 0) {
-		Py_INCREF(Py_None);
-		return Py_None;
-	} else if (result == 2) {
-		PyErr_SetString(PyExc_RuntimeError,
-				"Edge detection events already enabled for this GPIO channel");
-		return NULL;
-	} else {
-		sprintf(error, "Error #%d waiting for edge", result);
-		PyErr_SetString(PyExc_RuntimeError, error);
-		return NULL;
-	}
-
-	Py_RETURN_NONE;
-}
-
-// python function value = gpio_function(gpio)
-static PyObject *py_gpio_function(PyObject *self, PyObject *args) {
-	unsigned int gpio;
-	unsigned int value;
-	PyObject *func;
-	char *channel;
-
-	if (!PyArg_ParseTuple(args, "s", &channel))
-		return NULL;
-
-	if (get_gpio_number(channel, &gpio))
-		return NULL;
-
-	if (setup_error) {
-		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
-		return NULL;
-	}
-
-	gpio_get_direction(gpio, &value);
-	func = Py_BuildValue("i", value);
-	return func;
-}
-=======
 static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
 {
    unsigned int gpio;
@@ -754,7 +469,16 @@ static PyObject *py_gpio_function(PyObject *self, PyObject *args)
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
+
+   	if (setup_error) {
+   		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+   		return NULL;
+   	}
+
+   	gpio_get_direction(gpio, &value);
+   	func = Py_BuildValue("i", value);
+   	return func;
+}
 
 //expand by Dark_Guan https://github.com/Dark-Guan/adafruit-beaglebone-io-python
 // python function softPWM_Create(gpio,value,range)

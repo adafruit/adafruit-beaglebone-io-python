@@ -386,17 +386,13 @@ BBIO_err build_path(const char *partial_path, const char *prefix, char *full_pat
 int get_spi_bus_path_number(unsigned int spi)
 {
   char path[50];
-<<<<<<< HEAD
-  
-  build_path("/sys/devices/platform", "ocp", ocp_dir, sizeof(ocp_dir));
-=======
 
 #ifdef BBBVERSION41
   strncpy(ocp_dir, "/sys/devices/platform/ocp", sizeof(ocp_dir));
 #else
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
 #endif
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
+
 
   if (spi == 0) {
       snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
@@ -431,10 +427,7 @@ BBIO_err load_device_tree(const char *name)
 
     char line[256];
 
-<<<<<<< HEAD
-    build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
-=======
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
+
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
     file = fopen(slots, "r+");
@@ -475,10 +468,7 @@ int device_tree_loaded(const char *name)
 #endif
     char line[256];
 
-<<<<<<< HEAD
-    build_path("/sys/devices/platform", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
-=======
->>>>>>> 017383c6f29696d71752a12418a85cee6fb9dbf8
+
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
 
