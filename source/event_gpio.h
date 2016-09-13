@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -58,6 +58,7 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag);
 int gpio_get_direction(unsigned int gpio, unsigned int *value);
 int gpio_set_value(unsigned int gpio, unsigned int value);
 int gpio_get_value(unsigned int gpio, unsigned int *value);
+int gpio_get_fd(unsigned int gpio, int *value);
 
 int add_edge_detect(unsigned int gpio, unsigned int edge);
 void remove_edge_detect(unsigned int gpio);

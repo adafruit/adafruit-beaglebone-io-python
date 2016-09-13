@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -67,6 +67,36 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+// python function fd_gpio(channel)
+static PyObject *py_fd_gpio(PyObject *self, PyObject *args)
+{
+  unsigned int gpio;
+  char *channel;
+  int value;
+  PyObject *py_value;
+  BBIO_err err;
+
+  if (!PyArg_ParseTuple(args, "s", &channel))
+      return NULL;
+
+  err = get_gpio_number(channel, &gpio);
+  if (err != BBIO_OK)
+      return NULL;
+
+ // check channel is set up as an input or output
+  if (!module_setup || (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT))
+  {
+      PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel first");
+      return NULL;
+  }
+
+  gpio_get_fd(gpio, &value);
+
+  py_value = Py_BuildValue("i", value);
+
+  return py_value;
+}
+
 // python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None)
 static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -84,7 +114,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (!module_setup) {
       init_module();
    }
-   
+
 
    if (direction != INPUT && direction != OUTPUT)
    {
@@ -101,7 +131,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
       return NULL;
    }
 
-    
+
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
@@ -132,7 +162,7 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
 
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
-        return NULL;      
+        return NULL;
 
     if (!module_setup || gpio_direction[gpio] != OUTPUT)
     {
@@ -190,10 +220,10 @@ static void run_py_callbacks(unsigned int gpio)
          gettimeofday(&tv_timenow, NULL);
          timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
-            
+
             // save lastcall before calling func to prevent reentrant bounce
             cb->lastcall = timenow;
-            
+
             // run callback
             gstate = PyGILState_Ensure();
             result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
@@ -449,7 +479,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
       PyErr_SetString(PyExc_RuntimeError, error);
       return NULL;
    }
-   
+
    Py_RETURN_NONE;
 }
 
@@ -502,6 +532,7 @@ PyMethodDef gpio_methods[] = {
    {"cleanup", py_cleanup, METH_VARARGS, "Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection"},
    {"output", py_output_gpio, METH_VARARGS, "Output to a GPIO channel\ngpio  - gpio channel\nvalue - 0/1 or False/True or LOW/HIGH"},
    {"input", py_input_gpio, METH_VARARGS, "Input from a GPIO channel.  Returns HIGH=1=True or LOW=0=False\ngpio - gpio channel"},
+   {"fd", py_fd_gpio, METH_VARARGS, "File descriptor from a GPIO channel.  Returns the file descriptor\ngpio - gpio channel"},
    {"add_event_detect", (PyCFunction)py_add_event_detect, METH_VARARGS | METH_KEYWORDS, "Enable edge detection events for a particular GPIO channel.\nchannel      - either board pin number or BCM number depending on which mode is set.\nedge         - RISING, FALLING or BOTH\n[callback]   - A callback function for the event (optional)\n[bouncetime] - Switch bounce timeout in ms for callback"},
    {"remove_event_detect", py_remove_event_detect, METH_VARARGS, "Remove edge detection for a particular GPIO channel\ngpio - gpio channel"},
    {"event_detected", py_event_detected, METH_VARARGS, "Returns True if an edge has occured on a given GPIO.  You need to enable edge detection using add_event_detect() first.\ngpio - gpio channel"},
