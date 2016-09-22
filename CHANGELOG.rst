@@ -1,5 +1,12 @@
+1.0.0
+----
+* Merge pull request #108 from MatthewWest for PWM support in Linux kernel 4.1+
+* Merge pull request #96 from  PeteLawler for ADC support in Linux kernel 4.1+
+* Finally publish new version to PyPi 
+* Bump major version number to signify long duration since last release
+
 0.0.30
----
+-----
 * Merge Python 3 compatibility fixes from Github user westphahl.
 * Moved old Angstrom build fix for missing py_compile from setup.py to separate file.
 
