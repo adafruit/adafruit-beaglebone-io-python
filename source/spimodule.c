@@ -237,7 +237,7 @@ SPI_xfer(SPI *self, PyObject *args)
 		delay = 0;
 	}
 
-	xferptr = (struct spi_ioc_transfer*) malloc(sizeof(struct spi_ioc_transfer) * len);
+	xferptr = (struct spi_ioc_transfer*) calloc(len, sizeof(struct spi_ioc_transfer));
 	txbuf = malloc(sizeof(__u8) * len);
 	rxbuf = malloc(sizeof(__u8) * len);
 
@@ -300,7 +300,7 @@ SPI_xfer2(SPI *self, PyObject *args)
 	int status;	
 	uint16_t ii, len;
 	PyObject *list;
-	struct spi_ioc_transfer	xfer;
+	struct spi_ioc_transfer	xfer = {0};
 	uint8_t *txbuf, *rxbuf;
 
 	if (!PyArg_ParseTuple(args, "O:xfer2", &list))
