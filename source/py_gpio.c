@@ -32,6 +32,7 @@ SOFTWARE.
 #include "constants.h"
 #include "common.h"
 #include "event_gpio.h"
+#include "c_pinmux.h"
 
 static int gpio_warnings = 1;
 
@@ -111,7 +112,12 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (direction == OUTPUT) {
        gpio_set_value(gpio, initial);
    } else {
-       gpio_set_value(gpio, pud);
+	   if (pud == PUD_DOWN)
+		   set_pin_mode(channel, "gpio_pd");
+	   else if (pud == PUD_UP)
+		   set_pin_mode(channel, "gpio_pu");
+	   else
+		   set_pin_mode(channel, "gpio");
    }
 
    gpio_direction[gpio] = direction;
