@@ -1,70 +1,70 @@
 /*
-Copyright (c) 2013 Adafruit
+ Copyright (c) 2013 Adafruit
 
-Original RPi.GPIO Author Ben Croston
-Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
-permission notice, all modified code adopts the original license:
+ Original RPi.GPIO Author Ben Croston
+ Modified for BBIO Author Justin Cooper
 
-Copyright (c) 2013 Ben Croston
+ This file incorporates work covered by the following copyright and
+ permission notice, all modified code adopts the original license:
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of
-this software and associated documentation files (the "Software"), to deal in
-the Software without restriction, including without limitation the rights to
-use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
-of the Software, and to permit persons to whom the Software is furnished to do
-so, subject to the following conditions:
+ Copyright (c) 2013 Ben Croston
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+ Permission is hereby granted, free of charge, to any person obtaining a copy of
+ this software and associated documentation files (the "Software"), to deal in
+ the Software without restriction, including without limitation the rights to
+ use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+ of the Software, and to permit persons to whom the Software is furnished to do
+ so, subject to the following conditions:
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-*/
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ */
+#include <pthread.h>
 #include "Python.h"
 #include "constants.h"
 #include "common.h"
 #include "event_gpio.h"
 
+#include "softPwm.h" //softPWM
+
 static int gpio_warnings = 1;
 
-struct py_callback
-{
-   char channel[32];
-   unsigned int gpio;
-   PyObject *py_cb;
-   unsigned long long lastcall;
-   unsigned int bouncetime;
-   struct py_callback *next;
+struct py_callback {
+	char channel[32];
+	unsigned int gpio;
+	PyObject *py_cb;
+	unsigned long long lastcall;
+	unsigned int bouncetime;
+	struct py_callback *next;
 };
 static struct py_callback *py_callbacks = NULL;
 
-static int init_module(void)
-{
-    int i;
+static int init_module(void) {
+	int i;
 
-    for (i=0; i<120; i++)
-        gpio_direction[i] = -1;
+	for (i = 0; i < 120; i++)
+		gpio_direction[i] = -1;
 
-    module_setup = 1;
+	module_setup = 1;
 
-    return 0;
+	return 0;
 }
 
 // python function cleanup()
-static PyObject *py_cleanup(PyObject *self, PyObject *args)
-{
-    // clean up any exports
-    event_cleanup();
+static PyObject *py_cleanup(PyObject *self, PyObject *args) {
+	// clean up any exports
+	event_cleanup();
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 // python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None)
@@ -127,22 +127,23 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
     char *channel;
     BBIO_err err;
 
-    if (!PyArg_ParseTuple(args, "si", &channel, &value))
-        return NULL;
+	if (!PyArg_ParseTuple(args, "si", &channel, &value))
+		return NULL;
+
 
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
         return NULL;      
 
-    if (!module_setup || gpio_direction[gpio] != OUTPUT)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "The GPIO channel has not been setup() as an OUTPUT");
-        return NULL;
-    }
+	if (!module_setup || gpio_direction[gpio] != OUTPUT) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"The GPIO channel has not been setup() as an OUTPUT");
+		return NULL;
+	}
 
-    gpio_set_value(gpio, value);
+	gpio_set_value(gpio, value);
 
-    Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
 // python function value = input(channel)
@@ -154,94 +155,93 @@ static PyObject *py_input_gpio(PyObject *self, PyObject *args)
     PyObject *py_value;
     BBIO_err err;
 
-    if (!PyArg_ParseTuple(args, "s", &channel))
-        return NULL;
+	if (!PyArg_ParseTuple(args, "s", &channel))
+		return NULL;
+
 
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
         return NULL;
 
-   // check channel is set up as an input or output
-    if (!module_setup || (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT))
-    {
-        PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel first");
-        return NULL;
-    }
+	// check channel is set up as an input or output
+	if (!module_setup
+			|| (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT)) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"You must setup() the GPIO channel first");
+		return NULL;
+	}
 
-    gpio_get_value(gpio, &value);
+	gpio_get_value(gpio, &value);
 
-    py_value = Py_BuildValue("i", value);
+	py_value = Py_BuildValue("i", value);
 
-    return py_value;
+	return py_value;
 }
 
-static void run_py_callbacks(unsigned int gpio)
-{
-   PyObject *result;
-   PyGILState_STATE gstate;
-   struct py_callback *cb = py_callbacks;
-   struct timeval tv_timenow;
-   unsigned long long timenow;
+static void run_py_callbacks(unsigned int gpio) {
+	PyObject *result;
+	PyGILState_STATE gstate;
+	struct py_callback *cb = py_callbacks;
+	struct timeval tv_timenow;
+	unsigned long long timenow;
 
-   while (cb != NULL)
-   {
-      if (cb->gpio == gpio)
-      {
-         gettimeofday(&tv_timenow, NULL);
-         timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
-         if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
-            
-            // save lastcall before calling func to prevent reentrant bounce
-            cb->lastcall = timenow;
-            
-            // run callback
-            gstate = PyGILState_Ensure();
-            result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
+	while (cb != NULL) {
+		if (cb->gpio == gpio) {
+			gettimeofday(&tv_timenow, NULL);
+			timenow = tv_timenow.tv_sec * 1E6 + tv_timenow.tv_usec;
+			if (cb->bouncetime == 0
+					|| timenow - cb->lastcall > cb->bouncetime * 1000
+					|| cb->lastcall == 0 || cb->lastcall > timenow) {
 
-            if (result == NULL && PyErr_Occurred())
-            {
-               PyErr_Print();
-               PyErr_Clear();
-            }
-            Py_XDECREF(result);
-            PyGILState_Release(gstate);
-         }
-         cb->lastcall = timenow;
-      }
-      cb = cb->next;
-   }
+				// save lastcall before calling func to prevent reentrant bounce
+				cb->lastcall = timenow;
+
+				// run callback
+				gstate = PyGILState_Ensure();
+				result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
+
+				if (result == NULL && PyErr_Occurred()) {
+					PyErr_Print();
+					PyErr_Clear();
+				}
+				Py_XDECREF(result);
+				PyGILState_Release(gstate);
+			}
+			cb->lastcall = timenow;
+		}
+		cb = cb->next;
+	}
 }
 
-static int add_py_callback(char *channel, unsigned int gpio, unsigned int bouncetime, PyObject *cb_func)
-{
-   struct py_callback *new_py_cb;
-   struct py_callback *cb = py_callbacks;
+static int add_py_callback(char *channel, unsigned int gpio,
+		unsigned int bouncetime, PyObject *cb_func) {
+	struct py_callback *new_py_cb;
+	struct py_callback *cb = py_callbacks;
 
-   // add callback to py_callbacks list
-   new_py_cb = malloc(sizeof(struct py_callback));
-   if (new_py_cb == 0)
-   {
-      PyErr_NoMemory();
-      return -1;
-   }
-   new_py_cb->py_cb = cb_func;
-   Py_XINCREF(cb_func);         // Add a reference to new callback
-   memset(new_py_cb->channel, 0, sizeof(new_py_cb->channel));
-   strncpy(new_py_cb->channel, channel, sizeof(new_py_cb->channel) - 1);
-   new_py_cb->gpio = gpio;
-   new_py_cb->lastcall = 0;
-   new_py_cb->bouncetime = bouncetime;
-   new_py_cb->next = NULL;
-   if (py_callbacks == NULL) {
-      py_callbacks = new_py_cb;
-   } else {
-      // add to end of list
-      while (cb->next != NULL)
-         cb = cb->next;
-      cb->next = new_py_cb;
-   }
-   add_edge_callback(gpio, run_py_callbacks);
-   return 0;
+	// add callback to py_callbacks list
+	new_py_cb = malloc(sizeof(struct py_callback));
+	if (new_py_cb == 0) {
+		PyErr_NoMemory();
+		return -1;
+	}
+	new_py_cb->py_cb = cb_func;
+	Py_XINCREF(cb_func);         // Add a reference to new callback
+	memset(new_py_cb->channel, 0, sizeof(new_py_cb->channel));
+	strncpy(new_py_cb->channel, channel, sizeof(new_py_cb->channel) - 1);
+	new_py_cb->gpio = gpio;
+	new_py_cb->lastcall = 0;
+	new_py_cb->bouncetime = bouncetime;
+	new_py_cb->next = NULL;
+	if (py_callbacks == NULL) {
+		py_callbacks = new_py_cb;
+	} else {
+		// add to end of list
+		while (cb->next != NULL)
+			cb = cb->next;
+		cb->next = new_py_cb;
+	}
+	add_edge_callback(gpio, run_py_callbacks);
+	return 0;
 }
 
 // python function add_event_callback(gpio, callback, bouncetime=0)
@@ -391,17 +391,18 @@ static PyObject *py_event_detected(PyObject *self, PyObject *args)
    char *channel;
    BBIO_err err;
 
-   if (!PyArg_ParseTuple(args, "s", &channel))
-      return NULL;
+	if (!PyArg_ParseTuple(args, "s", &channel))
+		return NULL;
+
 
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
 
-   if (event_detected(gpio))
-      Py_RETURN_TRUE;
-   else
-      Py_RETURN_FALSE;
+	if (event_detected(gpio))
+		Py_RETURN_TRUE;
+	else
+		Py_RETURN_FALSE;
 }
 
 // python function py_wait_for_edge(gpio, edge)
@@ -469,56 +470,162 @@ static PyObject *py_gpio_function(PyObject *self, PyObject *args)
    if (err != BBIO_OK)
        return NULL;
 
-    if (setup_error)
-    {
-        PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
-        return NULL;
-    }
+   	if (setup_error) {
+   		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+   		return NULL;
+   	}
 
-    gpio_get_direction(gpio, &value);
-    func = Py_BuildValue("i", value);
-    return func;
+   	gpio_get_direction(gpio, &value);
+   	func = Py_BuildValue("i", value);
+   	return func;
+}
+
+//expand by Dark_Guan https://github.com/Dark-Guan/adafruit-beaglebone-io-python
+// python function softPWM_Create(gpio,value,range)
+static PyObject *softPWM_Create(PyObject *self, PyObject *args) {
+	unsigned int gpio;
+	unsigned int Initialvalue;
+	unsigned int range;
+	char *channel;
+
+	if (!PyArg_ParseTuple(args, "sii", &channel, &Initialvalue, &range))
+		return NULL;
+
+	if (get_gpio_number(channel, &gpio))
+		return NULL;
+
+	if (setup_error) {
+		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+		return NULL;
+	}
+	if (!module_setup || gpio_direction[gpio] != OUTPUT) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"The GPIO channel has not been setup() as an OUTPUT");
+		return NULL;
+	}
+
+//	printf("RUN softPWM_Create! \n");
+	softPwmCreate(gpio, Initialvalue, range);
+
+	Py_RETURN_NONE;
+}
+
+//expand by Dark_Guan https://github.com/Dark-Guan/adafruit-beaglebone-io-python
+// python function softPWM_Write(gpio,value)
+static PyObject *softPWM_Write(PyObject *self, PyObject *args) {
+	unsigned int gpio;
+	unsigned int value;
+
+	char *channel;
+
+	if (!PyArg_ParseTuple(args, "si", &channel, &value))
+		return NULL;
+
+	if (get_gpio_number(channel, &gpio))
+		return NULL;
+
+	if (setup_error) {
+		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+		return NULL;
+	}
+	if (!module_setup || gpio_direction[gpio] != OUTPUT) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"The GPIO channel has not been setup() as an OUTPUT");
+		return NULL;
+	}
+//	printf("RUN softPWM_Write! \n");
+	softPwmWrite(gpio, value);
+
+	Py_RETURN_NONE;
+}
+//expand by Dark_Guan https://github.com/Dark-Guan/adafruit-beaglebone-io-python
+// python function softPWM_Write(gpio,value)
+static PyObject *softPWM_Stop(PyObject *self, PyObject *args) {
+	unsigned int gpio;
+
+	char *channel;
+
+	if (!PyArg_ParseTuple(args, "s", &channel))
+		return NULL;
+
+	if (get_gpio_number(channel, &gpio))
+		return NULL;
+
+	if (setup_error) {
+		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+		return NULL;
+	}
+	if (!module_setup || gpio_direction[gpio] != OUTPUT) {
+		PyErr_SetString(PyExc_RuntimeError,
+				"The GPIO channel has not been setup() as an OUTPUT");
+		return NULL;
+	}
+//	printf("RUN softPWM_Stop! \n");
+	softPwmStop(gpio);
+
+	Py_RETURN_NONE;
 }
 
 // python function setwarnings(state)
-static PyObject *py_setwarnings(PyObject *self, PyObject *args)
-{
-   if (!PyArg_ParseTuple(args, "i", &gpio_warnings))
-      return NULL;
+static PyObject *py_setwarnings(PyObject *self, PyObject *args) {
+	if (!PyArg_ParseTuple(args, "i", &gpio_warnings))
+		return NULL;
 
-   if (setup_error)
-   {
-      PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
-      return NULL;
-   }
+	if (setup_error) {
+		PyErr_SetString(PyExc_RuntimeError, "Module not imported correctly!");
+		return NULL;
+	}
 
-   Py_RETURN_NONE;
+	Py_RETURN_NONE;
 }
 
-static const char moduledocstring[] = "GPIO functionality of a BeagleBone using Python";
+static const char moduledocstring[] =
+		"GPIO functionality of a BeagleBone using Python";
 
-PyMethodDef gpio_methods[] = {
-   {"setup", (PyCFunction)py_setup_channel, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel, direction and (optional) pull/up down control\nchannel        - Either: RPi board pin number (not BCM GPIO 00..nn number).  Pins start from 1\n                 or    : BCM GPIO number\ndirection      - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN\n[initial]      - Initial value for an output channel"},
-   {"cleanup", py_cleanup, METH_VARARGS, "Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection"},
-   {"output", py_output_gpio, METH_VARARGS, "Output to a GPIO channel\ngpio  - gpio channel\nvalue - 0/1 or False/True or LOW/HIGH"},
-   {"input", py_input_gpio, METH_VARARGS, "Input from a GPIO channel.  Returns HIGH=1=True or LOW=0=False\ngpio - gpio channel"},
-   {"add_event_detect", (PyCFunction)py_add_event_detect, METH_VARARGS | METH_KEYWORDS, "Enable edge detection events for a particular GPIO channel.\nchannel      - either board pin number or BCM number depending on which mode is set.\nedge         - RISING, FALLING or BOTH\n[callback]   - A callback function for the event (optional)\n[bouncetime] - Switch bounce timeout in ms for callback"},
-   {"remove_event_detect", py_remove_event_detect, METH_VARARGS, "Remove edge detection for a particular GPIO channel\ngpio - gpio channel"},
-   {"event_detected", py_event_detected, METH_VARARGS, "Returns True if an edge has occured on a given GPIO.  You need to enable edge detection using add_event_detect() first.\ngpio - gpio channel"},
-   {"add_event_callback", (PyCFunction)py_add_event_callback, METH_VARARGS | METH_KEYWORDS, "Add a callback for an event already defined using add_event_detect()\ngpio         - gpio channel\ncallback     - a callback function\n[bouncetime] - Switch bounce timeout in ms"},
-   {"wait_for_edge", py_wait_for_edge, METH_VARARGS, "Wait for an edge.\ngpio - gpio channel\nedge - RISING, FALLING or BOTH"},
-   {"gpio_function", py_gpio_function, METH_VARARGS, "Return the current GPIO function (IN, OUT, ALT0)\ngpio - gpio channel"},
-   {"setwarnings", py_setwarnings, METH_VARARGS, "Enable or disable warning messages"},
-   {NULL, NULL, 0, NULL}
-};
+PyMethodDef gpio_methods[] =
+		{
+				{ "setup", (PyCFunction) py_setup_channel, METH_VARARGS
+						| METH_KEYWORDS,
+						"Set up the GPIO channel, direction and (optional) pull/up down control\nchannel        - Either: RPi board pin number (not BCM GPIO 00..nn number).  Pins start from 1\n                 or    : BCM GPIO number\ndirection      - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN\n[initial]      - Initial value for an output channel" },
+				{ "cleanup", py_cleanup, METH_VARARGS,
+						"Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection" },
+				{ "output", py_output_gpio, METH_VARARGS,
+						"Output to a GPIO channel\ngpio  - gpio channel\nvalue - 0/1 or False/True or LOW/HIGH" },
+				{ "input", py_input_gpio, METH_VARARGS,
+						"Input from a GPIO channel.  Returns HIGH=1=True or LOW=0=False\ngpio - gpio channel" },
+				{ "add_event_detect", (PyCFunction) py_add_event_detect,
+						METH_VARARGS | METH_KEYWORDS,
+						"Enable edge detection events for a particular GPIO channel.\nchannel      - either board pin number or BCM number depending on which mode is set.\nedge         - RISING, FALLING or BOTH\n[callback]   - A callback function for the event (optional)\n[bouncetime] - Switch bounce timeout in ms for callback" },
+				{ "remove_event_detect", py_remove_event_detect, METH_VARARGS,
+						"Remove edge detection for a particular GPIO channel\ngpio - gpio channel" },
+				{ "event_detected", py_event_detected, METH_VARARGS,
+						"Returns True if an edge has occured on a given GPIO.  You need to enable edge detection using add_event_detect() first.\ngpio - gpio channel" },
+				{ "add_event_callback", (PyCFunction) py_add_event_callback,
+						METH_VARARGS | METH_KEYWORDS,
+						"Add a callback for an event already defined using add_event_detect()\ngpio         - gpio channel\ncallback     - a callback function\n[bouncetime] - Switch bounce timeout in ms" },
+				{ "wait_for_edge", py_wait_for_edge, METH_VARARGS,
+						"Wait for an edge.\ngpio - gpio channel\nedge - RISING, FALLING or BOTH" },
+				{ "gpio_function", py_gpio_function, METH_VARARGS,
+						"Return the current GPIO function (IN, OUT, ALT0)\ngpio - gpio channel" },
+				{ "setwarnings", py_setwarnings, METH_VARARGS,
+						"Enable or disable warning messages" },
+						{
+						"soft_pwm_create", softPWM_Create, METH_VARARGS,
+						"Create a softPWM for normal GPIO" }, {
+						"soft_pwm_write", softPWM_Write, METH_VARARGS,
+						"Set a PWM value of SoftPWM Pin" },
+						{ "soft_pwm_stop",
+						softPWM_Stop, METH_VARARGS, "Stop the SoftPWM" },
+						{
+						NULL, NULL, 0, NULL } };
 
 #if PY_MAJOR_VERSION > 2
 static struct PyModuleDef rpigpiomodule = {
-   PyModuleDef_HEAD_INIT,
-   "GPIO",       // name of module
-   moduledocstring,  // module documentation, may be NULL
-   -1,               // size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
-   gpio_methods
+	PyModuleDef_HEAD_INIT,
+	"GPIO",       // name of module
+	moduledocstring,// module documentation, may be NULL
+	-1,// size of per-interpreter state of the module, or -1 if the module keeps state in global variables.
+	gpio_methods
 };
 #endif
 
@@ -528,35 +635,35 @@ PyMODINIT_FUNC PyInit_GPIO(void)
 PyMODINIT_FUNC initGPIO(void)
 #endif
 {
-   PyObject *module = NULL;
+	PyObject *module = NULL;
 
 #if PY_MAJOR_VERSION > 2
-   if ((module = PyModule_Create(&rpigpiomodule)) == NULL)
-      return NULL;
+	if ((module = PyModule_Create(&rpigpiomodule)) == NULL)
+	return NULL;
 #else
-   if ((module = Py_InitModule3("GPIO", gpio_methods, moduledocstring)) == NULL)
-      return;
+	if ((module = Py_InitModule3("GPIO", gpio_methods, moduledocstring))
+			== NULL)
+		return;
 #endif
 
-   define_constants(module);
+	define_constants(module);
 
-   if (!PyEval_ThreadsInitialized())
-      PyEval_InitThreads();
+	if (!PyEval_ThreadsInitialized())
+		PyEval_InitThreads();
 
-   if (Py_AtExit(event_cleanup) != 0)
-   {
-      setup_error = 1;
-      event_cleanup();
+	if (Py_AtExit(event_cleanup) != 0) {
+		setup_error = 1;
+		event_cleanup();
 #if PY_MAJOR_VERSION > 2
-      return NULL;
+		return NULL;
 #else
-      return;
+		return;
 #endif
-   }
+	}
 
 #if PY_MAJOR_VERSION > 2
-   return module;
+	return module;
 #else
-   return;
+	return;
 #endif
 }

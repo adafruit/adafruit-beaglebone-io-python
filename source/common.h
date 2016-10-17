@@ -68,6 +68,7 @@ typedef struct pwm_t {
 int gpio_mode;
 int gpio_direction[120];
 
+
 #ifdef BBBVERSION41
     char ctrl_dir[43];
     char ocp_dir[33];

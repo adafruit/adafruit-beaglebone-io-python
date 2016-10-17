@@ -393,6 +393,7 @@ int get_spi_bus_path_number(unsigned int spi)
   build_path("/sys/devices", "ocp", ocp_dir, sizeof(ocp_dir));
 #endif
 
+
   if (spi == 0) {
       snprintf(path, sizeof(path), "%s/48030000.spi/spi_master/spi1", ocp_dir);
   } else {
@@ -425,6 +426,7 @@ BBIO_err load_device_tree(const char *name)
 #endif
 
     char line[256];
+
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
@@ -465,6 +467,7 @@ int device_tree_loaded(const char *name)
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
     char line[256];
+
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
