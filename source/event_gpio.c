@@ -84,8 +84,11 @@ int gpio_export(unsigned int gpio)
         return -1;
     }
     len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpio);
-    write(fd, str_gpio, len);
+    int ret = write(fd, str_gpio, len);
     close(fd);
+    if (ret < 0) {
+    	return ret;
+    }
 
     // add to list
     new_gpio = malloc(sizeof(struct gpio_exp));
@@ -197,8 +200,11 @@ int gpio_unexport(unsigned int gpio)
         return -1;
 
     len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpio);
-    write(fd, str_gpio, len);
+    int ret = write(fd, str_gpio, len);
     close(fd);
+    if (ret < 0) {
+    	return ret;
+    }
 
     // remove from list
     g = exported_gpios;
@@ -237,8 +243,12 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
             strncpy(direction, "in", ARRAY_SIZE(direction) - 1);
         }
 
-        write(fd, direction, strlen(direction));
+        int ret = write(fd, direction, strlen(direction));
         close(fd);
+        if (ret < 0) {
+        	return ret;
+        }
+
         return 0;
 }
 
@@ -253,7 +263,10 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
         return -1;
 
     lseek(fd, 0, SEEK_SET);
-    read(fd, &direction, sizeof(direction) - 1);
+    int ret = read(fd, &direction, sizeof(direction) - 1);
+    if (ret < 0) {
+    	return ret;
+    }
 
     if (strcmp(direction, "out") == 0) {
         *value = OUTPUT;
@@ -285,8 +298,12 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
         strncpy(vstr, "0", ARRAY_SIZE(vstr) - 1);
     }
 
-    write(fd, vstr, strlen(vstr));
+    int ret = write(fd, vstr, strlen(vstr));
     close(fd);
+    if (ret < 0) {
+    	return ret;
+    }
+
     return 0;
 }
 
@@ -299,10 +316,13 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
     {
         if ((fd = open_value_file(gpio)) == -1)
             return -1;
-    }    
+    }
 
     lseek(fd, 0, SEEK_SET);
-    read(fd, &ch, sizeof(ch));
+    int ret = read(fd, &ch, sizeof(ch));
+    if (ret < 0) {
+    	return ret;
+    }
 
     if (ch != '0') {
         *value = 1;
@@ -323,8 +343,12 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
         if ((fd = open(filename, O_WRONLY)) < 0)
         return -1;
 
-        write(fd, stredge[edge], strlen(stredge[edge]) + 1);
+        int ret = write(fd, stredge[edge], strlen(stredge[edge]) + 1);
         close(fd);
+        if (ret < 0) {
+        	return ret;
+        }
+
         return 0;
 }
 

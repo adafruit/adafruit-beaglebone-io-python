@@ -564,9 +564,9 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 BBIO_err pwm_disable(const char *key)
 {
     struct pwm_exp *pwm, *temp, *prev_pwm = NULL;
-    BBIO_err err;
 
 #ifndef BBBVERSION41
+    BBIO_err err;
     char fragment[18];
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
     err = unload_device_tree(fragment);
