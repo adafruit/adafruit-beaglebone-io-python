@@ -566,22 +566,7 @@ BBIO_err pwm_disable(const char *key)
     struct pwm_exp *pwm, *temp, *prev_pwm = NULL;
     BBIO_err err;
 
-#ifdef BBBVERSION41
-    char buffer[2];
-    size_t len;
-    pwm = lookup_exported_pwm(key);
-
-    // Disable the PWM
-    lseek(pwm->enable_fd, 0, SEEK_SET);
-    len = snprintf(buffer, sizeof(buffer), "0");
-    if (write(pwm->enable_fd, buffer, len) < 0) {
-        return BBIO_SYSFS;
-    }
-
-    // Unexport the PWM
-    // TODO later
-
-#else
+#ifndef BBBVERSION41
     char fragment[18];
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
     err = unload_device_tree(fragment);
@@ -595,6 +580,22 @@ BBIO_err pwm_disable(const char *key)
     {
         if (strcmp(pwm->key, key) == 0)
         {
+	        
+#ifdef BBBVERSION41
+	        char buffer[2];
+	        size_t len;
+	        
+	        // Disable the PWM
+	        lseek(pwm->enable_fd, 0, SEEK_SET);
+	        len = snprintf(buffer, sizeof(buffer), "0");
+	        if (write(pwm->enable_fd, buffer, len) < 0) {
+		        return BBIO_SYSFS;
+	        }
+
+	        // Unexport the PWM
+	        // TODO later
+#endif
+	        
             //close the fd
             close(pwm->period_fd);
             close(pwm->duty_fd);
