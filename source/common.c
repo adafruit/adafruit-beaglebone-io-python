@@ -392,7 +392,7 @@ BBIO_err build_path(const char *partial_path, const char *prefix, char *full_pat
 
 int get_spi_bus_path_number(unsigned int spi)
 {
-  char path[50];
+  char path[MAX_PATH];
 
 #ifdef BBBVERSION41
   strncpy(ocp_dir, "/sys/devices/platform/ocp", sizeof(ocp_dir));

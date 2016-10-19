@@ -40,6 +40,7 @@ SOFTWARE.
 #define ARRAY_SIZE(a)  (sizeof(a) / sizeof(a[0]))
 
 #define FILENAME_BUFFER_SIZE 128
+#define MAX_PATH 256
 
 typedef enum {
 	BBIO_OK, // No error
