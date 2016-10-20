@@ -68,6 +68,6 @@ void define_constants(PyObject *module)
    both_edge = Py_BuildValue("i", BOTH_EDGE);
    PyModule_AddObject(module, "BOTH", both_edge);
 
-   version = Py_BuildValue("s", "0.0.19");
+   version = Py_BuildValue("s", "0.0.20");
    PyModule_AddObject(module, "VERSION", version);
 }
