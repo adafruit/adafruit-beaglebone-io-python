@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -85,7 +85,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (!module_setup) {
       init_module();
    }
-   
+
 
    if (direction != INPUT && direction != OUTPUT)
    {
@@ -102,15 +102,33 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
       return NULL;
    }
 
-    
+
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
 
-   gpio_export(gpio);
-   gpio_set_direction(gpio, direction);
+   unsigned int count = 100000;
+   int res = -1;
+   do {   // wait until gpio file appears on the filesystem
+       res = gpio_export(gpio);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+
+   count = 100000;
+   do {
+       res = gpio_set_direction(gpio, direction);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+
    if (direction == OUTPUT) {
-       gpio_set_value(gpio, initial);
+       count = 100000;
+       do {
+           res = gpio_set_value(gpio, initial);
+       } while(res != 0 && count-- > 0);
+       if(count == 0)
+           return NULL;
    } else {
 	   if (pud == PUD_DOWN)
 		   set_pin_mode(channel, "gpio_pd");
@@ -138,7 +156,7 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
 
     err = get_gpio_number(channel, &gpio);
     if (err != BBIO_OK)
-        return NULL;      
+        return NULL;
 
     if (!module_setup || gpio_direction[gpio] != OUTPUT)
     {
@@ -196,10 +214,10 @@ static void run_py_callbacks(unsigned int gpio)
          gettimeofday(&tv_timenow, NULL);
          timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
-            
+
             // save lastcall before calling func to prevent reentrant bounce
             cb->lastcall = timenow;
-            
+
             // run callback
             gstate = PyGILState_Ensure();
             result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
@@ -455,7 +473,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
       PyErr_SetString(PyExc_RuntimeError, error);
       return NULL;
    }
-   
+
    Py_RETURN_NONE;
 }
 
