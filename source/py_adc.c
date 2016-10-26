@@ -86,7 +86,7 @@ static PyObject *py_read(PyObject *self, PyObject *args)
     }
 
     //scale modifier
-    value = value / 1800.0;
+    value = value / 4095.0;
 
     py_value = Py_BuildValue("f", value);
 
