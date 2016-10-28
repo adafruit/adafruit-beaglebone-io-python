@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -273,7 +273,7 @@ int gpio_get_direction(unsigned int gpio, unsigned int *value)
     } else {
         *value = INPUT;
     }
- 
+
     return 0;
 }
 
@@ -330,6 +330,20 @@ int gpio_get_value(unsigned int gpio, unsigned int *value)
         *value = 0;
     }
 
+    return 0;
+}
+
+int gpio_get_fd(unsigned int gpio, int *value)
+{
+    int fd = fd_lookup(gpio);
+
+    if (!fd)
+    {
+        if ((fd = open_value_file(gpio)) == -1)
+            return -1;
+    }
+
+    *value = fd;
     return 0;
 }
 

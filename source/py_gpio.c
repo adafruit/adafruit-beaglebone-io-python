@@ -68,6 +68,36 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
+// python function fd_gpio(channel)
+static PyObject *py_fd_gpio(PyObject *self, PyObject *args)
+{
+  unsigned int gpio;
+  char *channel;
+  int value;
+  PyObject *py_value;
+  BBIO_err err;
+
+  if (!PyArg_ParseTuple(args, "s", &channel))
+      return NULL;
+
+  err = get_gpio_number(channel, &gpio);
+  if (err != BBIO_OK)
+      return NULL;
+
+ // check channel is set up as an input or output
+  if (!module_setup || (gpio_direction[gpio] != INPUT && gpio_direction[gpio] != OUTPUT))
+  {
+      PyErr_SetString(PyExc_RuntimeError, "You must setup() the GPIO channel first");
+      return NULL;
+  }
+
+  gpio_get_fd(gpio, &value);
+
+  py_value = Py_BuildValue("i", value);
+
+  return py_value;
+}
+
 // python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None)
 static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwargs)
 {
@@ -526,6 +556,7 @@ PyMethodDef gpio_methods[] = {
    {"cleanup", py_cleanup, METH_VARARGS, "Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection"},
    {"output", py_output_gpio, METH_VARARGS, "Output to a GPIO channel\ngpio  - gpio channel\nvalue - 0/1 or False/True or LOW/HIGH"},
    {"input", py_input_gpio, METH_VARARGS, "Input from a GPIO channel.  Returns HIGH=1=True or LOW=0=False\ngpio - gpio channel"},
+   {"fd", py_fd_gpio, METH_VARARGS, "File descriptor from a GPIO channel.  Returns the file descriptor\ngpio - gpio channel"},
    {"add_event_detect", (PyCFunction)py_add_event_detect, METH_VARARGS | METH_KEYWORDS, "Enable edge detection events for a particular GPIO channel.\nchannel      - either board pin number or BCM number depending on which mode is set.\nedge         - RISING, FALLING or BOTH\n[callback]   - A callback function for the event (optional)\n[bouncetime] - Switch bounce timeout in ms for callback"},
    {"remove_event_detect", py_remove_event_detect, METH_VARARGS, "Remove edge detection for a particular GPIO channel\ngpio - gpio channel"},
    {"event_detected", py_event_detected, METH_VARARGS, "Returns True if an edge has occured on a given GPIO.  You need to enable edge detection using add_event_detect() first.\ngpio - gpio channel"},
