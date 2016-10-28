@@ -86,7 +86,11 @@ static PyObject *py_read(PyObject *self, PyObject *args)
     }
 
     //scale modifier
+#ifdef BBBVERSION41
     value = value / 4095.0;
+#else
+    value = value / 1800.0;
+#endif
 
     py_value = Py_BuildValue("f", value);
 
