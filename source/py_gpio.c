@@ -4,7 +4,7 @@ Copyright (c) 2013 Adafruit
 Original RPi.GPIO Author Ben Croston
 Modified for BBIO Author Justin Cooper
 
-This file incorporates work covered by the following copyright and 
+This file incorporates work covered by the following copyright and
 permission notice, all modified code adopts the original license:
 
 Copyright (c) 2013 Ben Croston
@@ -32,8 +32,8 @@ SOFTWARE.
 #include "constants.h"
 #include "common.h"
 #include "event_gpio.h"
+#include "c_pinmux.h"
 
-static PyObject *bb_revision;
 static int gpio_warnings = 1;
 
 struct py_callback
@@ -75,7 +75,8 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    char *channel;
    int direction;
    int pud = PUD_OFF;
-   int initial = -1;
+   int initial = 0;
+   BBIO_err err;
    static char *kwlist[] = {"channel", "direction", "pull_up_down", "initial", NULL};
 
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|ii", kwlist, &channel, &direction, &pud, &initial))
@@ -84,7 +85,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (!module_setup) {
       init_module();
    }
-   
+
 
    if (direction != INPUT && direction != OUTPUT)
    {
@@ -101,14 +102,41 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
       return NULL;
    }
 
-    
 
-   if (get_gpio_number(channel, &gpio))
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
        return NULL;
 
-   gpio_export(gpio);
-   gpio_set_direction(gpio, direction);
-   gpio_set_value(gpio, pud);
+   unsigned int count = 100000;
+   int res = -1;
+   do {   // wait until gpio file appears on the filesystem
+       res = gpio_export(gpio);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+
+   count = 100000;
+   do {
+       res = gpio_set_direction(gpio, direction);
+   } while(res != 0 && count-- > 0);
+   if(count == 0)
+       return NULL;
+
+   if (direction == OUTPUT) {
+       count = 100000;
+       do {
+           res = gpio_set_value(gpio, initial);
+       } while(res != 0 && count-- > 0);
+       if(count == 0)
+           return NULL;
+   } else {
+	   if (pud == PUD_DOWN)
+		   set_pin_mode(channel, "gpio_pd");
+	   else if (pud == PUD_UP)
+		   set_pin_mode(channel, "gpio_pu");
+	   else
+		   set_pin_mode(channel, "gpio");
+   }
 
    gpio_direction[gpio] = direction;
 
@@ -121,12 +149,14 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
     unsigned int gpio;
     int value;
     char *channel;
+    BBIO_err err;
 
     if (!PyArg_ParseTuple(args, "si", &channel, &value))
         return NULL;
 
-    if (get_gpio_number(channel, &gpio))
-        return NULL;      
+    err = get_gpio_number(channel, &gpio);
+    if (err != BBIO_OK)
+        return NULL;
 
     if (!module_setup || gpio_direction[gpio] != OUTPUT)
     {
@@ -146,11 +176,13 @@ static PyObject *py_input_gpio(PyObject *self, PyObject *args)
     char *channel;
     unsigned int value;
     PyObject *py_value;
+    BBIO_err err;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
         return NULL;
 
-    if (get_gpio_number(channel, &gpio))
+    err = get_gpio_number(channel, &gpio);
+    if (err != BBIO_OK)
         return NULL;
 
    // check channel is set up as an input or output
@@ -182,6 +214,10 @@ static void run_py_callbacks(unsigned int gpio)
          gettimeofday(&tv_timenow, NULL);
          timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
          if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
+
+            // save lastcall before calling func to prevent reentrant bounce
+            cb->lastcall = timenow;
+
             // run callback
             gstate = PyGILState_Ensure();
             result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
@@ -240,6 +276,7 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
    unsigned int bouncetime = 0;
    PyObject *cb_func;
    char *kwlist[] = {"gpio", "callback", "bouncetime", NULL};
+   BBIO_err err;
 
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "sO|i", kwlist, &channel, &cb_func, &bouncetime))
       return NULL;
@@ -250,7 +287,8 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
       return NULL;
    }
 
-   if (get_gpio_number(channel, &gpio))
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
        return NULL;
 
    // check channel is set up as an input
@@ -281,6 +319,7 @@ static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *k
    unsigned int bouncetime = 0;
    PyObject *cb_func = NULL;
    char *kwlist[] = {"gpio", "edge", "callback", "bouncetime", NULL};
+   BBIO_err err;
 
    if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|Oi", kwlist, &channel, &edge, &cb_func, &bouncetime))
       return NULL;
@@ -291,7 +330,8 @@ static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *k
       return NULL;
    }
 
-   if (get_gpio_number(channel, &gpio))
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
        return NULL;
 
    // check channel is set up as an input
@@ -335,12 +375,14 @@ static PyObject *py_remove_event_detect(PyObject *self, PyObject *args)
    struct py_callback *cb = py_callbacks;
    struct py_callback *temp;
    struct py_callback *prev = NULL;
+   BBIO_err err;
 
    if (!PyArg_ParseTuple(args, "s", &channel))
       return NULL;
 
-   if (get_gpio_number(channel, &gpio))
-        return NULL;
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
+       return NULL;
 
    // remove all python callbacks for gpio
    while (cb != NULL)
@@ -371,11 +413,13 @@ static PyObject *py_event_detected(PyObject *self, PyObject *args)
 {
    unsigned int gpio;
    char *channel;
+   BBIO_err err;
 
    if (!PyArg_ParseTuple(args, "s", &channel))
       return NULL;
 
-   if (get_gpio_number(channel, &gpio))
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
        return NULL;
 
    if (event_detected(gpio))
@@ -391,6 +435,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
    int edge, result, timeout;
    char *channel;
    char error[30];
+   BBIO_err err;
 
    if (!PyArg_ParseTuple(args, "sii", &channel, &edge, &timeout)){
       timeout = -1;
@@ -398,8 +443,9 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
          return NULL;
    }
 
-   if (get_gpio_number(channel, &gpio))
-      return NULL;
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
+       return NULL;
 
    // check channel is setup as an input
    if (!module_setup || gpio_direction[gpio] != INPUT)
@@ -432,7 +478,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
       PyErr_SetString(PyExc_RuntimeError, error);
       return NULL;
    }
-   
+
    Py_RETURN_NONE;
 }
 
@@ -443,13 +489,14 @@ static PyObject *py_gpio_function(PyObject *self, PyObject *args)
     unsigned int value;
     PyObject *func;
     char *channel;
-
+    BBIO_err err;
 
     if (!PyArg_ParseTuple(args, "s", &channel))
        return NULL;
 
-    if (get_gpio_number(channel, &gpio))
-        return NULL;
+   err = get_gpio_number(channel, &gpio);
+   if (err != BBIO_OK)
+       return NULL;
 
     if (setup_error)
     {

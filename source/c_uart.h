@@ -20,6 +20,10 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
+#ifndef C_UART_H
+#define C_UART_H
+#include "common.h"
 
-int uart_setup(const char *dt);
-void uart_cleanup(void);
+BBIO_err uart_setup(const char *dt);
+BBIO_err uart_cleanup(void);
+#endif

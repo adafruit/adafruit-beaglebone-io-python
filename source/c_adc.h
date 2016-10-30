@@ -21,8 +21,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+#ifndef BBIO_C_ADC_H
+#define BBIO_C_ADC_H
+#include "common.h"
+
 extern int adc_initialized;
 
-int adc_setup(void);
-int read_value(unsigned int ain, float *value);
-void adc_cleanup(void);
+BBIO_err adc_setup(void);
+BBIO_err read_value(unsigned int ain, float *value);
+BBIO_err adc_cleanup(void);
+#endif

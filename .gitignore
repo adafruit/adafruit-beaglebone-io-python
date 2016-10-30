@@ -28,3 +28,7 @@ nosetests.xml
 
 # Translations
 *.mo
+
+# Annoying MacOSX files.
+.DS_Store
+._.DS_Store

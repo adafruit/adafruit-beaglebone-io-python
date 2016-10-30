@@ -17,3 +17,16 @@ build:
 
 install: build
 	python setup.py install --force
+
+build2:
+	python2 setup.py build --force
+
+install2: build2
+	python2 setup.py install --force
+
+build3:
+	python3 setup.py build --force
+
+install3: build3
+	python3 setup.py install --force
+
