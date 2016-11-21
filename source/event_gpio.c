@@ -233,6 +233,10 @@ int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         char filename[40];
         char direction[10] = { 0 };
 
+        if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
+            return 0; // direction is not applicable to the USR LED pins
+        }
+
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
         if ((fd = open(filename, O_WRONLY)) < 0)
             return -1;
