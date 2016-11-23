@@ -628,14 +628,15 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, ...)
     va_list arg_list;
     va_start(arg_list, edge);
     int timeout = -1;
-    for(int i = 0; i < 1; i++)
+    int i;
+    for(i = 0; i < 1; i++)
     {
         timeout = va_arg(arg_list, int);
     }
     va_end(arg_list);
     
     int fd = fd_lookup(gpio);
-    int epfd, n, i;
+    int epfd, n;
     struct epoll_event events, ev;
     char buf;
 
