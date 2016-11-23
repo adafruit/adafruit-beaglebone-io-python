@@ -37,6 +37,7 @@ SOFTWARE.
 #include <string.h>
 #include "event_gpio.h"
 #include "common.h"
+#include <stdarg.h>
 
 const char *stredge[4] = {"none", "rising", "falling", "both"};
 
@@ -624,11 +625,22 @@ void event_cleanup(void)
     exports_cleanup();
 }
 
-int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
+int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, ...)
 // standalone from all the event functions above
+// variable arguments for retro compatibility
 {
+    va_list arg_list;
+    va_start(arg_list, edge);
+    int timeout = -1;
+    int i;
+    for(i = 0; i < 1; i++)
+    {
+        timeout = va_arg(arg_list, int);
+    }
+    va_end(arg_list);
+    
     int fd = fd_lookup(gpio);
-    int epfd, n, i;
+    int epfd, n;
     struct epoll_event events, ev;
     char buf;
 
@@ -661,7 +673,7 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
 
     // epoll for event
     for (i = 0; i<2; i++) // first time triggers with current state, so ignore
-       if ((n = epoll_wait(epfd, &events, 1, -1)) == -1)
+       if ((n = epoll_wait(epfd, &events, 1, timeout)) == -1)
        {
            gpio_event_remove(gpio);
            return 5;
@@ -684,5 +696,5 @@ int blocking_wait_for_edge(unsigned int gpio, unsigned int edge)
 
     gpio_event_remove(gpio);
     close(epfd);
-    return 0;
+    return (n == 1) ? 0 : -1;
 }
