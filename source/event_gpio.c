@@ -37,6 +37,7 @@ SOFTWARE.
 #include <string.h>
 #include "event_gpio.h"
 #include "common.h"
+#include <stdarg.h>
 
 const char *stredge[4] = {"none", "rising", "falling", "both"};
 
@@ -620,9 +621,19 @@ void event_cleanup(void)
     exports_cleanup();
 }
 
-int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, int timeout)
+int blocking_wait_for_edge(unsigned int gpio, unsigned int edge, ...)
 // standalone from all the event functions above
+// variable arguments for retro compatibility
 {
+    va_list arg_list;
+    va_start(arg_list, edge);
+    int timeout = -1;
+    for(int i = 0; i < 1; i++)
+    {
+        timeout = va_arg(arg_list, int);
+    }
+    va_end(arg_list);
+    
     int fd = fd_lookup(gpio);
     int epfd, n, i;
     struct epoll_event events, ev;
