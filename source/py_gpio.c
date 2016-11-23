@@ -33,6 +33,7 @@ SOFTWARE.
 #include "common.h"
 #include "event_gpio.h"
 #include "c_pinmux.h"
+#include <unistd.h>
 
 static int gpio_warnings = 1;
 
@@ -68,7 +69,7 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
     Py_RETURN_NONE;
 }
 
-// python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None)
+// python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None, delay=0)
 static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
@@ -76,10 +77,14 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    int direction;
    int pud = PUD_OFF;
    int initial = 0;
+   int delay = 0; // time in milliseconds to wait after exporting gpio pin
    BBIO_err err;
-   static char *kwlist[] = {"channel", "direction", "pull_up_down", "initial", NULL};
+   static char *kwlist[] = {"channel", "direction", "pull_up_down", "initial", "delay", NULL};
+   int res;
+   // char error[30];
 
-   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|ii", kwlist, &channel, &direction, &pud, &initial))
+
+   if (!PyArg_ParseTupleAndKeywords(args, kwargs, "si|iii", kwlist, &channel, &direction, &pud, &initial, &delay))
       return NULL;
 
    if (!module_setup) {
@@ -107,28 +112,30 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
    if (err != BBIO_OK)
        return NULL;
 
-   unsigned int count = 100000;
-   int res = -1;
-   do {   // wait until gpio file appears on the filesystem
-       res = gpio_export(gpio);
-   } while(res != 0 && count-- > 0);
-   if(count == 0)
-       return NULL;
+   // Export the GPIO pins using sysfs
+   gpio_export(gpio);
 
-   count = 100000;
-   do {
-       res = gpio_set_direction(gpio, direction);
-   } while(res != 0 && count-- > 0);
-   if(count == 0)
+   // See if a delay was specified in order to give udev some time 
+   // to set file permissions.
+   if (delay > 0)
+       nanosleep((struct timespec[]){{0, delay * 1000000}}, NULL);
+
+   // Set the pin direction and bail if we get an error.
+   res = gpio_set_direction(gpio, direction);
+   if(res != 0) {
+       PyErr_SetString(PyExc_ValueError, "Set gpio direction failed, missing file or invalid permissions.");
        return NULL;
+   }
 
    if (direction == OUTPUT) {
-       count = 100000;
-       do {
-           res = gpio_set_value(gpio, initial);
-       } while(res != 0 && count-- > 0);
-       if(count == 0)
+
+       // Set the pin value and bail if we get an error.
+       res = gpio_set_value(gpio, initial);
+       if(res != 0) {
+           PyErr_SetString(PyExc_ValueError, "Set gpio value failed, missing file or invalid permissions.");
            return NULL;
+       }
+
    } else {
 	   if (pud == PUD_DOWN)
 		   set_pin_mode(channel, "gpio_pd");
@@ -527,7 +534,7 @@ static PyObject *py_setwarnings(PyObject *self, PyObject *args)
 static const char moduledocstring[] = "GPIO functionality of a BeagleBone using Python";
 
 PyMethodDef gpio_methods[] = {
-   {"setup", (PyCFunction)py_setup_channel, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel, direction and (optional) pull/up down control\nchannel        - Either: RPi board pin number (not BCM GPIO 00..nn number).  Pins start from 1\n                 or    : BCM GPIO number\ndirection      - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN\n[initial]      - Initial value for an output channel"},
+   {"setup", (PyCFunction)py_setup_channel, METH_VARARGS | METH_KEYWORDS, "Set up the GPIO channel, direction and (optional) pull/up down control\nchannel        - Either: RPi board pin number (not BCM GPIO 00..nn number).  Pins start from 1\n                 or    : BCM GPIO number\ndirection      - INPUT or OUTPUT\n[pull_up_down] - PUD_OFF (default), PUD_UP or PUD_DOWN\n[initial]      - Initial value for an output channel\n[delay]        - Time in milliseconds to wait after exporting gpio pin"},
    {"cleanup", py_cleanup, METH_VARARGS, "Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection"},
    {"output", py_output_gpio, METH_VARARGS, "Output to a GPIO channel\ngpio  - gpio channel\nvalue - 0/1 or False/True or LOW/HIGH"},
    {"input", py_input_gpio, METH_VARARGS, "Input from a GPIO channel.  Returns HIGH=1=True or LOW=0=False\ngpio - gpio channel"},
