@@ -174,7 +174,8 @@ uart_t uart_table[] = {
 };
 
 // Copied from https://github.com/jadonk/bonescript/blob/master/src/bone.js
-
+// See am335x technical manual, p. 183, for more info:
+// http://www.ti.com/lit/ug/spruh73n/spruh73n.pdf
 pwm_t pwm_table[] = {
   { "ehrpwm2", 6, 1, 4, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_13"},
   { "ehrpwm2", 5, 0, 4, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_19"},
@@ -186,10 +187,10 @@ pwm_t pwm_table[] = {
   { "ehrpwm1", 4, 1, 6, "ehrpwm.1:1", "EHRPWM1B", "48302000", "48302200", "P9_16"},
   { "ehrpwm0", 1, 1, 3, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_21"},
   { "ehrpwm0", 0, 0, 3, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_22"},
-  { "ecap2", 7, 2, 4, "ecap.2", "ECAPPWM2", "", "", "P9_28"},
+  {   "ecap2", 7, 0, 4, "ecap.2",     "ECAPPWM2", "48304000", "48304100", "P9_28"},
   { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P9_29"},
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P9_31"},
-  { "ecap0", 2, 0, 0, "ecap.0", "ECAPPWM0", "", "", "P9_42"},
+  {   "ecap0", 2, 0, 0, "ecap.0",     "ECAPPWM0", "48300000", "48300100", "P9_42"},
   { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
 };
 
