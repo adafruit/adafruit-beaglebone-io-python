@@ -38,6 +38,7 @@ SOFTWARE.
 #endif
 
 #define KEYLEN 7
+#define PIN_MODE_LEN 5
 
 int pwm_initialized = 0;
 
@@ -286,6 +287,7 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
     char period_path[90];
     char polarity_path[90];
     char enable_path[90];
+    char pin_mode[PIN_MODE_LEN]; // "pwm" or "pwm2"
 
     int e;
     int period_fd, duty_fd, polarity_fd, enable_fd;
@@ -316,7 +318,14 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
         return BBIO_CAPE;
     }
     // Do pinmuxing
-    set_pin_mode(key, "pwm");
+    if(!strcmp(key, "P9_28")) {
+        // ecap2 (P9_28) requires mode pwm2
+        // based on bonescript commit 23bf443 by Matthew West
+        strncpy(pin_mode, "pwm2", PIN_MODE_LEN);
+    } else {
+        strncpy(pin_mode, "pwm", PIN_MODE_LEN);
+    }
+    set_pin_mode(key, pin_mode);
 
     // Get info for pwm
     err = get_pwm_by_key(key, &p);

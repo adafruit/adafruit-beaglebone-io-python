@@ -48,6 +48,38 @@ class TestPwmSetup:
         assert int(period) == 500000
         PWM.cleanup()
 
+    def test_start_pwm_ecap0(self):
+        print("test_start_pwm_ecap0\n");
+        PWM.cleanup()
+        PWM.start("P9_42", 0)
+        pwm_dir = get_pwm_dir()
+        assert os.path.exists(pwm_dir)
+        if kernel >= '4.1.0':
+            duty = open(pwm_dir + '/duty_cycle').read()
+        else:
+            duty = open(pwm_dir + '/duty').read()
+        period = open(pwm_dir + '/period').read()
+        assert int(duty) == 0
+        assert int(period) == 500000
+        PWM.cleanup()
+
+    # test not enabled as default as
+    # cape-universala overlay required
+    #def test_start_pwm_ecap2(self):
+        #print("test_start_pwm_ecap2\n");
+        #PWM.cleanup()
+        #PWM.start("P9_28", 0)
+        #pwm_dir = get_pwm_dir()
+        #assert os.path.exists(pwm_dir)
+        #if kernel >= '4.1.0':
+            #duty = open(pwm_dir + '/duty_cycle').read()
+        #else:
+            #duty = open(pwm_dir + '/duty').read()
+        #period = open(pwm_dir + '/period').read()
+        #assert int(duty) == 0
+        #assert int(period) == 500000
+        #PWM.cleanup()
+
     def test_start_pwm_with_polarity_one(self):
         PWM.cleanup()
         PWM.start("P9_14", 0, 2000, 1)
