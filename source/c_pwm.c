@@ -318,15 +318,13 @@ BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
         return BBIO_CAPE;
     }
     // Do pinmuxing
-    fprintf(stderr, "DEBUG: do pinmuxing: key=%s\n", key);
     if(!strcmp(key, "P9_28")) {
-        fprintf(stderr, "DEBUG: P9_28: use pwm2\n");
+        // ecap2 (P9_28) requires mode pwm2
+        // based on bonescript commit 23bf443 by Matthew West
         strncpy(pin_mode, "pwm2", PIN_MODE_LEN);
     } else {
-        fprintf(stderr, "DEBUG: use pwm\n");
         strncpy(pin_mode, "pwm", PIN_MODE_LEN);
     }
-    fprintf(stderr, "DEBUG: set_pin_mode(key=%s, pin_mode=%s)\n", key, pin_mode);
     set_pin_mode(key, pin_mode);
 
     // Get info for pwm
