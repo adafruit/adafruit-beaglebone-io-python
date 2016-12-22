@@ -1,3 +1,20 @@
+1.0.1
+----
+* Merge pull request #124 from jpbarraca/master [cf9771a]
+   * Timeout support for wait_for_edge (replaces PR #62)
+* Merge pull request #123 from bubbapizza/master [8b4f7f2]
+   * Added a delay parameter for GPIO.setup() for udev permissions
+* Merge pull request #121 from dengber/master [50e8883]
+   * ADC.read() returns wrong value
+* Merge pull request #64 from olegantonyan/master [d1e8dc1]
+   * Wait until GPIO file appears on the /sys filesystem (issue #36)
+* Merge pull request #106 from cocasema/master [12b79d7]
+   * Treat warnings as errors
+* Merge pull request #119 from JesseMcL/pr [e7e987a]
+   * Add GPIO pullup configurations and fix PWM Segfault on kernel 4.1+
+* Merge pull request #116 from kozga/master [1b04cdf]
+   * Fix SPI: IOError: [Errno 22] Invalid argument in xfer and xfer2 funct…
+
 1.0.0
 ----
 * Merge pull request #108 from MatthewWest for PWM support in Linux kernel 4.1+
