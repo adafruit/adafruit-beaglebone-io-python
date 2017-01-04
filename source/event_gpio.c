@@ -182,8 +182,11 @@ int open_value_file(unsigned int gpio)
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
 
-    if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0)
-    return -1;
+    fprintf(stderr, "open_value_file: open: filename=%s\n", filename);
+    if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0) {
+       fprintf(stderr, "open_value_file: open: failed\n");
+       return -1;
+    }
     add_fd_list(gpio, fd);
     return fd;
 }
@@ -288,13 +291,32 @@ int gpio_set_value(unsigned int gpio, unsigned int value)
     char vstr[10];
 
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
-        snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
+
+        char *usr_led_trigger[] = { "heartbeat", "mmc0", "cpu0", "mmc1" }; 
+        int led = gpio -  USR_LED_GPIO_MIN;
+
+        fprintf(stderr, "gpio_set_value: led=%d\n", led);
+
+        snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", led);
+
+        fprintf(stderr, "gpio_set_value: open: filename=%s\n", filename);
+
+        if ((fd = open(filename, O_WRONLY)) < 0) {
+           fprintf(stderr, "gpio_set_value: open: failed for led=%d\n", led);
+           fprintf(stderr, "gpio_set_value: trying usr_led_trigger\n");
+           fprintf(stderr, "gpio_set_value: usr_led_trigger[led]=%s\n", usr_led_trigger[led]);
+           snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
+        }
+
     } else {
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
 
-    if ((fd = open(filename, O_WRONLY)) < 0)
+    fprintf(stderr, "gpio_set_value: open: filename=%s\n", filename);
+    if ((fd = open(filename, O_WRONLY)) < 0) {
+       fprintf(stderr, "gpio_set_value: open: failed\n");
         return -1;
+    }
 
     if (value) {
         strncpy(vstr, "1", ARRAY_SIZE(vstr) - 1);

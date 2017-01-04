@@ -42,7 +42,7 @@ SOFTWARE.
 #define HIGH 1
 #define LOW  0
 
-#define MAX_FILENAME 50
+#define MAX_FILENAME 60
 
 #define USR_LED_GPIO_MIN 53
 #define USR_LED_GPIO_MAX 56
