@@ -11,19 +11,16 @@ class TestLED:
     def set_brightness(self, state, led, name):
         GPIO.setup(led, GPIO.OUT)
         GPIO.output(led, state)
-
-        path = "/sys/class/leds/beaglebone:green:{0}/brightness".format(led.lower())
+        prefix = "/sys/class/leds/beaglebone:green:{0}/brightness"
+        path = prefix.format(led.lower())
         value = self.read_led_file(path)
-
         if value < 0:
-            path = "/sys/class/leds/beaglebone:green:{0}/brightness".format(name)
+            path = prefix.format(name)
             value = self.read_led_file(path)
-
         if state == 1:
             assert int(value) > 0
         else:
             assert int(value) == 0
-        GPIO.cleanup()
 
     def read_led_file(self, path):
         try:
