@@ -1,0 +1,54 @@
+From 88366a61455cbe3e42ab59da939065abeab81597 Mon Sep 17 00:00:00 2001
+From: Drew Fustini <drew@pdp7.com>
+Date: Thu, 5 Jan 2017 02:33:58 -0600
+Subject: [PATCH] rename USR LED names to test Adafruit_BBIO issue #129
+
+Patch for ti-linux-4.4.y branch of ti-linux-kernel-dev which renames
+the labels of the USR LED nodes 
+
+Related issue:
+Doesn't support Ubuntu core beaglebone leds #129
+https://github.com/adafruit/adafruit-beaglebone-io-python/issues/129
+---
+ arch/arm/boot/dts/am335x-bone-common.dtsi | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/am335x-bone-common.dtsi b/arch/arm/boot/dts/am335x-bone-common.dtsi
+index 1f496145..ba95ffc 100644
+--- a/arch/arm/boot/dts/am335x-bone-common.dtsi
++++ b/arch/arm/boot/dts/am335x-bone-common.dtsi
+@@ -26,28 +26,28 @@
+                compatible = "gpio-leds";
+ 
+                led@2 {
+-                       label = "beaglebone:green:usr0";
++                       label = "beaglebone:green:heartbeat";
+                        gpios = <&gpio1 21 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "heartbeat";
+                        default-state = "off";
+                };
+ 
+                led@3 {
+-                       label = "beaglebone:green:usr1";
++                       label = "beaglebone:green:mmc0";
+                        gpios = <&gpio1 22 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "mmc0";
+                        default-state = "off";
+                };
+ 
+                led@4 {
+-                       label = "beaglebone:green:usr2";
++                       label = "beaglebone:green:cpu0";
+                        gpios = <&gpio1 23 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "cpu0";
+                        default-state = "off";
+                };
+ 
+                led@5 {
+-                       label = "beaglebone:green:usr3";
++                       label = "beaglebone:green:mmc1";
+                        gpios = <&gpio1 24 GPIO_ACTIVE_HIGH>;
+                        linux,default-trigger = "mmc1";
+                        default-state = "off";
+-- 
+2.9.3
