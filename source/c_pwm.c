@@ -272,7 +272,7 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
     return BBIO_OK;
 }
 
-BBIO_err pwm_setup(const char *key, float duty, float freq, int polarity)
+BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attribute__ ((unused)) float freq, __attribute__ ((unused)) int polarity)
 {
     BBIO_err err;
     struct pwm_exp *new_pwm;
