@@ -337,6 +337,8 @@ BBIO_err get_pwm_key(const char *input, char *key)
     return BBIO_INVARG;
 }
 
+// TODO: fix warning
+// source/common.c:344:14: error: comparison between signed and unsigned integer expressions [-Werror=sign-compare]
 BBIO_err get_adc_ain(const char *key, unsigned int *ain)
 {
     *ain = lookup_ain_by_key(key);
