@@ -18,7 +18,7 @@ if kernel >= '4.1.0':
 else:
     kernel41 = None
 
-CFLAGS = ['-Wall', '-Werror', '-Wextra', '-Wno-format-security', '-Wno-missing-field-initializers']
+CFLAGS = ['-Wall', '-Werror', '-Wextra', '-Wno-missing-field-initializers']
 
 classifiers = ['Development Status :: 3 - Alpha',
                'Operating System :: POSIX :: Linux',

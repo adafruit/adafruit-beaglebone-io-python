@@ -451,7 +451,7 @@ BBIO_err load_device_tree(const char *name)
     }
 
     //if the device isn't already loaded, load it, and return
-    fprintf(file, name);
+    fprintf(file, "%s", name);
     fclose(file);
 
     //0.2 second delay
