@@ -471,7 +471,7 @@ int gpio_initial(unsigned int gpio)
     return 0;
 }
 
-void *poll_thread(void *threadarg)
+void *poll_thread(__attribute__ ((unused)) void *threadarg)
 {
     struct epoll_event events;
     char buf;
