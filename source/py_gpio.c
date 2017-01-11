@@ -61,7 +61,7 @@ static int init_module(void)
 }
 
 // python function cleanup()
-static PyObject *py_cleanup(PyObject *self, PyObject *args)
+static PyObject *py_cleanup(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
 {
     // clean up any exports
     event_cleanup();
@@ -70,7 +70,7 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 }
 
 // python function setup(channel, direction, pull_up_down=PUD_OFF, initial=None, delay=0)
-static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_setup_channel(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
    char *channel;
@@ -151,7 +151,7 @@ static PyObject *py_setup_channel(PyObject *self, PyObject *args, PyObject *kwar
 }
 
 // python function output(channel, value)
-static PyObject *py_output_gpio(PyObject *self, PyObject *args)
+static PyObject *py_output_gpio(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
     unsigned int gpio;
     int value;
@@ -177,7 +177,7 @@ static PyObject *py_output_gpio(PyObject *self, PyObject *args)
 }
 
 // python function value = input(channel)
-static PyObject *py_input_gpio(PyObject *self, PyObject *args)
+static PyObject *py_input_gpio(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
     unsigned int gpio;
     char *channel;
@@ -276,7 +276,7 @@ static int add_py_callback(char *channel, unsigned int gpio, unsigned int bounce
 }
 
 // python function add_event_callback(gpio, callback, bouncetime=0)
-static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_add_event_callback(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
    char *channel;
@@ -318,7 +318,7 @@ static PyObject *py_add_event_callback(PyObject *self, PyObject *args, PyObject 
 }
 
 // python function add_event_detect(gpio, edge, callback=None, bouncetime=0
-static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_add_event_detect(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
    unsigned int gpio;
    char *channel;
@@ -375,7 +375,7 @@ static PyObject *py_add_event_detect(PyObject *self, PyObject *args, PyObject *k
 }
 
 // python function remove_event_detect(gpio)
-static PyObject *py_remove_event_detect(PyObject *self, PyObject *args)
+static PyObject *py_remove_event_detect(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
    unsigned int gpio;
    char *channel;
@@ -416,7 +416,7 @@ static PyObject *py_remove_event_detect(PyObject *self, PyObject *args)
 }
 
 // python function value = event_detected(channel)
-static PyObject *py_event_detected(PyObject *self, PyObject *args)
+static PyObject *py_event_detected(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
    unsigned int gpio;
    char *channel;
@@ -436,7 +436,7 @@ static PyObject *py_event_detected(PyObject *self, PyObject *args)
 }
 
 // python function py_wait_for_edge(gpio, edge, timeout = -1)
-static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
+static PyObject *py_wait_for_edge(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
    unsigned int gpio;
    int edge, result, timeout;
@@ -490,7 +490,7 @@ static PyObject *py_wait_for_edge(PyObject *self, PyObject *args)
 }
 
 // python function value = gpio_function(gpio)
-static PyObject *py_gpio_function(PyObject *self, PyObject *args)
+static PyObject *py_gpio_function(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
     unsigned int gpio;
     unsigned int value;
@@ -517,7 +517,7 @@ static PyObject *py_gpio_function(PyObject *self, PyObject *args)
 }
 
 // python function setwarnings(state)
-static PyObject *py_setwarnings(PyObject *self, PyObject *args)
+static PyObject *py_setwarnings(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
 {
    if (!PyArg_ParseTuple(args, "i", &gpio_warnings))
       return NULL;

@@ -27,7 +27,7 @@ SOFTWARE.
 #include "c_pwm.h"
 
 // python function cleanup()
-static PyObject *py_cleanup(PyObject *self, PyObject *args)
+static PyObject *py_cleanup(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
 {
     // unexport the PWM
     pwm_cleanup();
@@ -36,7 +36,7 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 }
 
 // python function start(channel, duty_cycle, freq)
-static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_start_channel(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
     char key[8];
     char *channel;
@@ -106,7 +106,7 @@ static PyObject *py_start_channel(PyObject *self, PyObject *args, PyObject *kwar
 }
 
 // python function stop(channel)
-static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_stop_channel(__attribute__ ((unused)) PyObject *self, PyObject *args, __attribute__ ((unused)) PyObject *kwargs)
 {
     char key[8];
     char *channel;
@@ -138,7 +138,7 @@ static PyObject *py_stop_channel(PyObject *self, PyObject *args, PyObject *kwarg
 }
 
 // python method PWM.set_duty_cycle(channel, duty_cycle)
-static PyObject *py_set_duty_cycle(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_set_duty_cycle(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
     char key[8];
     char *channel;
@@ -172,7 +172,7 @@ static PyObject *py_set_duty_cycle(PyObject *self, PyObject *args, PyObject *kwa
 }
 
 // python method PWM.set_frequency(channel, frequency)
-static PyObject *py_set_frequency(PyObject *self, PyObject *args, PyObject *kwargs)
+static PyObject *py_set_frequency(__attribute__ ((unused)) PyObject *self, PyObject *args, PyObject *kwargs)
 {
     char key[8];
     char *channel;

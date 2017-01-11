@@ -39,7 +39,7 @@ SOFTWARE.
 //}
 
 // python function setup()
-static PyObject *py_setup_adc(PyObject *self, PyObject *args)
+static PyObject *py_setup_adc(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
 {
     BBIO_err err;
 
@@ -55,9 +55,9 @@ static PyObject *py_setup_adc(PyObject *self, PyObject *args)
 }
 
 // python function read(channel)
-static PyObject *py_read(PyObject *self, PyObject *args)
+static PyObject *py_read(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
-    unsigned int ain;
+    int ain;
     float value;
     char *channel;
     PyObject *py_value;
@@ -98,9 +98,9 @@ static PyObject *py_read(PyObject *self, PyObject *args)
 }
 
 // python function read(channel)
-static PyObject *py_read_raw(PyObject *self, PyObject *args)
+static PyObject *py_read_raw(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
-    unsigned int ain;
+    int ain;
     float value;
     char *channel;
     PyObject *py_value;

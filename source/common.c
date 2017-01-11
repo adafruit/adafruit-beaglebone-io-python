@@ -337,7 +337,9 @@ BBIO_err get_pwm_key(const char *input, char *key)
     return BBIO_INVARG;
 }
 
-BBIO_err get_adc_ain(const char *key, unsigned int *ain)
+// TODO: fix warning
+// source/common.c:344:14: error: comparison between signed and unsigned integer expressions [-Werror=sign-compare]
+BBIO_err get_adc_ain(const char *key, int *ain)
 {
     *ain = lookup_ain_by_key(key);
     
@@ -451,7 +453,7 @@ BBIO_err load_device_tree(const char *name)
     }
 
     //if the device isn't already loaded, load it, and return
-    fprintf(file, name);
+    fprintf(file, "%s", name);
     fclose(file);
 
     //0.2 second delay

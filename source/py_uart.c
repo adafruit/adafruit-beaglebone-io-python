@@ -29,7 +29,7 @@ SOFTWARE.
 const char *valid_uarts[4] = {"UART1", "UART2", "UART4", "UART5"};
 
 // python function cleanup()
-static PyObject *py_cleanup(PyObject *self, PyObject *args)
+static PyObject *py_cleanup(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
 {
     // unexport the UART
     uart_cleanup();
@@ -38,7 +38,7 @@ static PyObject *py_cleanup(PyObject *self, PyObject *args)
 }
 
 // python function setup()
-static PyObject *py_setup_uart(PyObject *self, PyObject *args)
+static PyObject *py_setup_uart(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
     char dt[FILENAME_BUFFER_SIZE];
     char *channel;

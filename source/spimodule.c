@@ -60,7 +60,7 @@ typedef struct {
 } SPI;
 
 static PyObject *
-SPI_new(PyTypeObject *type, PyObject *args, PyObject *kwds)
+SPI_new(PyTypeObject *type, __attribute__ ((unused)) PyObject *args, __attribute__ ((unused)) PyObject *kwds)
 {
 	SPI *self;
 	if ((self = (SPI *)type->tp_alloc(type, 0)) == NULL)
@@ -169,7 +169,8 @@ static PyObject *
 SPI_readbytes(SPI *self, PyObject *args)
 {
 	uint8_t	rxbuf[MAXMSGLEN];
-	int		status, len, ii;
+	ssize_t len;
+	int		status, ii;
 	PyObject	*list;
 
 	if (!PyArg_ParseTuple(args, "i:read", &len))
@@ -178,7 +179,7 @@ SPI_readbytes(SPI *self, PyObject *args)
 	/* read at least 1 byte, no more than 1024 */
 	if (len < 1)
 		len = 1;
-	else if (len > sizeof(rxbuf))
+	else if (len > (ssize_t)sizeof(rxbuf))
 		len = sizeof(rxbuf);
 
 	memset(rxbuf, 0, sizeof rxbuf);
@@ -380,7 +381,7 @@ static int __SPI_set_mode( int fd, __u8 mode) {
 }
 
 static PyObject *
-SPI_get_mode(SPI *self, void *closure)
+SPI_get_mode(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result = Py_BuildValue("i", (self->mode & (SPI_CPHA | SPI_CPOL) ) );
 
@@ -388,7 +389,7 @@ SPI_get_mode(SPI *self, void *closure)
 }
 
 static PyObject *
-SPI_get_cshigh(SPI *self, void *closure)
+SPI_get_cshigh(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result;
 
@@ -402,7 +403,7 @@ SPI_get_cshigh(SPI *self, void *closure)
 }
 
 static PyObject *
-SPI_get_lsbfirst(SPI *self, void *closure)
+SPI_get_lsbfirst(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result;
 
@@ -416,7 +417,7 @@ SPI_get_lsbfirst(SPI *self, void *closure)
 }
 
 static PyObject *
-SPI_get_3wire(SPI *self, void *closure)
+SPI_get_3wire(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result;
 
@@ -430,7 +431,7 @@ SPI_get_3wire(SPI *self, void *closure)
 }
 
 static PyObject *
-SPI_get_loop(SPI *self, void *closure)
+SPI_get_loop(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result;
 
@@ -445,7 +446,7 @@ SPI_get_loop(SPI *self, void *closure)
 
 
 static int
-SPI_set_mode(SPI *self, PyObject *val, void *closure)
+SPI_set_mode(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t mode, tmp;
 
@@ -480,7 +481,7 @@ SPI_set_mode(SPI *self, PyObject *val, void *closure)
 }
 
 static int
-SPI_set_cshigh(SPI *self, PyObject *val, void *closure)
+SPI_set_cshigh(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t tmp;
 
@@ -508,7 +509,7 @@ SPI_set_cshigh(SPI *self, PyObject *val, void *closure)
 }
 
 static int
-SPI_set_lsbfirst(SPI *self, PyObject *val, void *closure)
+SPI_set_lsbfirst(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t tmp;
 
@@ -536,7 +537,7 @@ SPI_set_lsbfirst(SPI *self, PyObject *val, void *closure)
 }
 
 static int
-SPI_set_3wire(SPI *self, PyObject *val, void *closure)
+SPI_set_3wire(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t tmp;
 
@@ -564,7 +565,7 @@ SPI_set_3wire(SPI *self, PyObject *val, void *closure)
 }
 
 static int
-SPI_set_loop(SPI *self, PyObject *val, void *closure)
+SPI_set_loop(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t tmp;
 
@@ -592,14 +593,14 @@ SPI_set_loop(SPI *self, PyObject *val, void *closure)
 }
 
 static PyObject *
-SPI_get_bpw(SPI *self, void *closure)
+SPI_get_bpw(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result = Py_BuildValue("i", self->bpw);
 	return result;
 }
 
 static int
-SPI_set_bpw(SPI *self, PyObject *val, void *closure)
+SPI_set_bpw(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint8_t bits;
 
@@ -633,14 +634,14 @@ SPI_set_bpw(SPI *self, PyObject *val, void *closure)
 }
 
 static PyObject *
-SPI_get_msh(SPI *self, void *closure)
+SPI_get_msh(SPI *self, __attribute__ ((unused)) void *closure)
 {
 	PyObject *result = Py_BuildValue("i", self->msh);
 	return result;
 }
 
 static int
-SPI_set_msh(SPI *self, PyObject *val, void *closure)
+SPI_set_msh(SPI *self, PyObject *val, __attribute__ ((unused)) void *closure)
 {
 	uint32_t msh;
 
@@ -716,7 +717,7 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 			"Bus and/or device number is invalid.");
 		return NULL;
 	}
-	if (load_device_tree(device_tree_name) == -1) {
+	if (load_device_tree(device_tree_name) == BBIO_CAPE) {
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
 	}
