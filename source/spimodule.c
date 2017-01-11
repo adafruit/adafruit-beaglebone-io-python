@@ -169,7 +169,8 @@ static PyObject *
 SPI_readbytes(SPI *self, PyObject *args)
 {
 	uint8_t	rxbuf[MAXMSGLEN];
-	int		status, len, ii;
+	ssize_t len;
+	int		status, ii;
 	PyObject	*list;
 
 	if (!PyArg_ParseTuple(args, "i:read", &len))
@@ -178,7 +179,7 @@ SPI_readbytes(SPI *self, PyObject *args)
 	/* read at least 1 byte, no more than 1024 */
 	if (len < 1)
 		len = 1;
-	else if (len > sizeof(rxbuf))
+	else if (len > (ssize_t)sizeof(rxbuf))
 		len = sizeof(rxbuf);
 
 	memset(rxbuf, 0, sizeof rxbuf);
@@ -716,7 +717,7 @@ SPI_open(SPI *self, PyObject *args, PyObject *kwds)
 			"Bus and/or device number is invalid.");
 		return NULL;
 	}
-	if (load_device_tree(device_tree_name) == -1) {
+	if (load_device_tree(device_tree_name) == BBIO_CAPE) {
 		PyErr_SetFromErrno(PyExc_IOError);
 		return NULL;
 	}

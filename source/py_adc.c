@@ -57,7 +57,7 @@ static PyObject *py_setup_adc(__attribute__ ((unused)) PyObject *self, __attribu
 // python function read(channel)
 static PyObject *py_read(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
-    unsigned int ain;
+    int ain;
     float value;
     char *channel;
     PyObject *py_value;
@@ -100,7 +100,7 @@ static PyObject *py_read(__attribute__ ((unused)) PyObject *self, PyObject *args
 // python function read(channel)
 static PyObject *py_read_raw(__attribute__ ((unused)) PyObject *self, PyObject *args)
 {
-    unsigned int ain;
+    int ain;
     float value;
     char *channel;
     PyObject *py_value;

@@ -489,7 +489,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
     BBIO_err err;
     char buffer[20];
-    int len;
+    ssize_t len;
 
     struct pwm_exp *pwm = lookup_exported_pwm(key);
     if (pwm == NULL) {
@@ -518,7 +518,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     len = read(pwm->period_fd, buffer, sizeof(buffer));
     if (len < 0) {
         return BBIO_SYSFS;
-    } else if (len >= sizeof(buffer)) {
+    } else if (len >= (ssize_t)sizeof(buffer)) {
         // If this is the case, there's more in the file.
         // This should never happen, as it would mean that
         // the period is 10^8 seconds
@@ -534,7 +534,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     len = read(pwm->duty_fd, buffer, sizeof(buffer));
     if (len < 0) {
         return BBIO_SYSFS;
-    } else if (len >= sizeof(buffer)) {
+    } else if (len >= (ssize_t)sizeof(buffer)) {
         // If this is the case, there's more in the file.
         // This should never happen, as it would mean that
         // the period is 10^8 seconds

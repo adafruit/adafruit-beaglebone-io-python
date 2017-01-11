@@ -79,7 +79,7 @@ int gpio_direction[120];
  
 BBIO_err get_gpio_number(const char *key, unsigned int *gpio);
 BBIO_err get_pwm_key(const char *input, char *key);
-BBIO_err get_adc_ain(const char *key, unsigned int *ain);
+BBIO_err get_adc_ain(const char *key, int *ain);
 BBIO_err get_uart_device_tree_name(const char *name, char *dt);
 BBIO_err build_path(const char *partial_path, const char *prefix, char *full_path, size_t full_path_len);
 int get_spi_bus_path_number(unsigned int spi);
