@@ -6,10 +6,13 @@ except:
     pass
 
 import distribute_setup
+import io
 import sys
 import platform
 distribute_setup.use_setuptools()
 from setuptools import setup, Extension, find_packages
+
+open_as_utf8 = lambda x: io.open(x, encoding='utf-8')
 
 kernel = platform.release()
 
@@ -35,7 +38,7 @@ setup(name             = 'Adafruit_BBIO',
       author           = 'Justin Cooper',
       author_email     = 'justin@adafruit.com',
       description      = 'A module to control BeagleBone IO channels',
-      long_description = open('README.rst').read() + open('CHANGELOG.rst').read(),
+      long_description = open_as_utf8('README.rst').read() + open_as_utf8('CHANGELOG.rst').read(),
       license          = 'MIT',
       keywords         = 'Adafruit BeagleBone IO GPIO PWM ADC',
       url              = 'https://github.com/adafruit/adafruit-beaglebone-io-python/',
