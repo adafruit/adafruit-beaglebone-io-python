@@ -1,3 +1,13 @@
+1.0.2
+----
+* Merge pull request #130 from adafruit/issue129-usr-leds [1439133]
+   * Add support for alternate USR LED labels
+* Merge pull request #131 from adafruit/fix-gcc-warnings [f0ee018]
+   * Fix gcc warnings
+* Merge pull request #132 from buckket/setup_unicode_fix [4c67dfc]
+   * Make use of io.open() with explicit file encoding in setup.py
+
+
 1.0.1
 ----
 * Merge pull request #124 from jpbarraca/master [cf9771a]
