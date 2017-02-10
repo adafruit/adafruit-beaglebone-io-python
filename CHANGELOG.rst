@@ -1,3 +1,8 @@
+1.0.3
+----
+* Add -Wno-strict-aliasing to CFLAGS to ignore gcc warning
+   * Resolves GitHub issue #133 by @archey
+
 1.0.2
 ----
 * Merge pull request #130 from adafruit/issue129-usr-leds [1439133]
