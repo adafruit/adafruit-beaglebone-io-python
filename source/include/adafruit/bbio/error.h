@@ -23,9 +23,13 @@ SOFTWARE.
 #pragma once
 
 #ifdef __cplusplus
+
+#include <stdexcept>
+
 namespace adafruit {
 namespace bbio {
-#endif
+
+#endif // __cplusplus
 
 typedef enum {
 	BBIO_OK, // No error
@@ -38,6 +42,48 @@ typedef enum {
 } BBIO_err;
 
 #ifdef __cplusplus
+
+class BBIOError : public std::runtime_error
+{
+public:
+    BBIOError(BBIO_err code, std::string const& message = "")
+        : std::runtime_error(
+                std::to_string(code) + "-" + to_c_str(code) + " " + message)
+    {}
+
+    static char const* to_c_str(BBIO_err err)
+    {
+        switch (err) {
+            case BBIO_OK:     return "OK";
+            case BBIO_ACCESS: return "ACCESS";
+            case BBIO_SYSFS:  return "SYSFS";
+            case BBIO_CAPE:   return "CAPE";
+            case BBIO_INVARG: return "INVARG";
+            case BBIO_MEM:    return "MEMORY";
+            case BBIO_GEN:    return "GENERAL";
+            default:          return "<INVALID>";
+        }
+    }
+};
+
+class CheckError
+{
+public:
+    CheckError(BBIO_err code)
+    {
+        if (code != BBIO_OK) {
+            throw BBIOError(code);
+        }
+    }
+    CheckError(int code)
+    {
+        if (code != BBIO_OK) {
+            throw BBIOError((BBIO_err)code);
+        }
+    }
+};
+
 } // namespace bbio
 } // namespace adafruit
-#endif
+
+#endif // __cplusplus
