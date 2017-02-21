@@ -33,6 +33,8 @@ SOFTWARE.
 
 #include <stddef.h>
 
+#include "adafruit/bbio/error.h"
+
 #define MODE_UNKNOWN -1
 #define BOARD        10
 #define BCM          11
@@ -41,16 +43,6 @@ SOFTWARE.
 
 #define FILENAME_BUFFER_SIZE 128
 #define MAX_PATH 256
-
-typedef enum {
-	BBIO_OK, // No error
-	BBIO_ACCESS, // Error accessing a file
-	BBIO_SYSFS, // Some error with Sysfs files
-	BBIO_CAPE, // some error with capes
-	BBIO_INVARG, // Invalid argument
-	BBIO_MEM,
-	BBIO_GEN // General error
-} BBIO_err;
 
 // Modeled after "pwm": submap in bone.js from bonescript
 // https://github.com/jadonk/bonescript/blob/master/src/bone.js#L680
