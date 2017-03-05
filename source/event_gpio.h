@@ -30,6 +30,8 @@ SOFTWARE.
 #ifndef EVENT_GPIO_H
 #define EVENT_GPIO_H
 
+#include "adafruit/bbio/error.h"
+
 #define NO_EDGE      0
 #define RISING_EDGE  1
 #define FALLING_EDGE 2
@@ -51,13 +53,13 @@ SOFTWARE.
 #define PUD_DOWN 1
 #define PUD_UP   2
 
-int gpio_export(unsigned int gpio);
-int gpio_unexport(unsigned int gpio);
+BBIO_err gpio_export(unsigned int gpio);
+BBIO_err gpio_unexport(unsigned int gpio);
 void exports_cleanup(void);
-int gpio_set_direction(unsigned int gpio, unsigned int in_flag);
-int gpio_get_direction(unsigned int gpio, unsigned int *value);
-int gpio_set_value(unsigned int gpio, unsigned int value);
-int gpio_get_value(unsigned int gpio, unsigned int *value);
+BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag);
+BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value);
+BBIO_err gpio_set_value(unsigned int gpio, unsigned int value);
+BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value);
 
 int add_edge_detect(unsigned int gpio, unsigned int edge);
 void remove_edge_detect(unsigned int gpio);

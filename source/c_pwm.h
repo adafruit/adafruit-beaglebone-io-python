@@ -25,6 +25,7 @@ SOFTWARE.
 
 #include "common.h"
 
+BBIO_err initialize_pwm(void);
 BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
 BBIO_err pwm_disable(const char *key);
 BBIO_err pwm_set_frequency(const char *key, float freq);
