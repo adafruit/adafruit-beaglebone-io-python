@@ -38,6 +38,10 @@ SOFTWARE.
 #include "event_gpio.h"
 #include "common.h"
 
+#define GPIO_NOT_EXPORTED 0
+#define GPIO_EXPORTED 1
+#define GPIO_ALREADY_EXPORTED 2
+
 const char *stredge[4] = {"none", "rising", "falling", "both"};
 
 // file descriptors
@@ -61,7 +65,7 @@ struct callback
 struct callback *callbacks = NULL;
 
 pthread_t threads;
-int exported_gpios[120] = { 0 };
+int exported_gpios[120] = { GPIO_NOT_EXPORTED };
 int event_occurred[120] = { 0 };
 int thread_running = 0;
 int epfd = -1;
@@ -71,9 +75,19 @@ int gpio_export(unsigned int gpio)
     int fd, len;
     char str_gpio[10];
 
-    // already exported
-    if (exported_gpios[gpio] != 0)
-        return 1;
+    // already exported by us?
+    if (exported_gpios[gpio] != GPIO_NOT_EXPORTED)
+        return 0;
+
+    // already exported by someone else?
+    char gpio_path[64];
+    snprintf(gpio_path, sizeof(gpio_path), "/sys/class/gpio/gpio%d", gpio);
+
+    if (access(gpio_path, R_OK|W_OK|X_OK) != -1)
+    {
+        exported_gpios[gpio] = GPIO_ALREADY_EXPORTED;
+        return 0;
+    }
 
     if ((fd = open("/sys/class/gpio/export", O_WRONLY)) < 0)
     {
@@ -87,7 +101,7 @@ int gpio_export(unsigned int gpio)
     }
 
     // add to list
-    exported_gpios[gpio] = 1;
+    exported_gpios[gpio] = GPIO_EXPORTED;
     return 0;
 }
 
@@ -173,7 +187,7 @@ int gpio_unexport(unsigned int gpio)
     int fd, len;
     char str_gpio[10];
 
-    if (exported_gpios[gpio] == 0)
+    if (exported_gpios[gpio] != GPIO_EXPORTED)
         return 0;
 
     close_value_fd(gpio);
@@ -189,7 +203,7 @@ int gpio_unexport(unsigned int gpio)
     }
 
     // remove from list
-    exported_gpios[gpio] = 0;
+    exported_gpios[gpio] = GPIO_NOT_EXPORTED;
     return 0;
 }
 
