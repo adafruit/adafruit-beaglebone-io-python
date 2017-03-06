@@ -60,15 +60,8 @@ struct callback
 };
 struct callback *callbacks = NULL;
 
-// gpio exports
-struct gpio_exp
-{
-    unsigned int gpio;
-    struct gpio_exp *next;
-};
-struct gpio_exp *exported_gpios = NULL;
-
 pthread_t threads;
+int exported_gpios[120] = { 0 };
 int event_occurred[120] = { 0 };
 int thread_running = 0;
 int epfd = -1;
@@ -77,7 +70,10 @@ int gpio_export(unsigned int gpio)
 {
     int fd, len;
     char str_gpio[10];
-    struct gpio_exp *new_gpio, *g;
+
+    // already exported
+    if (exported_gpios[gpio] != 0)
+        return 1;
 
     if ((fd = open("/sys/class/gpio/export", O_WRONLY)) < 0)
     {
@@ -91,24 +87,7 @@ int gpio_export(unsigned int gpio)
     }
 
     // add to list
-    new_gpio = malloc(sizeof(struct gpio_exp));
-    if (new_gpio == 0)
-        return -1; // out of memory
-
-    new_gpio->gpio = gpio;
-    new_gpio->next = NULL;
-
-    if (exported_gpios == NULL)
-    {
-        // create new list
-        exported_gpios = new_gpio;
-    } else {
-        // add to end of existing list
-        g = exported_gpios;
-        while (g->next != NULL)
-            g = g->next;
-        g->next = new_gpio;
-    }
+    exported_gpios[gpio] = 1;
     return 0;
 }
 
@@ -193,7 +172,9 @@ int gpio_unexport(unsigned int gpio)
 {
     int fd, len;
     char str_gpio[10];
-    struct gpio_exp *g, *temp, *prev_g = NULL;
+
+    if (exported_gpios[gpio] == 0)
+        return 0;
 
     close_value_fd(gpio);
 
@@ -208,24 +189,8 @@ int gpio_unexport(unsigned int gpio)
     }
 
     // remove from list
-    g = exported_gpios;
-    while (g != NULL)
-    {
-        if (g->gpio == gpio)
-        {
-            if (prev_g == NULL)
-                exported_gpios = g->next;
-            else
-                prev_g->next = g->next;
-            temp = g;
-            g = g->next;
-            free(temp);
-        } else {
-            prev_g = g;
-            g = g->next;
-        }
-    }
-        return 0;
+    exported_gpios[gpio] = 0;
+    return 0;
 }
 
 int gpio_set_direction(unsigned int gpio, unsigned int in_flag)
@@ -381,9 +346,10 @@ unsigned int gpio_lookup(int fd)
 
 void exports_cleanup(void)
 {
+    int i;
     // unexport everything
-    while (exported_gpios != NULL)
-        gpio_unexport(exported_gpios->gpio);
+    for (i = 0; i < 120; ++i)
+        gpio_unexport(i);
 }
 
 int add_edge_callback(unsigned int gpio, void (*func)(unsigned int gpio))
