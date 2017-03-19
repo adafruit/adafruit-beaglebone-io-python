@@ -5,6 +5,7 @@
 
 lib_LTLIBRARIES =
 noinst_PROGRAMS =
+check_PROGRAMS =
 
 ################################################################################
 # Global flags
@@ -34,9 +35,14 @@ AM_CXXFLAGS = \
 ################################################################################
 # AdafruitBBIO library
 ################################################################################
-lib_LTLIBRARIES += libadafruit-bbio.la
+# libadafruit-bbio1 - c++11 ABI
+# libadafruit-bbio0 - c++98 ABI
 
-libadafruit_bbio_la_SOURCES = \
+lib_LTLIBRARIES += \
+	libadafruit-bbio1.la \
+	libadafruit-bbio0.la
+
+LIBSOURCES = \
 	c_adc.c \
 	c_pinmux.c \
 	c_pwm.c \
@@ -47,7 +53,14 @@ libadafruit_bbio_la_SOURCES = \
 	library/gpio.cpp \
 	library/pwm.cpp
 
-libadafruit_bbio_la_LDFLAGS = $(AM_LDFLAGS) -shared
+libadafruit_bbio1_la_SOURCES = $(LIBSOURCES)
+libadafruit_bbio0_la_SOURCES = $(LIBSOURCES)
+
+libadafruit_bbio1_la_CXXFLAGS = $(AM_CXXFLAGS) -D_GLIBCXX_USE_CXX11_ABI=1
+libadafruit_bbio0_la_CXXFLAGS = $(AM_CXXFLAGS) -D_GLIBCXX_USE_CXX11_ABI=0
+
+libadafruit_bbio1_la_LDFLAGS = $(AM_LDFLAGS) -shared
+libadafruit_bbio0_la_LDFLAGS = $(AM_LDFLAGS) -shared
 
 ################################################################################
 # Examples
@@ -55,11 +68,30 @@ libadafruit_bbio_la_LDFLAGS = $(AM_LDFLAGS) -shared
 noinst_PROGRAMS += examples/cpp/pwm
 
 examples_cpp_pwm_SOURCES = examples/cpp/pwm.cpp
-examples_cpp_pwm_LDADD = libadafruit-bbio.la
+examples_cpp_pwm_LDADD   = libadafruit-bbio1.la
 examples_cpp_pwm_LDFLAGS = $(AM_LDFLAGS) -lpthread -static
 
 noinst_PROGRAMS += examples/cpp/gpio
 
 examples_cpp_gpio_SOURCES = examples/cpp/gpio.cpp
-examples_cpp_gpio_LDADD = libadafruit-bbio.la
+examples_cpp_gpio_LDADD   = libadafruit-bbio1.la
 examples_cpp_gpio_LDFLAGS = $(AM_LDFLAGS) -lpthread -static
+
+################################################################################
+# Tests
+################################################################################
+TESTS = $(check_PROGRAMS)
+
+check_PROGRAMS += test/cpp/abi-old
+
+test_cpp_abi_old_SOURCES  = test/cpp/abi.cpp
+test_cpp_abi_old_CXXFLAGS = $(AM_CXXFLAGS) -pthread -D_GLIBCXX_USE_CXX11_ABI=0
+test_cpp_abi_old_LDADD    = libadafruit-bbio0.la
+test_cpp_abi_old_LDFLAGS  = $(AM_LDFLAGS) -lpthread -static
+
+check_PROGRAMS += test/cpp/abi-new
+
+test_cpp_abi_new_SOURCES  = test/cpp/abi.cpp
+test_cpp_abi_new_CXXFLAGS = $(AM_CXXFLAGS) -pthread -D_GLIBCXX_USE_CXX11_ABI=1
+test_cpp_abi_new_LDADD    = libadafruit-bbio1.la
+test_cpp_abi_new_LDFLAGS  = $(AM_LDFLAGS) -lpthread -static

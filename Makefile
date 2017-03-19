@@ -52,7 +52,7 @@ build/Makefile: configure
 
 cpp: build/Makefile
 	cd build && \
-	$(MAKE)
+	$(MAKE) check
 
 cpp-install: cpp
 	cd build && \
@@ -77,7 +77,8 @@ cpp-clean:
 	  m4/ltversion.m4 \
 	  m4/lt~obsolete.m4 \
 	  missing \
-	  source/Makefile.in
+	  source/Makefile.in \
+	  test-driver
 
 ################################################################################
 
