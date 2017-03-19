@@ -3,10 +3,6 @@
 # Copyright (c) 2017 Nikolay Semenov
 ################################################################################
 
-lib_LTLIBRARIES =
-noinst_PROGRAMS =
-check_PROGRAMS =
-
 ################################################################################
 # Global flags
 ################################################################################
@@ -37,10 +33,19 @@ AM_CXXFLAGS = \
 ################################################################################
 # libadafruit-bbio1 - c++11 ABI
 # libadafruit-bbio0 - c++98 ABI
-
-lib_LTLIBRARIES += \
+lib_LTLIBRARIES = \
 	libadafruit-bbio1.la \
 	libadafruit-bbio0.la
+
+adafruitdir = $(includedir)/adafruit
+adafruit_HEADERS = \
+	include/adafruit/bbio.h
+
+adafruit_bbiodir = $(adafruitdir)/bbio
+adafruit_bbio_HEADERS = \
+	include/adafruit/bbio/error.h \
+	include/adafruit/bbio/gpio.h \
+	include/adafruit/bbio/pwm.h
 
 LIBSOURCES = \
 	c_adc.c \
@@ -65,7 +70,7 @@ libadafruit_bbio0_la_LDFLAGS = $(AM_LDFLAGS) -shared
 ################################################################################
 # Examples
 ################################################################################
-noinst_PROGRAMS += examples/cpp/pwm
+noinst_PROGRAMS = examples/cpp/pwm
 
 examples_cpp_pwm_SOURCES = examples/cpp/pwm.cpp
 examples_cpp_pwm_LDADD   = libadafruit-bbio1.la
@@ -80,6 +85,7 @@ examples_cpp_gpio_LDFLAGS = $(AM_LDFLAGS) -lpthread -static
 ################################################################################
 # Tests
 ################################################################################
+check_PROGRAMS =
 TESTS = $(check_PROGRAMS)
 
 check_PROGRAMS += test/cpp/abi-old
