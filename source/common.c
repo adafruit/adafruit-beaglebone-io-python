@@ -376,6 +376,7 @@ BBIO_err build_path(const char *partial_path, const char *prefix, char *full_pat
                 int (*errfunc) (const char *epath, int eerrno),
                 glob_t *pglob); */
     int err = glob(pattern, 0, NULL, &results);
+    free(pattern);
     if (err != BBIO_OK) {
         globfree(&results);
         if (err == GLOB_NOSPACE)
