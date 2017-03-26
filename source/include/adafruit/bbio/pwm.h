@@ -39,7 +39,7 @@ public:
     Pwm(std::string const& key);
     ~Pwm();
 
-    void start(float duty_cycle, float frequency, Polarity);
+    void start(float duty_cycle = 0.0, float frequency = 2000.0, Polarity = Polarity::Normal);
     void stop();
 
     // 0.0 <= duty_cycle <= 100.0
