@@ -40,6 +40,12 @@ install3: build3
 # sudo apt-get install automake
 # make cpp
 # cd build && sudo make install
+#
+# libgtest-dev is needed for UT
+#
+# sudo sh -c 'echo cape-universaln > /sys/devices/platform/bone_capemgr/slots'
+# sudo sh -c 'echo pwm > /sys/devices/platform/ocp/ocp\:P9_16_pinmux/state'
+# sudo sh -c 'echo pwm > /sys/devices/platform/ocp/ocp\:P8_19_pinmux/state'
 ################################################################################
 configure: configure.ac
 	rm -f configure && \
@@ -51,6 +57,10 @@ build/Makefile: configure
 	../configure
 
 cpp: build/Makefile
+	cd build && \
+	$(MAKE) build
+
+cpp-check: cpp
 	cd build && \
 	$(MAKE) check
 

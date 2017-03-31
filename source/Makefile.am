@@ -101,3 +101,28 @@ test_cpp_abi_new_SOURCES  = test/cpp/abi.cpp
 test_cpp_abi_new_CXXFLAGS = $(AM_CXXFLAGS) -pthread -D_GLIBCXX_USE_CXX11_ABI=1
 test_cpp_abi_new_LDADD    = libadafruit-bbio1.la
 test_cpp_abi_new_LDFLAGS  = $(AM_LDFLAGS) -lpthread -static
+
+if HAVE_GTEST
+
+check_PROGRAMS += test/cpp/unittest
+
+gtest/src/gtest-all.cc: /usr/src/gtest/src
+	mkdir -p gtest && cp -Rvf $< gtest
+
+gtest/src/gtest_main.cc: gtest/src/gtest-all.cc
+
+BUILT_SOURCES = \
+	gtest/src/gtest-all.cc \
+	gtest/src/gtest_main.cc
+
+test_cpp_unittest_SOURCES = \
+	test/cpp/pwm.cpp \
+	gtest/src/gtest-all.cc \
+	gtest/src/gtest_main.cc
+
+test_cpp_unittest_CPPFLAGS = $(AM_CPPFLAGS) $(GTEST_CPPFLAGS) -isystem gtest
+test_cpp_unittest_CXXFLAGS = $(AM_CXXFLAGS) -pthread -D_GLIBCXX_USE_CXX11_ABI=1
+test_cpp_unittest_LDADD    = libadafruit-bbio1.la
+test_cpp_unittest_LDFLAGS  = $(AM_LDFLAGS) -lpthread -static
+
+endif # HAVE_GTEST
