@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2013 Adafruit
-Author: Justin Cooper
+Copyright (c) 2017 Adafruit
+Copyright (c) 2017 Nikolay Semenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,17 +20,53 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef C_PWM_H
-#define C_PWM_H
 
-#include "common.h"
+#include "adafruit/bbio/pwm.h"
 
-BBIO_err initialize_pwm(void);
-BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
-BBIO_err pwm_disable(const char *key);
-BBIO_err pwm_set_frequency(const char *key, float freq);
-BBIO_err pwm_set_duty_cycle(const char *key, float duty);
-BBIO_err pwm_set_polarity(const char *key, int polarity);
-void pwm_cleanup(void);
+extern "C" {
+#include "c_pwm.h"
+}
 
-#endif
+namespace adafruit {
+namespace bbio {
+
+/*
+ * Pwm
+ */
+Pwm::Pwm(std::string const& key)
+    : key_(key)
+{}
+
+Pwm::~Pwm()
+{
+    stop();
+}
+
+void Pwm::start(float duty_cycle, float frequency, Polarity polarity)
+{
+    (CheckError)pwm_start(key_.c_str(), duty_cycle, frequency, (int)polarity);
+}
+
+void Pwm::stop()
+{
+    (CheckError)pwm_disable(key_.c_str());
+}
+
+void Pwm::set_duty_cycle(float duty_cycle)
+{
+    (CheckError)pwm_set_duty_cycle(key_.c_str(), duty_cycle);
+}
+
+void Pwm::set_frequency(float frequency)
+{
+    (CheckError)pwm_set_frequency(key_.c_str(), frequency);
+}
+
+void Pwm::set_polarity(Polarity polarity)
+{
+    (CheckError)pwm_set_polarity(key_.c_str(), (int)polarity);
+}
+
+} // namespace bbio
+} // namespace adafruit
+

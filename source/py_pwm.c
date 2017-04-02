@@ -25,6 +25,7 @@ SOFTWARE.
 #include "constants.h"
 #include "common.h"
 #include "c_pwm.h"
+#include <syslog.h>
 
 // python function cleanup()
 static PyObject *py_cleanup(__attribute__ ((unused)) PyObject *self, __attribute__ ((unused)) PyObject *args)
@@ -251,6 +252,7 @@ PyMODINIT_FUNC initPWM(void)
 
    define_constants(module);
 
+   initlog(LOG_NOTICE, NULL, BBIO_LOG_OPTION);
 
 #if PY_MAJOR_VERSION > 2
     return module;

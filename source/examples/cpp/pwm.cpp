@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2013 Adafruit
-Author: Justin Cooper
+Copyright (c) 2017 Adafruit
+Copyright (c) 2017 Nikolay Semenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,17 +20,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef C_PWM_H
-#define C_PWM_H
 
-#include "common.h"
+#include "adafruit/bbio.h"
 
-BBIO_err initialize_pwm(void);
-BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
-BBIO_err pwm_disable(const char *key);
-BBIO_err pwm_set_frequency(const char *key, float freq);
-BBIO_err pwm_set_duty_cycle(const char *key, float duty);
-BBIO_err pwm_set_polarity(const char *key, int polarity);
-void pwm_cleanup(void);
+#include <chrono>
+#include <thread>
 
-#endif
+int main(int /*argc*/, char** /*argv*/)
+{
+    using adafruit::bbio::Pwm;
+
+    adafruit::bbio::init({LOG_DEBUG, nullptr, LOG_PERROR});
+
+    Pwm pwm("P8_19");
+    pwm.start(0., 1e9 / (1 * 1000 * 1000), Pwm::Polarity::Normal);
+
+    for (int i = 0; i < 1000; ++i) {
+        pwm.set_duty_cycle(i / 10.0);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    }
+
+    return 0;
+}

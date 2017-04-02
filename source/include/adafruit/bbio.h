@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2013 Adafruit
-Author: Justin Cooper
+Copyright (c) 2017 Adafruit
+Copyright (c) 2017 Nikolay Semenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,17 +20,40 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef C_PWM_H
-#define C_PWM_H
+#pragma once
 
-#include "common.h"
+#include <adafruit/bbio/error.h>
+#include <adafruit/bbio/gpio.h>
+#include <adafruit/bbio/pwm.h>
 
-BBIO_err initialize_pwm(void);
-BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
-BBIO_err pwm_disable(const char *key);
-BBIO_err pwm_set_frequency(const char *key, float freq);
-BBIO_err pwm_set_duty_cycle(const char *key, float duty);
-BBIO_err pwm_set_polarity(const char *key, int polarity);
-void pwm_cleanup(void);
+#include <syslog.h>
 
-#endif
+namespace adafruit {
+namespace bbio {
+
+struct lib_options
+{
+    int syslog_level;
+
+    // If NULL then syslog uses process name.
+    char const* syslog_identifier;
+
+    // Add LOG_PERROR to print to console
+    int syslog_option;
+
+    lib_options(int syslog_level = LOG_INFO,
+                char const* syslog_identifier = nullptr,
+                int syslog_option = LOG_CONS | LOG_PID | LOG_NDELAY)
+        : syslog_level(syslog_level)
+        , syslog_identifier(syslog_identifier)
+        , syslog_option(syslog_option)
+    {}
+};
+
+/*
+ * Initialize the library.
+ */
+void init(lib_options = lib_options());
+
+} // namespace bbio
+} // namespace adafruit

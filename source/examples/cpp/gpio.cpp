@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2013 Adafruit
-Author: Justin Cooper
+Copyright (c) 2017 Adafruit
+Copyright (c) 2017 Nikolay Semenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,17 +20,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef C_PWM_H
-#define C_PWM_H
 
-#include "common.h"
+#include "adafruit/bbio.h"
 
-BBIO_err initialize_pwm(void);
-BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
-BBIO_err pwm_disable(const char *key);
-BBIO_err pwm_set_frequency(const char *key, float freq);
-BBIO_err pwm_set_duty_cycle(const char *key, float duty);
-BBIO_err pwm_set_polarity(const char *key, int polarity);
-void pwm_cleanup(void);
+#include <chrono>
+#include <thread>
 
-#endif
+int main(int /*argc*/, char** /*argv*/)
+{
+    using adafruit::bbio::lib_options;
+    using adafruit::bbio::Gpio;
+
+    adafruit::bbio::init(lib_options(LOG_DEBUG, nullptr, LOG_PERROR));
+
+    Gpio gpio("P8_10", Gpio::Direction::Output);
+
+    for (int i = 0; i < 100; ++i) {
+        gpio.set_value((i % 2 == 1) ? Gpio::Value::High : Gpio::Value::Low);
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+
+    return 0;
+}

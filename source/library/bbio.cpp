@@ -1,6 +1,6 @@
 /*
-Copyright (c) 2013 Adafruit
-Author: Justin Cooper
+Copyright (c) 2017 Adafruit
+Copyright (c) 2017 Nikolay Semenov
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
@@ -20,17 +20,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
-#ifndef C_PWM_H
-#define C_PWM_H
 
+#include "adafruit/bbio.h"
+#include "adafruit/bbio/error.h"
+
+extern "C" {
 #include "common.h"
+#include "c_pwm.h"
+}
 
-BBIO_err initialize_pwm(void);
-BBIO_err pwm_start(const char *key, float duty, float freq, int polarity);
-BBIO_err pwm_disable(const char *key);
-BBIO_err pwm_set_frequency(const char *key, float freq);
-BBIO_err pwm_set_duty_cycle(const char *key, float duty);
-BBIO_err pwm_set_polarity(const char *key, int polarity);
-void pwm_cleanup(void);
+namespace adafruit {
+namespace bbio {
 
-#endif
+void init(lib_options lib_options)
+{
+    initlog(lib_options.syslog_level,
+            lib_options.syslog_identifier,
+            lib_options.syslog_option);
+    initialize_pwm();
+}
+
+} // namespace bbio
+} // namespace adafruit

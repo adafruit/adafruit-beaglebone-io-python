@@ -24,9 +24,10 @@ SOFTWARE.
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <string.h>
+#include <syslog.h>
 #include <fcntl.h>
 #include <unistd.h>
 
@@ -71,6 +72,7 @@ struct pwm_exp *lookup_exported_pwm(const char *key)
         pwm = pwm->next;
     }
 
+    syslog(LOG_DEBUG, "lookup_exported_pwm: couldn't find '%s'", key);
     return NULL; /* standard for pointers */
 }
 
@@ -107,9 +109,11 @@ BBIO_err initialize_pwm(void)
         }
 #endif
         pwm_initialized = 1;
+        syslog(LOG_INFO, "initialize_pwm: OK");
         return BBIO_OK;
     }
 
+    syslog(LOG_INFO, "initialize_pwm: OK");
     return BBIO_OK;
 }
 
@@ -119,12 +123,15 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
     unsigned long period_ns;
     struct pwm_exp *pwm;
 
-    if (freq <= 0.0)
+    if (freq <= 0.0) {
+        syslog(LOG_ERR, "pwm_set_frequency: %s freq %f <= 0.0", key, freq);
         return BBIO_INVARG;
+    }
 
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
+        syslog(LOG_ERR, "pwm_set_frequency: %s couldn't find key", key);
         return BBIO_GEN;
     }
 
@@ -141,6 +148,8 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty_ns);
         lseek(pwm->duty_fd, 0, SEEK_SET); // Seek to beginning of file
         if (write(pwm->duty_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_frequency: %s couldn't write duty: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
 
@@ -148,6 +157,8 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         len = snprintf(buffer, sizeof(buffer), "%lu", period_ns);
         lseek(pwm->period_fd, 0, SEEK_SET); // Seek to beginning of file
         if (write(pwm->period_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_frequency: %s couldn't write period: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
 
@@ -161,6 +172,8 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         len = snprintf(buffer, sizeof(buffer), "%lu", period_ns);
         lseek(pwm->period_fd, 0, SEEK_SET); // Seek to beginning of file
         if (write(pwm->period_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_frequency: %s couldn't write period: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
 
@@ -169,10 +182,13 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
         len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty_ns);
         lseek(pwm->duty_fd, 0, SEEK_SET); // Seek to beginning of file
         if (write(pwm->duty_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_frequency: %s couldn't write duty: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
     } // else do nothing
 
+    syslog(LOG_DEBUG, "pwm_set_frequency: %s %f OK", key, freq);
     return BBIO_OK;
 }
 
@@ -188,6 +204,7 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
+        syslog(LOG_ERR, "pwm_set_polarity: %s couldn't find key", key);
         return BBIO_GEN;
     }
 
@@ -198,6 +215,8 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     memset(buffer, 0, 9);  // Initialize buffer
     lseek(pwm->enable_fd, 0, SEEK_SET);
     if (read(pwm->enable_fd, buffer, len) < 0) {
+        syslog(LOG_ERR, "pwm_set_polarity: %s couldn't read enable: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
@@ -209,6 +228,8 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
         lseek(pwm->enable_fd, 0, SEEK_SET);
         len = snprintf(buffer, sizeof(buffer), "0");
         if (write(pwm->enable_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_polarity: %s couldn't write enable: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
     }
@@ -221,6 +242,7 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
     } else if (polarity == 1) {
         len = snprintf(buffer, sizeof(buffer), "inversed");
     } else {
+        syslog(LOG_ERR, "pwm_set_polarity: %s invalid argument value: %i", key, polarity);
         return BBIO_INVARG;
     }
 #else
@@ -229,6 +251,8 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
 
     lseek(pwm->polarity_fd, 0, SEEK_SET); // Seek to beginning of file
     if (write(pwm->polarity_fd, buffer, len) < 0) {
+        syslog(LOG_ERR, "pwm_set_polarity: %s couldn't write polarity: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
@@ -238,11 +262,14 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
         lseek(pwm->enable_fd, 0, SEEK_SET);
         len = snprintf(buffer, sizeof(buffer), "1");
         if (write(pwm->enable_fd, buffer, len) < 0) {
+            syslog(LOG_ERR, "pwm_set_polarity: %s couldn't write enable: %i-%s",
+                   key, errno, strerror(errno));
             return BBIO_SYSFS;
         }
     }
 #endif
 
+    syslog(LOG_DEBUG, "pwm_set_polarity: %s %i OK", key, polarity);
     return BBIO_OK;
 }
 
@@ -257,6 +284,7 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
     pwm = lookup_exported_pwm(key);
 
     if (pwm == NULL) {
+        syslog(LOG_ERR, "pwm_set_duty_cycle: %s couldn't find key", key);
         return BBIO_GEN;
     }
 
@@ -266,9 +294,12 @@ BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
     len = snprintf(buffer, sizeof(buffer), "%lu", pwm->duty_ns);
     lseek(pwm->duty_fd, 0, SEEK_SET); // Seek to beginning of file
     if (write(pwm->duty_fd, buffer, len) < 0) {
+        syslog(LOG_ERR, "pwm_set_duty_cycle: %s couldn't write duty: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
+    syslog(LOG_DEBUG, "pwm_set_duty_cycle: %s %f OK", key, duty);
     return BBIO_OK;
 }
 
@@ -298,6 +329,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     if (!pwm_initialized) {
         err = initialize_pwm();
         if (err != BBIO_OK) {
+            syslog(LOG_ERR, "pwm_setup: %s couldn't initialize pwm: %i", key, err);
             return err;
         }
     }
@@ -315,6 +347,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         || device_tree_loaded("univ-hdmi")       // ""
         || device_tree_loaded("univ-nhdmi")))    // ""
     {
+        syslog(LOG_ERR, "pwm_setup: %s no suitable cape loaded", key);
         return BBIO_CAPE;
     }
     // Do pinmuxing
@@ -330,21 +363,25 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     // Get info for pwm
     err = get_pwm_by_key(key, &p);
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_setup: %s couldn't get pwm: %i", key, err);
         return err;
     }
 
     err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_setup: %s couldn't build pwm_dev_path: %i", key, err);
         return err;
     }
 
     err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_setup: %s couldn't build pwm_addr_path: %i", key, err);
         return err;
     }
 
     err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_setup: %s couldn't build pwm_chip_path: %i", key, err);
         return err;
     }
 
@@ -357,11 +394,15 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
             snprintf(pwm_export_path, sizeof(pwm_export_path), "%s/export", pwm_chip_path);
             f = fopen(pwm_export_path, "w");
             if (f == NULL) { // Can't open the export file
+                syslog(LOG_ERR, "pwm_setup: %s couldn't open %s: %i-%s",
+                       key, pwm_export_path, errno, strerror(errno));
                 return BBIO_ACCESS;
             }
             fprintf(f, "%d", p->index);
             fclose(f);
         } else {
+            syslog(LOG_ERR, "pwm_setup: %s couldn't stat %s: %i-%s",
+                   key, pwm_path, errno, strerror(errno));
             perror("stat");
             return BBIO_GEN;
         }
@@ -370,6 +411,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
             /* It is a directory. Already exported */
         } else {
             /* It's a file. Shouldn't ever happen */
+            syslog(LOG_ERR, "pwm_setup: %s %s is not a directory", key, pwm_path);
             return BBIO_GEN;
         }
     }
@@ -378,6 +420,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     if (-1 == e) {
         if (ENOENT == errno) {
             // Directory still doesn't exist, exit with error
+            syslog(LOG_ERR, "pwm_setup: %s %s doesn't exist", key, pwm_path);
             return BBIO_GEN;
         }
     }
@@ -432,13 +475,17 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     snprintf(polarity_path, sizeof(polarity_path), "%s/polarity", pwm_path);
 
     //add period and duty fd to pwm list
-    if ((period_fd = open(period_path, O_RDWR)) < 0)
+    if ((period_fd = open(period_path, O_RDWR)) < 0) {
+        syslog(LOG_ERR, "pwm_setup: %s couldn't open %s: %i-%s",
+               key, period_path, errno, strerror(errno));
         return BBIO_SYSFS;
+    }
 
     if ((duty_fd = open(duty_path, O_RDWR)) < 0) {
         //error, close already opened period_fd.
         close(period_fd);
-
+        syslog(LOG_ERR, "pwm_setup: %s couldn't open %s: %i-%s",
+               key, duty_path, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
@@ -446,6 +493,8 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         //error, close already opened period_fd and duty_fd.
         close(period_fd);
         close(duty_fd);
+        syslog(LOG_ERR, "pwm_setup: %s couldn't open %s: %i-%s",
+               key, polarity_path, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
@@ -455,6 +504,8 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         close(period_fd);
         close(duty_fd);
         close(polarity_fd);
+        syslog(LOG_ERR, "pwm_setup: %s couldn't open %s: %i-%s",
+               key, enable_path, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 #endif
@@ -465,6 +516,8 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         close(period_fd);
         close(duty_fd);
         close(polarity_fd);
+        syslog(LOG_ERR, "pwm_setup: %s couldn't malloc pwm_exp: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_MEM; // out of memory
     }
 
@@ -482,11 +535,14 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
 
     export_pwm(new_pwm);
 
+    syslog(LOG_INFO, "pwm_setup: %s OK", key);
     return BBIO_OK;
 }
 
 BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
+    syslog(LOG_DEBUG, "pwm_start: %s, %f, %f, %i", key, duty, freq, polarity);
+
     BBIO_err err;
     char buffer[20];
     ssize_t len;
@@ -495,6 +551,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     if (pwm == NULL) {
         err = pwm_setup(key, duty, freq, polarity);
         if (err != BBIO_OK) {
+            syslog(LOG_ERR, "pwm_start: %s pwm setup failed: %i", key, err);
             return err;
         }
 
@@ -503,11 +560,13 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 
     // If we somehow didn't start successfully
     if (pwm == NULL) {
+        syslog(LOG_ERR, "pwm_start: %s pwm is NULL", key);
         return BBIO_GEN;
     }
 
     err = pwm_set_polarity(key, polarity);
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't set polarity: %i", key, err);
         return err;
     }
 
@@ -517,6 +576,8 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     lseek(pwm->period_fd, 0, SEEK_SET);
     len = read(pwm->period_fd, buffer, sizeof(buffer));
     if (len < 0) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't read period: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     } else if (len >= (ssize_t)sizeof(buffer)) {
         // If this is the case, there's more in the file.
@@ -533,6 +594,8 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     lseek(pwm->duty_fd, 0, SEEK_SET);
     len = read(pwm->duty_fd, buffer, sizeof(buffer));
     if (len < 0) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't read duty: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     } else if (len >= (ssize_t)sizeof(buffer)) {
         // If this is the case, there's more in the file.
@@ -547,11 +610,13 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     pwm->duty = duty;
     err = pwm_set_frequency(key, freq);
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't set duty frequency: %i", key, err);
         return err;
     }
 
     err = pwm_set_duty_cycle(key, duty);
     if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't set duty cycle: %i", key, err);
         return err;
     }
 
@@ -562,10 +627,13 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     len = snprintf(buffer, sizeof(buffer), "1");
     lseek(pwm->enable_fd, 0, SEEK_SET);
     if (write(pwm->enable_fd, buffer, len) < 0) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't write enable: %i-%s",
+               key, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 #endif
 
+    syslog(LOG_INFO, "pwm_start: %s OK", key);
     return BBIO_OK;
 }
 
@@ -589,22 +657,24 @@ BBIO_err pwm_disable(const char *key)
     {
         if (strcmp(pwm->key, key) == 0)
         {
-	        
+
 #ifdef BBBVERSION41
 	        char buffer[2];
 	        size_t len;
-	        
+
 	        // Disable the PWM
 	        lseek(pwm->enable_fd, 0, SEEK_SET);
 	        len = snprintf(buffer, sizeof(buffer), "0");
 	        if (write(pwm->enable_fd, buffer, len) < 0) {
+	          syslog(LOG_ERR, "pwm_disable: %s couldn't write enable: %i-%s",
+	                 key, errno, strerror(errno));
 		        return BBIO_SYSFS;
 	        }
 
 	        // Unexport the PWM
 	        // TODO later
 #endif
-	        
+
             //close the fd
             close(pwm->period_fd);
             close(pwm->duty_fd);
@@ -626,6 +696,8 @@ BBIO_err pwm_disable(const char *key)
             pwm = pwm->next;
         }
     }
+
+    syslog(LOG_INFO, "pwm_disable: %s OK", key);
     return BBIO_OK;
 }
 

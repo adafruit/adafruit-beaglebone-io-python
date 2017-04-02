@@ -34,6 +34,7 @@ SOFTWARE.
 #include "event_gpio.h"
 #include "c_pinmux.h"
 #include <unistd.h>
+#include <syslog.h>
 
 static int gpio_warnings = 1;
 
@@ -131,7 +132,7 @@ static PyObject *py_setup_channel(__attribute__ ((unused)) PyObject *self, PyObj
 
        // Set the pin value and bail if we get an error.
        res = gpio_set_value(gpio, initial);
-       if(res != 0) {
+       if (res != BBIO_OK) {
            PyErr_SetString(PyExc_ValueError, "Set gpio value failed, missing file or invalid permissions.");
            return NULL;
        }
@@ -575,6 +576,8 @@ PyMODINIT_FUNC initGPIO(void)
 #endif
 
    define_constants(module);
+
+   initlog(LOG_NOTICE, NULL, BBIO_LOG_OPTION);
 
    if (!PyEval_ThreadsInitialized())
       PyEval_InitThreads();
