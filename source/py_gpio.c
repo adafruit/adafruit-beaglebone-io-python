@@ -445,10 +445,9 @@ static PyObject *py_wait_for_edge(__attribute__ ((unused)) PyObject *self, PyObj
    char error[30];
    BBIO_err err;
 
-   if (!PyArg_ParseTuple(args, "sii", &channel, &edge, &timeout)){
-      timeout = -1;
-      if (!PyArg_ParseTuple(args, "si", &channel, &edge))
-         return NULL;
+   timeout = -1;
+   if (!PyArg_ParseTuple(args, "si|i", &channel, &edge, &timeout)){
+      return NULL;
    }
 
    err = get_gpio_number(channel, &gpio);
