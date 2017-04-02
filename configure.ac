@@ -1,6 +1,6 @@
 AC_INIT([Adafruit BeagleBone IO Library],
         [1.0.0],
-        [support@adafruit.com],
+        [https://github.com/adafruit/adafruit-beaglebone-io-python/issues],
         [adafruit-bbio])
 
 AC_PREREQ([2.59])
