@@ -1,0 +1,1 @@
+KERNEL=="gpio*", SUBSYSTEM=="gpio", ACTION=="add", PROGRAM="/usr/local/bin/udev-non-root-gpio-permissions.sh"
