@@ -54,7 +54,7 @@ class TestAdc:
 
         ADC.setup()
 
-        for x in range(0,10000):
+        for x in range(0,1000):
             start = time.time() 
             value = -1
             value = ADC.read("AIN1")
