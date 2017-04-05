@@ -312,8 +312,7 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         int led = gpio -  USR_LED_GPIO_MIN;
 
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", led);
-
-        if ((fd = open(filename, O_WRONLY)) < 0) {
+        if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
 
@@ -321,7 +320,8 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
 
-    if ((fd = open(filename, O_WRONLY)) < 0) {
+    fd = open(filename, O_WRONLY);
+    if (fd < 0) {
         syslog(LOG_ERR, "gpio_set_value: %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
