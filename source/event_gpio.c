@@ -284,6 +284,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
 
     lseek(fd, 0, SEEK_SET);
     int ret = read(fd, &direction, sizeof(direction) - 1);
+    close(fd);
     if (ret < 0) {
         syslog(LOG_ERR, "gpio_get_direction: %u couldn't read '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
