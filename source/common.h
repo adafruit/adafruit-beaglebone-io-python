@@ -42,6 +42,9 @@ using adafruit::bbio::BBIO_err;
 #define BOARD        10
 #define BCM          11
 
+#define CTRL_DIR_MAX 50
+#define OCP_DIR_MAX  50
+
 #define ARRAY_SIZE(a)  (sizeof(a) / sizeof(a[0]))
 
 #define FILENAME_BUFFER_SIZE 128
@@ -64,8 +67,8 @@ typedef struct pwm_t {
 extern int gpio_mode;
 extern int gpio_direction[120];
 
-extern char ctrl_dir[43];
-extern char ocp_dir[33];
+extern char ctrl_dir[CTRL_DIR_MAX];
+extern char ocp_dir[OCP_DIR_MAX];
 
 BBIO_err get_gpio_number(const char *key, unsigned int *gpio);
 BBIO_err get_pwm_key(const char *input, char *key);

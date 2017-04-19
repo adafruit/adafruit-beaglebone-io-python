@@ -55,8 +55,8 @@ SOFTWARE.
 int gpio_mode;
 int gpio_direction[120];
 
-char ctrl_dir[43];
-char ocp_dir[33];
+char ctrl_dir[CTRL_DIR_MAX];
+char ocp_dir[OCP_DIR_MAX];
 
 int setup_error = 0;
 int module_setup = 0;
