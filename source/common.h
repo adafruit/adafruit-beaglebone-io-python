@@ -64,13 +64,8 @@ typedef struct pwm_t {
 extern int gpio_mode;
 extern int gpio_direction[120];
 
-#ifdef BBBVERSION41
-  extern char ctrl_dir[43];
-  extern char ocp_dir[33];
-#else
-  extern char ctrl_dir[35];
-  extern char ocp_dir[25];
-#endif
+extern char ctrl_dir[43];
+extern char ocp_dir[33];
 
 BBIO_err get_gpio_number(const char *key, unsigned int *gpio);
 BBIO_err get_pwm_key(const char *input, char *key);
