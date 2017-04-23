@@ -68,7 +68,7 @@ class RotaryEncoder(object):
     print("RotaryEncoder(): self._eqep_dirs[0]: {0}".format(self._eqep_dirs[0]))
     print("RotaryEncoder(): self._eqep_dirs[1]: {0}".format(self._eqep_dirs[1]))
     print("RotaryEncoder(): self._eqep_dirs[2]: {0}".format(self._eqep_dirs[2]))
-    print("RotaryEncoder(): self._eqep_dirs[eqep_num]: {0}".format(self._eqep_dirs[eqep_num]))
+    print("RotaryEncoder(): self._eqep_dirs[eqep_num: {0}]: {1}".format(eqep_num, self._eqep_dirs[eqep_num]))
     assert 0 <= eqep_num <= 3 , "eqep_num must be between 0 and 3"
     self.base_dir = self._eqep_dirs[eqep_num]
     print("RotaryEncoder(): self.base_dir: {0}".format(self.base_dir))
