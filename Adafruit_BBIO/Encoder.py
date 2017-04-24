@@ -143,6 +143,7 @@ class RotaryEncoder(object):
     position = position_handle.read()
     print("getPosition(): position: {0}".format(position))
     #return sysfs.kernelFileIO(position_file)
+    return position
     
   def setFrequency(self,freq):
     '''
