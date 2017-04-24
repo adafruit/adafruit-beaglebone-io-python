@@ -138,7 +138,10 @@ class RotaryEncoder(object):
     '''
     position_file = "%s/position" % self.base_dir
     print("getPosition(): position_file: {0}".format(position_file))
-    print("getPosition(): TODO: read position_file")
+    position_handle = open(position_file, 'r')
+    print("getPosition(): position_handle: {0}".format(position_handle))
+    position = position_handle.read()
+    print("getPosition(): position: {0}".format(position))
     #return sysfs.kernelFileIO(position_file)
     
   def setFrequency(self,freq):

@@ -1,8 +1,8 @@
 #!/usr/bin/python
 
 import Adafruit_BBIO.Encoder as Encoder
-
-qep = Encoder.RotaryEncoder(1)
+# A on P8.11 and B on P8.12
+qep = Encoder.RotaryEncoder(2)
 #qep = Encoder.QEP()
 print qep
 
