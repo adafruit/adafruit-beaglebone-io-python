@@ -1,56 +1,57 @@
-I'm using P8.11 and P8.12 for testing a rotary encoder.
+I have  documented how-to to enable all the eqep pins:
+https://github.com/adafruit/adafruit-beaglebone-io-python/commit/c418cdae9a2a2c0d52412561c0125b0d227af4eb
 
-Using cape-universal:
+BeagleBone must boot with cape-universal enabled and load the `cape-universala` overlay in order to
+use all the eQEP pins:
+
+### Install the latest Device Tree overlays:
 ```
-debian@beaglebone:~$ cat /sys/devices/platform/bone_capemgr/slots
- 0: PF----  -1 
- 1: PF----  -1 
- 2: PF----  -1 
- 3: PF----  -1 
- 4: P-O-L-   0 Override Board Name,00A0,Override Manuf,univ-all
- 5: P-O-L-   1 Override Board Name,00A0,Override Manuf,BB-ADC
+sudo apt-get upgrade bb-cape-overlays
 ```
 
-/boot/uEnv.txt:
+### File: /boot/uEnv.txt
 ```
-uname_r=4.4.47-ti-r87
-dtb=am335x-boneblack-overlay.dtb
+uname_r=4.4.62-ti-r99
 cmdline=coherent_pool=1M quiet cape_universal=enable
+cape_enable=bone_capemgr.enable_partno=cape-universala
 ```
 
-Configure the pin mode for eQEP:
+### File: /sys/devices/platform/bone_capemgr/slots
 ```
-debian@beaglebone:~$ config-pin p8.11 qep && config-pin p8.12 qep
-
-debian@beaglebone:~$ config-pin -q p8.11 && config-pin -q p8.12 
-P8_11 Mode: qep
-P8_12 Mode: qep
-```
-
-System info:
-```
-debian@beaglebone:~$ uname -a
-Linux beaglebone 4.4.47-ti-r87 #1 SMP Mon Feb 6 22:21:49 UTC 2017 armv7l GNU/Linux
-debian@beaglebone:~$ cat /etc/debian_version 
-8.7
-debian@beaglebone:~$ sudo cat /etc/dogtag 
-BeagleBoard.org Debian Image 2015-12-07
+0: PF----  -1 
+1: PF----  -1 
+2: PF----  -1 
+3: PF----  -1 
+4: P-O-L-   0 Override Board Name,00A0,Override Manuf,cape-universala
 ```
 
-Check the position:
+### eqep0: P9_27, P9_92
 ```
-debian@beaglebone:~$ find /sys/devices |grep eqep |grep position$
-/sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position
-/sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
-/sys/devices/platform/ocp/48300000.epwmss/48300180.eqep/position
-debian@beaglebone:~$ cat `find /sys/devices |grep eqep |grep position$`
-0
--3251
-0
-debian@beaglebone:~$ watch -n 1 cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
+config-pin P9_27 qep
+config-pin P9_92 qep # alias for P9_42.1
+cat /sys/devices/platform/ocp/48300000.epwmss/48300180.eqep/position
 ```
 
-For P8.11 and P8.12:
+### eqep1: P8.33, P8.35
 ```
-/sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
+config-pin P8.33 qep 
+config-pin P8.35 qep
+cat /sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position
 ```
+
+### eqep2: P8.11, P8.12
+```
+config-pin P8.11 qep 
+config-pin P8.12 qep 
+cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
+```
+
+### eqep2b: P8.41, P8.42
+_alternate pins for eqep2 (mutually exclusive)_
+```
+config-pin P8.41 qep 
+config-pin P8.42 qep 
+cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
+```
+
+### TODO: implement in corresponding methods in `Encoder.py`
