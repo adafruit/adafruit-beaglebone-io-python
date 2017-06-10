@@ -56,18 +56,12 @@
 import Adafruit_BBIO.Encoder as Encoder
 
 qep = Encoder.RotaryEncoder(0)
-print qep
-print("qep.enable(): {0}".format(qep.enable()))
 print("qep.getPosition(): {0}".format(qep.getPosition()))
 
 qep = Encoder.RotaryEncoder(1)
-print qep
-print("qep.enable(): {0}".format(qep.enable()))
 print("qep.getPosition(): {0}".format(qep.getPosition()))
 
 qep = Encoder.RotaryEncoder(2)
-print qep
-print("qep.enable(): {0}".format(qep.enable()))
 print("qep.getPosition(): {0}".format(qep.getPosition()))
 
 
@@ -77,3 +71,4 @@ print("qep.getPosition(): {0}".format(qep.getPosition()))
 #qep.setFrequency(5000)
 #qep.setPosition(100)
 #qep.disable()
+#print("qep.enable(): {0}".format(qep.enable()))
