@@ -75,49 +75,57 @@ int epfd = -1;
 
 BBIO_err gpio_export(unsigned int gpio)
 {
-    int fd, len;
+    int fd = 0, len = 0, ret = BBIO_GEN;
     char str_gpio[10];
 
     // already exported by us?
     if (exported_gpios[gpio] != GPIO_NOT_EXPORTED) {
         syslog(LOG_DEBUG, "gpio_export: %u already exported", gpio);
-        return BBIO_OK;
+        ret = BBIO_OK;
+        goto exit;
     }
 
     // already exported by someone else?
     char gpio_path[64];
     snprintf(gpio_path, sizeof(gpio_path), "/sys/class/gpio/gpio%d", gpio);
 
-    if (access(gpio_path, R_OK|W_OK|X_OK) != -1)
-    {
+    if (access(gpio_path, R_OK|W_OK|X_OK) != -1) {
         exported_gpios[gpio] = GPIO_ALREADY_EXPORTED;
         syslog(LOG_DEBUG, "gpio_export: %u already exported", gpio);
-        return BBIO_OK;
+        ret =  BBIO_OK;
+        goto exit;
     }
 
-#define GPIO_EXPORT "/sys/class/gpio/export"
+    const char gpio_export[] = "/sys/class/gpio/export";
 
-    if ((fd = open(GPIO_EXPORT, O_WRONLY)) < 0)
-    {
-        syslog(LOG_ERR, "gpio_export: %u couldn't open '"GPIO_EXPORT"': %i-%s",
-               gpio, errno, strerror(errno));
-        return BBIO_SYSFS;
+    if ((fd = open(gpio_export, O_WRONLY)) < 0) {
+        syslog(LOG_ERR, "gpio_export: %u couldn't open \"%s\": %i-%s",
+               gpio, gpio_export, errno, strerror(errno));
+        ret =  BBIO_SYSFS;
+        goto exit;
     }
 
     len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpio);
-    int ret = write(fd, str_gpio, len);
-    close(fd);
-    if (ret < 0) {
-        syslog(LOG_ERR, "gpio_export: %u couldn't write '"GPIO_EXPORT"': %i-%s",
-               gpio, errno, strerror(errno));
-        return BBIO_SYSFS;
+    if(write(fd, str_gpio, len) < 0) {
+        syslog(LOG_ERR, "gpio_export: %u couldn't write \"%s\": %i-%s",
+               gpio, gpio_export, errno, strerror(errno));
+        ret =  BBIO_SYSFS;
+        goto exit;
     }
 
     // add to list
     exported_gpios[gpio] = GPIO_EXPORTED;
 
     syslog(LOG_DEBUG, "gpio_export: %u OK", gpio);
-    return BBIO_OK;
+    ret = BBIO_OK;
+
+    exit:
+    if(fd && (ret = close(fd))) {
+        syslog(LOG_ERR, "gpio_export: %u couldn't close \"%s\": %i-%s",
+               gpio, gpio_export, errno, strerror(errno));
+        ret =  BBIO_SYSFS;
+    }
+    return ret;
 }
 
 void close_value_fd(unsigned int gpio)
