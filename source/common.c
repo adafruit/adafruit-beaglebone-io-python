@@ -443,6 +443,16 @@ BBIO_err load_device_tree(const char *name)
     FILE *file = NULL;
     char line[256];
     char uboot_overlay;
+    /*
+      Refer to: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
+
+      Robert C. Nelson maintains the BeagleBoard.org Debian images and
+      suggested adding this check to see if u-boot overlays are enabled.
+
+      If u-boot overlays are enabled, then device tree overlays should not
+      be loaded with the cape manager by writing to the slots file.  There
+      is currently a kernel bug that causes the write to hang.
+    */
     const char *cmd = "grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
 
 #ifdef BBBVERSION41
