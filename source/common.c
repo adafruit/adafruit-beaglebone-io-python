@@ -441,6 +441,10 @@ int get_spi_bus_path_number(unsigned int spi)
 BBIO_err load_device_tree(const char *name)
 {
     FILE *file = NULL;
+    char line[256];
+    char uboot_overlay;
+    const char *cmd = "grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
+
 #ifdef BBBVERSION41
     char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
@@ -449,28 +453,25 @@ BBIO_err load_device_tree(const char *name)
      build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
 
-    char line[256];
-    char buf[1035];
-    const char *cmd = "grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
-    FILE *fp;
-
     fprintf(stderr, "load_device_tree: cmd=%s\n", cmd);
-    fp = popen(cmd, "r");
-    if (fp == NULL) {
+    file = popen(cmd, "r");
+    if (file == NULL) {
         fprintf(stderr, "load_device_tree: failed to run command\n");
 #ifndef NO_PYTHON
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, cmd);
 #endif  // !NO_PYTHON
         return BBIO_CAPE;
     }
-    while (fgets(buf, sizeof(buf)-1, fp) != NULL) {
-      fprintf(stderr, "load_device_tree: %s\n", buf);
+    uboot_overlay = fgetc(file);
+    fprintf(stderr, "load_device_tree: uboot_overlay=%c\n", uboot_overlay);
+    if(uboot_overlay == '1') {
+      fprintf(stderr, "load_device_tree: uboot_overlay is 1\n");
+    } else {
+      fprintf(stderr, "load_device_tree: uboot_overlay is NOT 1\n");
     }
-    pclose(fp);
-
+    pclose(file);
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
-    fprintf(stderr, "load_device_tree: slots=%s\n", slots);
 
     file = fopen(slots, "r+");
     if (!file) {
@@ -481,7 +482,6 @@ BBIO_err load_device_tree(const char *name)
     }
 
     while (fgets(line, sizeof(line), file)) {
-        fprintf(stderr, "load_device_tree: line=%s\n", slots);
         //the device is already loaded, return 1
         if (strstr(line, name)) {
             fclose(file);
