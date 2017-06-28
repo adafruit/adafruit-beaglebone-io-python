@@ -437,19 +437,57 @@ int get_spi_bus_path_number(unsigned int spi)
   }
 }
 
+/*
+   Refer to: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
+
+   Robert C. Nelson maintains the BeagleBoard.org Debian images and
+   suggested adding this check to see if u-boot overlays are enabled.
+
+   If u-boot overlays are enabled, then device tree overlays should not
+   be loaded with the cape manager by writing to the slots file.  There
+   is currently a kernel bug that causes the write to hang.
+*/
+int uboot_overlay_enabled(void) {
+    const char *cmd = "/bin/grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
+    char uboot_overlay;
+    FILE *file = NULL;
+
+    file = popen(cmd, "r");
+    if (file == NULL) {
+       fprintf(stderr, "error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
+       return -1;
+    }
+    uboot_overlay = fgetc(file);
+    pclose(file);
+
+    if(uboot_overlay == '1') {
+      return 1;
+    } else {
+      return 0;
+    }
+}
+
 
 BBIO_err load_device_tree(const char *name)
 {
+    char line[256];
     FILE *file = NULL;
+
 #ifdef BBBVERSION41
     char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 #else
-     char slots[40];
-     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
+    char slots[40];
+    build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
 
-    char line[256];
+    /* Check if the Linux kernel booted with u-boot overlays enabled.
+       If enabled, do not load overlays via slots file as the write
+       will hang due to kernel bug in cape manager driver. Just return
+       BBIO_OK in order to avoid cape manager bug. */
+    if(uboot_overlay_enabled()) {
+      return BBIO_OK;
+    }
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
@@ -492,6 +530,14 @@ int device_tree_loaded(const char *name)
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
     char line[256];
+
+    /* Check if the Linux kernel booted with u-boot overlays enabled.
+       If enabled, do not load overlays via slots file as the write
+       will hang due to kernel bug in cape manager driver. Return 1
+       to fake the device tree is loaded to avoid cape manager bug */
+    if(uboot_overlay_enabled()) {
+      return 1;
+    }
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
