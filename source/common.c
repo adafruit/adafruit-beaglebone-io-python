@@ -463,24 +463,20 @@ BBIO_err load_device_tree(const char *name)
      build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
 
-    fprintf(stderr, "load_device_tree: cmd=%s\n", cmd);
     file = popen(cmd, "r");
     if (file == NULL) {
-        fprintf(stderr, "load_device_tree: failed to grep /proc/cmdline\n");
 #ifndef NO_PYTHON
         PyErr_SetFromErrnoWithFilename(PyExc_IOError, "/proc/cmdline");
 #endif  // !NO_PYTHON
         return BBIO_CAPE;
     }
     uboot_overlay = fgetc(file);
-    fprintf(stderr, "load_device_tree: uboot_overlay=%c\n", uboot_overlay);
     pclose(file);
     if(uboot_overlay == '1') {
       /* Linux kernel booted with u-boot overlays enabled.
          Do not load overlays via slots file as the write
          will hang due to kernel bug in cape manager driver.
          Skip cape manager and just return BBIO_OK. */
-      fprintf(stderr, "load_device_tree: u-boot overlays enable. return BBIO_OK.\n");
       return BBIO_OK;
     }
 
