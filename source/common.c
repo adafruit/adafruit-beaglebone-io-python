@@ -450,8 +450,27 @@ BBIO_err load_device_tree(const char *name)
 #endif
 
     char line[256];
+    char buf[1035];
+    const char *cmd = "grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
+    FILE *fp;
+
+    fprintf(stderr, "load_device_tree: cmd=%s\n", cmd);
+    fp = popen(cmd, "r");
+    if (fp == NULL) {
+        fprintf(stderr, "load_device_tree: failed to run command\n");
+#ifndef NO_PYTHON
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, cmd);
+#endif  // !NO_PYTHON
+        return BBIO_CAPE;
+    }
+    while (fgets(buf, sizeof(buf)-1, fp) != NULL) {
+      fprintf(stderr, "load_device_tree: %s\n", buf);
+    }
+    pclose(fp);
+
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
+    fprintf(stderr, "load_device_tree: slots=%s\n", slots);
 
     file = fopen(slots, "r+");
     if (!file) {
@@ -462,6 +481,7 @@ BBIO_err load_device_tree(const char *name)
     }
 
     while (fgets(line, sizeof(line), file)) {
+        fprintf(stderr, "load_device_tree: line=%s\n", slots);
         //the device is already loaded, return 1
         if (strstr(line, name)) {
             fclose(file);
