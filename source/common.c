@@ -453,7 +453,7 @@ BBIO_err load_device_tree(const char *name)
       be loaded with the cape manager by writing to the slots file.  There
       is currently a kernel bug that causes the write to hang.
     */
-    const char *cmd = "grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
+    const char *cmd = "/bin/grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
 
 #ifdef BBBVERSION41
     char slots[41];
@@ -466,20 +466,23 @@ BBIO_err load_device_tree(const char *name)
     fprintf(stderr, "load_device_tree: cmd=%s\n", cmd);
     file = popen(cmd, "r");
     if (file == NULL) {
-        fprintf(stderr, "load_device_tree: failed to run command\n");
+        fprintf(stderr, "load_device_tree: failed to grep /proc/cmdline\n");
 #ifndef NO_PYTHON
-        PyErr_SetFromErrnoWithFilename(PyExc_IOError, cmd);
+        PyErr_SetFromErrnoWithFilename(PyExc_IOError, "/proc/cmdline");
 #endif  // !NO_PYTHON
         return BBIO_CAPE;
     }
     uboot_overlay = fgetc(file);
     fprintf(stderr, "load_device_tree: uboot_overlay=%c\n", uboot_overlay);
-    if(uboot_overlay == '1') {
-      fprintf(stderr, "load_device_tree: uboot_overlay is 1\n");
-    } else {
-      fprintf(stderr, "load_device_tree: uboot_overlay is NOT 1\n");
-    }
     pclose(file);
+    if(uboot_overlay == '1') {
+      /* Linux kernel booted with u-boot overlays enabled.
+         Do not load overlays via slots file as the write
+         will hang due to kernel bug in cape manager driver.
+         Skip cape manager and just return BBIO_OK. */
+      fprintf(stderr, "load_device_tree: u-boot overlays enable. return BBIO_OK.\n");
+      return BBIO_OK;
+    }
 
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
