@@ -57,6 +57,7 @@ BBIO_err initialize_adc(void)
     if (err == BBIO_OK) {
         strncat(adc_prefix_dir, "/sys/bus/iio/devices/iio:device0/in_voltage", sizeof(adc_prefix_dir));
         snprintf(test_path, sizeof(test_path), "%s%d_raw", adc_prefix_dir, 1);
+        sleep(1);
         fh = fopen(test_path, "r");
 
         if (!fh) {
