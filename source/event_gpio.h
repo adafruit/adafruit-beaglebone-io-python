@@ -48,6 +48,8 @@ SOFTWARE.
 
 #define USR_LED_GPIO_MIN 53
 #define USR_LED_GPIO_MAX 56
+#define USR_LED_RED      66
+#define USR_LED_GREEN    67
 
 #define PUD_OFF  0
 #define PUD_DOWN 1
