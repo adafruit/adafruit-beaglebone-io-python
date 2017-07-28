@@ -167,6 +167,12 @@ pins_t table[] = {
   { "DGND", "P9_44", 0, -1, -1},
   { "DGND", "P9_45", 0, -1, -1},
   { "DGND", "P9_46", 0, -1, -1},
+  
+  // These are for the Blue
+    { "GPIO1_17", "GP0_1", 49, -1, -1},
+
+  
+  
   { NULL, NULL, 0, 0, 0 }
 };
 
