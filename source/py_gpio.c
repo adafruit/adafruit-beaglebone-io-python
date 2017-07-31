@@ -138,12 +138,18 @@ static PyObject *py_setup_channel(__attribute__ ((unused)) PyObject *self, PyObj
        }
 
    } else {
-	   if (pud == PUD_DOWN)
-		   set_pin_mode(channel, "gpio_pd");
+       if (pud == PUD_DOWN)
+		   res = set_pin_mode(channel, "gpio_pd");
 	   else if (pud == PUD_UP)
-		   set_pin_mode(channel, "gpio_pu");
+		   res = set_pin_mode(channel, "gpio_pu");
 	   else
-		   set_pin_mode(channel, "gpio");
+		   res = set_pin_mode(channel, "gpio");
+   }
+   
+   //Check if set_pin_mode() returned no error
+   if (res != BBIO_OK) {
+       PyErr_SetString(PyExc_ValueError, "Set gpio mode failed, missing file or invalid permissions.");
+       return NULL;
    }
 
    gpio_direction[gpio] = direction;
