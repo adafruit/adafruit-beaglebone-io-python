@@ -25,9 +25,13 @@ neutral = [0x3c, 0x3c, 0x42, 0x42, 0xa9, 0xa9, 0x89, 0x89,
 ]
 
 bus.write_i2c_block_data(matrix, 0, frown)
-time.sleep(delay)
+for fade in range(0xef, 0xe0, -1):
+    bus.write_byte_data(matrix, fade, 0)
+    time.sleep(delay/10)
 
 bus.write_i2c_block_data(matrix, 0, neutral)
-time.sleep(delay)
+for fade in range(0xe0, 0xef, 1):
+    bus.write_byte_data(matrix, fade, 0)
+    time.sleep(delay/10)
 
 bus.write_i2c_block_data(matrix, 0, smile)
