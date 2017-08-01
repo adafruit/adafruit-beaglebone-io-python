@@ -3,8 +3,9 @@
 import Adafruit_BBIO.GPIO as GPIO
 import time
 
-LEDs = ["GP0_0", "GP0_1", "GP0_2", "GP0_3", "GP1_0", "GP1_1"]
+LEDs = ["GP0_0", "GP0_1", "GP0_2", "GP0_3", "GP1_0", "GP1_1", "UT1_0"]
 for LED in LEDs:
+    print(LED)
     GPIO.setup(LED, GPIO.OUT)
 
 while True:
