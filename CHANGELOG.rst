@@ -1,3 +1,61 @@
+1.0.4
+----
+* @djsutton (1):
+  * fix TypeError: function takes exactly 3 arguments (2 given) from wait_for_edge
+
+* @pdp7 (29):
+  * Instruct users to open GitHub issue instead email
+  * add udev rules and script for non-root access to gpio
+  * fix file descriptor leak in gpio_set_value()
+  * document how to test read and write to all GPIO pins
+  * reduce ADC reads in pytest from 10,000 to 1,000
+  * close file descriptor to avoid leak
+  * remove conditional logic for ctrl_dir and ocp_dir size
+  * increase size of ctrl_dir and ocp_dir for future use
+  * Document how to run config-pin at boot
+  * Document how to test eQEP with Rotary Encoder
+  * Add skeleton for Encoder module to read eQEP
+  * Add code to Encoder.QEP from PyBBIO.RotaryEncoder
+  * Adapt code from PyBBIO.RotaryEncoder
+  * add test for rotary encoder
+  * read from eqep position file
+  * return position from getPosition()
+  * document howo to enable all the eqep pins
+  * Document how to test eqep pins with rotary encoder
+  * run config-pin to set pin mux for qep
+  * update QEP test
+  * update QEP test for issue #122
+  * Test if kernel booted wit u-boot overlays
+  * check if kernel cmdline for uboot overlay
+  * Add documentation about u-boot overlays
+  * Return BBIO_OK when u-boot overlays ared enabled
+  * remove debug printing
+  * Skip check for device tree loaded if u-boot overlays enabled
+  * Sleep after loading ADC overlay to allow driver load
+  * Workaround test failure until TIMERn bug is fixed
+
+* @ltjax (3):
+  * Use lookup table to prevent duplicate pin export
+  * Handle already exported pins
+  * Fix build_path memory leak
+
+* @Vadim-Stupakov (1):
+  * Fixed issue #145 GPIO library doesn't free GPIO file descriptor. File descriptor leak.     Made a little bit refactoring
+
+* @cocasema (8):
+  * Declare PHONY targets in root Makefile
+  * Extract BBIO_err into a separate header
+  * Add syslog and debugging messages
+  * Add libadafruit-bbio with C++ wrappers for PWM/GPIO
+  * Add 2 versions of library with c++98 and c++11 abi
+  * Install header files properly
+  * Add default values to pwm::start() method.
+  * Add PWM c++ tests
+
+* @zsserg (2):
+  * Added error checking for setting pin direction in gpio.setup() (Python)
+  * Added debug output to set_pin_mode()
+
 1.0.3
 ----
 * Add -Wno-strict-aliasing to CFLAGS to ignore gcc warning
