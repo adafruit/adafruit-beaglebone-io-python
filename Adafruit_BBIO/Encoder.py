@@ -107,7 +107,7 @@ class RotaryEncoder(object):
     Config pin for QEP
     '''
     result = call(["config-pin", pin, "qep"])
-    print "config_pin> pin={0} result={1}".format(pin, result)
+    print("config_pin> pin={0} result={1}".format(pin, result))
     return result
   
   def cat_file(self, path):
@@ -116,7 +116,7 @@ class RotaryEncoder(object):
     Print contents of file
     '''
     result = call(["cat", path])
-    print "cat_file> path={0} result={1}".format(path, result)
+    print("cat_file> path={0} result={1}".format(path, result))
     return result
    
   def __init__(self, eqep_num):
@@ -127,10 +127,10 @@ class RotaryEncoder(object):
     eqep_num can be: EQEP0, EQEP1, EQEP2 or EQEP2b based on which pins \
     the rotary encoder is connected to.
     '''
-    print ">>>>>>>> TEST CALL BEGIN"
+    print(">>>>>>>> TEST CALL BEGIN")
 
     ###################################
-    print ">>>>>> eqep0: P9_27, P9_92"
+    print(">>>>>> eqep0: P9_27, P9_92")
     pin = "P9_27"
     self.config_pin(pin)
 
@@ -141,7 +141,7 @@ class RotaryEncoder(object):
     self.cat_file(path);
 
     ###################################
-    print ">>>>>>> eqep1: P8.33, P8.35"
+    print(">>>>>>> eqep1: P8.33, P8.35")
 
     pin = "P8.33"
     self.config_pin(pin)
@@ -153,7 +153,7 @@ class RotaryEncoder(object):
     self.cat_file(path);
 
     ###################################
-    print ">>>>>>> eqep2: P8.11, P8.12"
+    print(">>>>>>> eqep2: P8.11, P8.12")
 
     pin = "P8.11"
     self.config_pin(pin)
@@ -165,7 +165,7 @@ class RotaryEncoder(object):
     self.cat_file(path);
 
     ###################################
-    print ">>>>>>> eqep2b: P8.41, P8.42"
+    print(">>>>>>> eqep2b: P8.41, P8.42")
 
     pin = "P8.41"
     self.config_pin(pin)
@@ -177,7 +177,7 @@ class RotaryEncoder(object):
     self.cat_file(path);
 
     ###################################
-    print ">>>>>>>> TEST CALL END"
+    print(">>>>>>>> TEST CALL END")
 
     print("RotaryEncoder(): eqep_num: {0}".format(eqep_num))
     print("RotaryEncoder(): self._eqep_dirs[0]: {0}".format(self._eqep_dirs[0]))
@@ -307,7 +307,7 @@ class RotaryEncoder(object):
 #  encoder.zero()
 #  
 #def loop():
-#  print "encoder position : "+encoder.getPosition()
+#  print("encoder position : "+encoder.getPosition())
 #  delay(1000)
 #  
 #run(setup, loop)
