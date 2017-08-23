@@ -20,7 +20,11 @@ class TestSetup:
         GPIO.cleanup()
 
     def test_setup_output_name(self):
-        GPIO.setup("TIMER6", GPIO.OUT)
+        # WARNING: TIMERn syntax is not working on newer kernels
+        #          such as 4.4. Originally discovered while testing
+        #          Pull Request #152. See issue #156 for details.
+        #GPIO.setup("TIMER6", GPIO.OUT)
+        GPIO.setup("P8_10", GPIO.OUT)
         assert os.path.exists('/sys/class/gpio/gpio68')
         direction = open('/sys/class/gpio/gpio68/direction').read()
         assert direction == 'out\n'        
@@ -34,7 +38,11 @@ class TestSetup:
         GPIO.cleanup()
 
     def test_setup_input_name(self):
-        GPIO.setup("TIMER6", GPIO.IN)
+        # WARNING: TIMERn syntax is not working on newer kernels
+        #          such as 4.4. Originally discovered while testing
+        #          Pull Request #152. See issue #156 for details.
+        #GPIO.setup("TIMER6", GPIO.IN)
+        GPIO.setup("P8_10", GPIO.IN)
         assert os.path.exists('/sys/class/gpio/gpio68')
         direction = open('/sys/class/gpio/gpio68/direction').read()
         assert direction == 'in\n'        
