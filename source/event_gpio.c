@@ -194,6 +194,10 @@ int open_value_file(unsigned int gpio)
     // create file descriptor of value file
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
+    } else if(gpio == USR_LED_RED) {     // red LED
+        snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+    } else if(gpio == USR_LED_GREEN) {     // green LED
+        snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
     } else {
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
@@ -247,7 +251,8 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         char filename[40];
         char direction[10] = { 0 };
 
-        if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
+        if (((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) ||
+                (gpio == USR_LED_RED) || (gpio == USR_LED_GREEN)) {
             syslog(LOG_DEBUG, "gpio_set_direction: %u not applicable to the USR LED", gpio);
             return BBIO_OK; // direction is not applicable to the USR LED pins
         }
@@ -324,7 +329,11 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
-
+    
+    } else if(gpio == USR_LED_RED) {
+        snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+    } else if(gpio == USR_LED_GREEN) {
+        snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
     } else {
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
