@@ -125,6 +125,7 @@ BBIO_err gpio_export(unsigned int gpio)
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
     }
+    usleep(100000);      // Hack to wait for newly exported pins to get correct ownership
     return ret;
 }
 

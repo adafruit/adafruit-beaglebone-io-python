@@ -6,8 +6,8 @@
 import Adafruit_BBIO.GPIO as GPIO
 import time
 
-button="GP0_0"  # PAUSE=P8_9, MODE=P8_10
-LED   ="GP0_1"
+button="PAUSE"  # PAUSE=P8_9, MODE=P8_10
+LED   ="RED_LED"
 
 # Set the GPIO pins:
 GPIO.setup(LED,    GPIO.OUT)
