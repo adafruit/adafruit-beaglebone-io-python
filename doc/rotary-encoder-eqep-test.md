@@ -55,3 +55,47 @@ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 ```
 
 ### TODO: implement in corresponding methods in `Encoder.py`
+
+
+### Read QEP1
+* Updated: 2017-08-31
+* I was able to enable QEP1 with the following:
+
+#### /boot/uEnv.txt
+```
+uname_r=4.9.35-ti-r44
+enable_uboot_overlays=1
+disable_uboot_overlay_video=1
+cmdline=coherent_pool=1M net.ifnames=0 cape_universal=enable
+cape_enable=bone_capemgr.enable_partno=cape-universala
+```
+
+#### Read QEP1:
+```
+$ config-pin P8.33 qep
+$ config-pin P8.35 qep
+$ cat /sys/devices/platform/ocp/ocp\:P8_33_pinmux/state
+qep
+$ cat /sys/devices/platform/ocp/ocp\:P8_35_pinmux/state
+qep
+$ cat /sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position
+0
+```
+
+#### Version info:
+```
+$ sudo /opt/scripts/tools/version.sh
+git:/opt/scripts/:[2ce750d881941c5189db9e189af90517e11c079f]
+eeprom:[A335BNLT000C3014BBBK1316]
+dogtag:[BeagleBoard.org Debian Image 2017-06-18]
+bootloader:[microSD-(push-button)]:[/dev/mmcblk0]:[U-Boot
+2017.09-rc2-00002-g7c9353]
+bootloader:[eMMC-(default)]:[/dev/mmcblk1]:[U-Boot 2017.09-rc2-00002-g84a7f2]
+kernel:[4.9.35-ti-r44]
+nodejs:[v4.8.4]
+uboot_overlay_options:[enable_uboot_overlays=1]
+uboot_overlay_options:[disable_uboot_overlay_video=1]
+pkg:[bb-cape-overlays]:[4.4.20170728.0-0rcnee1~jessie+20170728]
+pkg:[bb-wl18xx-firmware]:[1.20170612-0rcnee0~jessie+20170612]
+WARNING:pkg:[firmware-ti-connectivity]:[NOT_INSTALLED]
+```
