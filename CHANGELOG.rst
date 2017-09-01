@@ -1,3 +1,34 @@
+1.0.5
+----
+* @pdp7 (5):
+  * Merge pull request #153 from MarkAYoder/master
+  * Fix print syntax to avoid python3 errors
+  * Merge pull request #160 from MarkAYoder/master
+  * document how to read QEP1
+  * Update rotary-encoder-eqep-test.md
+
+* @MarkAYoder (20):
+  * Have GP0_1 working
+  * Removed --force to speed things up
+  * Added GP0 1, 2 and 3
+  * Flashes 4 LEDs
+  * Works with button
+  * Blinks red and gree LEDs
+  * Blinks all 6 GPIOs
+  * Added red and green LEDs
+  * i2c works
+  * PWD isn't working, yet
+  * Added port setup
+  * Switched to apt install
+  * Added tmp101 to name
+  * Added LED matrix example
+  * Removed newline from print
+  * Added fade
+  * Adding GPIO defs for uart1
+  * Testing UT1_0, not working yet
+  * Switched GP0_0 to GP0_3, etc.
+  * Added PAUSE and MODE buttons.
+
 1.0.4
 ----
 * @djsutton (1):

@@ -40,7 +40,7 @@ extension_args = {
 }
 
 setup(name             = 'Adafruit_BBIO',
-      version          = '1.0.4',
+      version          = '1.0.5',
       author           = 'Justin Cooper',
       author_email     = 'justin@adafruit.com',
       description      = 'A module to control BeagleBone IO channels',
