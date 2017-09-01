@@ -57,7 +57,7 @@ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 ### TODO: implement in corresponding methods in `Encoder.py`
 
 
-### Read QEP1
+## Read QEP1
 * Updated: 2017-08-31
 * I was able to enable QEP1 with the following:
 
