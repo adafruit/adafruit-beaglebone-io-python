@@ -6,6 +6,9 @@
 
 This is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
 
+It is recommended to use an official BeagleBoard.org Debian image:
+https://beagleboard.org/latest-images
+
 **Note: BBIO has been renamed to Adafruit_BBIO.**
 
 **Installation on Ubuntu/Debian**
