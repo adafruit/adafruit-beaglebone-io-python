@@ -6,27 +6,7 @@
 
 This is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
 
-It has been tested on the 5-20 and 6-6 Angstrom image on the BeagleBone Black.
-
 **Note: BBIO has been renamed to Adafruit_BBIO.**
-
-**Installation on Angstrom**
-
-Easiest::
-
-    /usr/bin/ntpdate -b -s -u pool.ntp.org
-    opkg update && opkg install python-pip python-setuptools
-    pip install Adafruit_BBIO
-    
-Manual::
-
-    git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git 
-    #set the date and time 
-    /usr/bin/ntpdate -b -s -u pool.ntp.org 
-    #install dependency 
-    opkg update && opkg install python-distutils 
-    cd adafruit-beaglebone-io-python 
-    python setup.py install
 
 **Installation on Ubuntu/Debian**
 
