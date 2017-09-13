@@ -3,7 +3,7 @@
 import Adafruit_BBIO.GPIO as GPIO
 import time
 
-LEDs = ["RED_LED", "GREEN_LED"]
+LEDs = ["RED", "GREEN"]
 
 for LED in LEDs:
     GPIO.setup(LED, GPIO.OUT)

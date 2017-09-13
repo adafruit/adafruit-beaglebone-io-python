@@ -50,6 +50,11 @@ SOFTWARE.
 #define USR_LED_GPIO_MAX 56
 #define USR_LED_RED      66
 #define USR_LED_GREEN    67
+#define BAT25   27
+#define BAT50   11
+#define BAT75   61
+#define BAT100  10000       // Placeholder until I find the real number
+#define WIFI    10001       // Ditto
 
 #define PUD_OFF  0
 #define PUD_DOWN 1

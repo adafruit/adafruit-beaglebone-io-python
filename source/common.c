@@ -177,6 +177,11 @@ pins_t table[] = {
     { "GP1_4", "GP1_4",  97, -1, -1},
     { "RED_LED",   "RED",    66, -1, -1},   // LEDs
     { "GREEN_LED", "GREEN",  67, -1, -1},
+    { "BAT25", "BAT25",  27, -1, -1},
+    { "BAT50", "BAT50",  11, -1, -1},
+    { "BAT75", "BAT75",  61, -1, -1},
+    { "BAT100", "BAT100",  10000, -1, -1}, // Placeholder
+    { "WIFI", "WIFI",  10001, -1, -1}, // Placeholder
   
     { "PAUSE", "P8_9",  69, 1, -1},
     { "MODE",  "P8_10", 68, 1, -1},
