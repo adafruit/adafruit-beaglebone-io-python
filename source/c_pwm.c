@@ -348,7 +348,8 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         || device_tree_loaded("univ-nhdmi")))    // ""
     {
         syslog(LOG_ERR, "pwm_setup: %s no suitable cape loaded", key);
-        return BBIO_CAPE;
+        //FIXME; Assume U-Boot did the work...
+        //return BBIO_CAPE;
     }
     // Do pinmuxing
     if(!strcmp(key, "P9_28")) {
