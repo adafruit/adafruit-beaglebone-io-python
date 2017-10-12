@@ -659,6 +659,10 @@ int device_tree_loaded(const char *name)
       return 1;
     }
 
+    if(pocketbeagle()) {
+      return BBIO_OK;
+    }
+
     snprintf(slots, sizeof(slots), "%s/slots", ctrl_dir);
 
 
