@@ -313,10 +313,11 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     char pwm_addr_path[60]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm"
     char pwm_chip_path[75]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0"
     char pwm_export_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/export"
-    char pwm_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1"
-    char duty_path[90]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1/duty_cycle"
-    char period_path[90];
-    char polarity_path[90];
+    char pwm_path[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1"
+    char pwm_path_udev[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm-0:1"
+    char duty_path[95]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1/duty_cycle"
+    char period_path[95];
+    char polarity_path[95];
     char enable_path[90];
     char pin_mode[PIN_MODE_LEN]; // "pwm" or "pwm2"
 
@@ -387,6 +388,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     }
 
     snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
+    snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%s:%d", pwm_chip_path, pwm_chip_path, p->index);
 
     // Export PWM if hasn't already been
     e = stat(pwm_path, &s);
@@ -422,7 +424,17 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         if (ENOENT == errno) {
             // Directory still doesn't exist, exit with error
             syslog(LOG_ERR, "pwm_setup: %s %s doesn't exist", key, pwm_path);
-            return BBIO_GEN;
+            //return BBIO_GEN;
+
+            e = stat(pwm_path_udev, &s);
+            if (-1 == e) {
+                if (ENOENT == errno) {
+                    // Directory still doesn't exist, exit with error
+                    syslog(LOG_ERR, "pwm_setup: %s %s doesn't exist", key, pwm_path_udev);
+                    return BBIO_GEN;
+                }
+            }
+            strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path_udev));
         }
     }
 
