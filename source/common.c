@@ -561,6 +561,28 @@ int uboot_overlay_enabled(void) {
     }
 }
 
+/*
+   PocketBeagle has everything built-in to the main dtb
+*/
+int pocketbeagle(void) {
+    const char *cmd = "/bin/grep -c 'TI AM335x PocketBeagle' /proc/device-tree/model";
+    char pocketbeagle;
+    FILE *file = NULL;
+
+    file = popen(cmd, "r");
+    if (file == NULL) {
+       fprintf(stderr, "error: pocketbeagle() failed to run cmd=%s\n", cmd);
+       return -1;
+    }
+    pocketbeagle = fgetc(file);
+    pclose(file);
+
+    if(pocketbeagle == '1') {
+      return 1;
+    } else {
+      return 0;
+    }
+}
 
 BBIO_err load_device_tree(const char *name)
 {
@@ -580,6 +602,10 @@ BBIO_err load_device_tree(const char *name)
        will hang due to kernel bug in cape manager driver. Just return
        BBIO_OK in order to avoid cape manager bug. */
     if(uboot_overlay_enabled()) {
+      return BBIO_OK;
+    }
+
+    if(pocketbeagle()) {
       return BBIO_OK;
     }
 
