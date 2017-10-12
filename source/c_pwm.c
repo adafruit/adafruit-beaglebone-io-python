@@ -388,7 +388,9 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     }
 
     snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
+    syslog(LOG_ERR, "pwm_setup_debug: %s %s", key, pwm_path);
     snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%s:%d", pwm_chip_path, pwm_chip_path, p->index);
+    syslog(LOG_ERR, "pwm_setup_debug: %s %s", key, pwm_path_udev);
 
     // Export PWM if hasn't already been
     e = stat(pwm_path, &s);
