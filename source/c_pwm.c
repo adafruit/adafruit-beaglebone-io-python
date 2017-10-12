@@ -581,11 +581,12 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         return BBIO_GEN;
     }
 
-    err = pwm_set_polarity(key, polarity);
-    if (err != BBIO_OK) {
-        syslog(LOG_ERR, "pwm_start: %s couldn't set polarity: %i", key, err);
-        return err;
-    }
+//FIXME: polarity set broken in v4.9.x/v4.14.x
+//    err = pwm_set_polarity(key, polarity);
+//    if (err != BBIO_OK) {
+//        syslog(LOG_ERR, "pwm_start: %s couldn't set polarity: %i", key, err);
+//        return err;
+//    }
 
     // Read out current period_ns from the file, in order for it to behave
     // properly
