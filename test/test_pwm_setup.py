@@ -96,10 +96,17 @@ class TestPwmSetup:
         assert int(duty) == 0
         assert int(period) == 500000
 
-        if kernel >= '4.1.0':
-            assert polarity == "inversed\n"
-        else:
-            assert int(polarity) == 1
+        # TEMPORARY FIX: disable polarity check
+        # due to issue in 4.9.x+ kernels
+        # refer to issue #170:
+        # https://github.com/adafruit/adafruit-beaglebone-io-python/issues/170
+        # and commit c35e4cb from pull request #173:
+        # "source/c_pwm.c: disable pwm_set_polarity (broken in v4.9.x/v4.14.x)"
+        # https://github.com/adafruit/adafruit-beaglebone-io-python/pull/173/commits/c35e4cb98a1f14c85aca7259132bcc97e93d78f8
+        #if kernel >= '4.1.0':
+        #   assert polarity == "inversed\n"
+        #else:
+        #   assert int(polarity) == 1
         PWM.cleanup()
 
     def test_start_pwm_with_polarity_default(self):
@@ -118,10 +125,17 @@ class TestPwmSetup:
         assert int(duty) == 0
         assert int(period) == 500000
 
-        if kernel >= '4.1.0':
-            assert polarity == 'normal\n'
-        else:
-            assert int(polarity) == 0
+        # TEMPORARY FIX: disable polarity check
+        # due to issue in 4.9.x+ kernels
+        # refer to issue #170:
+        # https://github.com/adafruit/adafruit-beaglebone-io-python/issues/170
+        # and commit c35e4cb from pull request #173:
+        # "source/c_pwm.c: disable pwm_set_polarity (broken in v4.9.x/v4.14.x)"
+        # https://github.com/adafruit/adafruit-beaglebone-io-python/pull/173/commits/c35e4cb98a1f14c85aca7259132bcc97e93d78f8
+        #if kernel >= '4.1.0':
+        #    assert polarity == 'normal\n'
+        #else:
+        #    assert int(polarity) == 0
         PWM.cleanup()
 
     def test_start_pwm_with_polarity_zero(self):
