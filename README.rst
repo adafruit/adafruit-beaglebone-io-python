@@ -52,7 +52,8 @@ You can also refer to the pin names::
 Setup the pin for output, and write GPIO.HIGH or GPIO.LOW. Or you can use 1 or 0.::
 
     import Adafruit_BBIO.GPIO as GPIO
-    GPIO.setup("P8_14", GPIO.OUT) GPIO.output("P8_14", GPIO.HIGH)
+    GPIO.setup("P8_14", GPIO.OUT)
+    GPIO.output("P8_14", GPIO.HIGH)
 
 **On-Board LEDs**
 
