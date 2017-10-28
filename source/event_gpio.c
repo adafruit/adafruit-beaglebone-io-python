@@ -351,6 +351,31 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     char filename[MAX_FILENAME];
     char vstr[10];
 
+    if(uboot_overlay_enabled()) {
+      syslog(LOG_DEBUG, "libadafruit-bbio: uboot_overlay_enabled() is true");
+      fprintf(stderr, "libadafruit-bbio: uboot_overlay_enabled() is true\n");
+    } else {   
+      syslog(LOG_DEBUG, "libadafruit-bbio: uboot_overlay_enabled() is FALSE");
+      fprintf(stderr, "libadafruit-bbio: uboot_overlay_enabled() is FASLE\n");
+    }
+
+    if(pocketbeagle()) {
+      syslog(LOG_DEBUG, "libadafruit-bbio: pocketbeagle() is true");
+      fprintf(stderr, "libadafruit-bbio: pocketbeagle() is true\n");
+    } else {   
+      syslog(LOG_DEBUG, "libadafruit-bbio: pocketbeagle() is FALSE");
+      fprintf(stderr, "libadafruit-bbio: pocketbeagle() is FASLE\n");
+    }
+
+    if(beaglebone_blue()) {
+      syslog(LOG_DEBUG, "libadafruit-bbio: beaglebone_blue() is true");
+      fprintf(stderr, "libadafruit-bbio: beaglebone_blue() is true\n");
+    } else {
+      syslog(LOG_DEBUG, "libadafruit-bbio: beaglebone_blue() is FALSE");
+      fprintf(stderr, "libadafruit-bbio: beaglebone_blue() is FALSE\n");
+    }
+
+
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
 
         char *usr_led_trigger[] = { "heartbeat", "mmc0", "cpu0", "mmc1" }; 

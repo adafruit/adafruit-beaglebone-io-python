@@ -589,6 +589,34 @@ int pocketbeagle(void) {
     }
 }
 
+
+/*
+   Check if board is a BeagleBone Blue
+
+   Refer to GitHub issue for more information:
+   https://github.com/adafruit/adafruit-beaglebone-io-python/issues/178
+*/
+int beaglebone_blue(void) {
+    const char *cmd = "/bin/grep -c 'TI AM335x BeagleBone Blue' /proc/device-tree/model";
+    char blue;
+    FILE *file = NULL;
+
+    file = popen(cmd, "r");
+    if (file == NULL) {
+       fprintf(stderr, "error: beaglebone_blue() failed to run cmd=%s\n", cmd);
+       return -1;
+    }
+    blue = fgetc(file);
+    pclose(file);
+
+    if(blue == '1') {
+      return 1;
+    } else {
+      return 0;
+    }
+}
+
+
 BBIO_err load_device_tree(const char *name)
 {
     char line[256];
