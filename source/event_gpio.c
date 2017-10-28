@@ -190,37 +190,44 @@ int add_fd_list(unsigned int gpio, int fd)
 int open_value_file(unsigned int gpio)
 {
     int fd;
-    char filename[MAX_FILENAME];
+    char filename[MAX_FILENAME] = "";
 
     // create file descriptor of value file
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
-    } else switch(gpio) {
-        case USR_LED_RED:
-           snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-           break;
-        case USR_LED_GREEN:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-            break;
-        case BAT25:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
-            break;
-        case BAT50:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
-            break;
-        case BAT75:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
-            break;
-        case BAT100:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
-            break;
-        case WIFI:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
-            break;
-        default:
-            snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-            break;
+    } else if (beaglebone_blue()) {
+        fprintf(stderr, "gpio open_value_file: beaglebone_blue() is true\n");
+        switch(gpio) {
+            case USR_LED_RED:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+                break;
+            case USR_LED_GREEN:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
+                break;
+            case BAT25:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
+                break;
+            case BAT50:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
+                break;
+            case BAT75:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
+                break;
+            case BAT100:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
+                break;
+            case WIFI:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
+                break;
+            default:
+                snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+                break;
+        }
+    } else {
+        fprintf(stderr, "gpio open_value_file: default gpio path\n");
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
+    fprintf(stderr, "gpio open_value_file: filename=%s\n", filename);
     
     // if(gpio == USR_LED_RED) {     // red LED
     //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -279,11 +286,23 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         char filename[40];
         char direction[10] = { 0 };
 
-        if (((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) ||
-                (gpio == USR_LED_RED) || (gpio == USR_LED_GREEN)
-                 || (gpio == BAT25) || (gpio == BAT50)
-                 || (gpio == BAT75) || (gpio == BAT100)
-                 || (gpio == WIFI)) {
+        if ( ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) 
+             ||
+             ( beaglebone_blue() 
+               &&
+               ( 
+                 (gpio == USR_LED_RED)
+                 || (gpio == USR_LED_GREEN)
+                 || (gpio == BAT25)
+                 || (gpio == BAT50)
+                 || (gpio == BAT75)
+                 || (gpio == BAT100)
+                 || (gpio == WIFI)
+               ) 
+             )
+           )
+        {
+            fprintf(stderr, "gpio_set_direction: %u not applicable to the USR LED\n", gpio);
             syslog(LOG_DEBUG, "gpio_set_direction: %u not applicable to the USR LED", gpio);
             return BBIO_OK; // direction is not applicable to the USR LED pins
         }
@@ -352,29 +371,23 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     char vstr[10];
 
     if(uboot_overlay_enabled()) {
-      syslog(LOG_DEBUG, "libadafruit-bbio: uboot_overlay_enabled() is true");
-      fprintf(stderr, "libadafruit-bbio: uboot_overlay_enabled() is true\n");
+      //syslog(LOG_DEBUG, "libadafruit-bbio: uboot_overlay_enabled() is true");
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is true\n");
     } else {   
-      syslog(LOG_DEBUG, "libadafruit-bbio: uboot_overlay_enabled() is FALSE");
-      fprintf(stderr, "libadafruit-bbio: uboot_overlay_enabled() is FASLE\n");
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is FASLE\n");
     }
 
     if(pocketbeagle()) {
-      syslog(LOG_DEBUG, "libadafruit-bbio: pocketbeagle() is true");
-      fprintf(stderr, "libadafruit-bbio: pocketbeagle() is true\n");
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is true\n");
     } else {   
-      syslog(LOG_DEBUG, "libadafruit-bbio: pocketbeagle() is FALSE");
-      fprintf(stderr, "libadafruit-bbio: pocketbeagle() is FASLE\n");
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is FASLE\n");
     }
 
     if(beaglebone_blue()) {
-      syslog(LOG_DEBUG, "libadafruit-bbio: beaglebone_blue() is true");
-      fprintf(stderr, "libadafruit-bbio: beaglebone_blue() is true\n");
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is true\n");
     } else {
-      syslog(LOG_DEBUG, "libadafruit-bbio: beaglebone_blue() is FALSE");
-      fprintf(stderr, "libadafruit-bbio: beaglebone_blue() is FALSE\n");
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is FALSE\n");
     }
-
 
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
 
@@ -385,33 +398,39 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
-    
-    } else switch(gpio) {
-        case USR_LED_RED:
-           snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-           break;
-        case USR_LED_GREEN:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-            break;
-        case BAT25:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
-            break;
-        case BAT50:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
-            break;
-        case BAT75:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
-            break;
-        case BAT100:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
-            break;
-        case WIFI:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
-            break;
-        default:
-            snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-            break;
+    } else if (beaglebone_blue()) {
+        fprintf(stderr, "gpio_set_value: beaglebone_blue() is true\n");
+        switch(gpio) {
+            case USR_LED_RED:
+               snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+               break;
+            case USR_LED_GREEN:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
+                break;
+            case BAT25:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
+                break;
+            case BAT50:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
+                break;
+            case BAT75:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
+                break;
+            case BAT100:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
+                break;
+            case WIFI:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
+                break;
+            default:
+                snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+                break;
+        }
+    } else {
+        fprintf(stderr, "gpio_set_value: default gpio path\n");
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
+    fprintf(stderr, "gpio_set_value: filename=%s\n", filename);
 
     // if(gpio == USR_LED_RED) {
     //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
