@@ -581,12 +581,6 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         return BBIO_GEN;
     }
 
-    err = pwm_set_polarity(key, polarity);
-    if (err != BBIO_OK) {
-        syslog(LOG_ERR, "pwm_start: %s couldn't set polarity: %i", key, err);
-        return err;
-    }
-
     // Read out current period_ns from the file, in order for it to behave
     // properly
     memset(buffer, 0, sizeof(buffer));  // Initialize buffer
@@ -625,15 +619,24 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 
     // Initialize pwm->duty to avoid weirdness
     pwm->duty = duty;
+    fprintf(stderr, "pwm_set_frequency()\n");
     err = pwm_set_frequency(key, freq);
     if (err != BBIO_OK) {
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_start: %s couldn't set duty frequency: %i", key, err);
         return err;
     }
 
+    fprintf(stderr, "pwm_set_duty_cycle()\n");
     err = pwm_set_duty_cycle(key, duty);
     if (err != BBIO_OK) {
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_start: %s couldn't set duty cycle: %i", key, err);
+        return err;
+    }
+
+    fprintf(stderr, "pwm_set_polarity()\n");
+    err = pwm_set_polarity(key, polarity);
+    if (err != BBIO_OK) {
+        syslog(LOG_ERR, "pwm_start: %s couldn't set polarity: %i", key, err);
         return err;
     }
 
@@ -642,6 +645,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         return BBIO_GEN;
     }
     len = snprintf(buffer, sizeof(buffer), "1");
+    fprintf(stderr, "write 1 to pwm->enable_fd\n");
     lseek(pwm->enable_fd, 0, SEEK_SET);
     if (write(pwm->enable_fd, buffer, len) < 0) {
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_start: %s couldn't write enable: %i-%s",
