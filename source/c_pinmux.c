@@ -36,9 +36,9 @@ BBIO_err set_pin_mode(const char *key, const char *mode)
 	if (NULL == f) {
 		return BBIO_ACCESS;
 	}
-	syslog(LOG_DEBUG, "set_pin_mode() :: Pinmux file %s access OK", path); 
+	syslog(LOG_DEBUG, "Adafruit_BBIO: set_pin_mode() :: Pinmux file %s access OK", path); 
 	fprintf(f, "%s", mode);
 	fclose(f);
-	syslog(LOG_DEBUG, "set_pin_mode() :: Set pinmux mode to %s for %s", mode, pin);
+	syslog(LOG_DEBUG, "Adafruit_BBIO: set_pin_mode() :: Set pinmux mode to %s for %s", mode, pin);
 	return BBIO_OK;
 }
