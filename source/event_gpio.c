@@ -238,7 +238,7 @@ int open_value_file(unsigned int gpio)
     // }
 
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0) {
-        syslog(LOG_ERR, "gpio open_value_file: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio open_value_file: %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return -1;
     }
@@ -259,7 +259,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
 #define GPIO_UNEXPORT "/sys/class/gpio/unexport"
 
     if ((fd = open(GPIO_UNEXPORT, O_WRONLY)) < 0) {
-      syslog(LOG_ERR, "gpio_unexport: %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
+      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport: %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
              gpio, errno, strerror(errno));
       return BBIO_SYSFS;
     }
