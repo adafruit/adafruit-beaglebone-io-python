@@ -554,6 +554,7 @@ int uboot_overlay_enabled(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "libadafruit-bbio: error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
        return -1;
     }
     uboot_overlay = fgetc(file);
@@ -577,6 +578,7 @@ int pocketbeagle(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: pocketbeagle() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "libadafruit-bbio: error: pocketbeagle() failed to run cmd=%s\n", cmd);
        return -1;
     }
     pocketbeagle = fgetc(file);
@@ -604,6 +606,7 @@ int beaglebone_blue(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: beaglebone_blue() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "libadafruit-bbio: error: beaglebone_blue() failed to run cmd=%s\n", cmd);
        return -1;
     }
     blue = fgetc(file);
