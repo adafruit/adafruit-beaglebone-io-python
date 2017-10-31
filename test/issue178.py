@@ -35,7 +35,11 @@
 
 import Adafruit_BBIO.GPIO as GPIO
 
-test_pins = [ "P8_7", "P8_8", "P8_17", "P8_32", "P8_26" ]
+test_pins = [
+              "USR0", "USR1", "USR2", "USR3",
+              "RED_LED", "GREEN_LED", "BAT25", "BAT50", "BAT75",
+              "P8_7", "P8_8", "P8_17", "P8_32", "P8_26"
+            ]
 
 for pin in test_pins:
   print("========================")
