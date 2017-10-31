@@ -302,7 +302,7 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
              )
            )
         {
-            syslog(LOG_DEBUG, "gpio_set_direction: %u not applicable to the USR LED", gpio);
+            syslog(LOG_WARNING, "gpio_set_direction: %u not applicable to built-in LEDs", gpio);
             return BBIO_OK; // direction is not applicable to the USR LED pins
         }
 
