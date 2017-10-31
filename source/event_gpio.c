@@ -369,17 +369,41 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     char filename[MAX_FILENAME];
     char vstr[10];
 
+    // TODO: remove this debug output created for issue #178
+    /*
+    if(uboot_overlay_enabled()) {
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is FASLE\n");
+    }
+
+    if(pocketbeagle()) {
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is FASLE\n");
+    }
+
+    if(beaglebone_blue()) {
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is FALSE\n");
+    }
+    */
+
+
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
 
         char *usr_led_trigger[] = { "heartbeat", "mmc0", "cpu0", "mmc1" }; 
         int led = gpio -  USR_LED_GPIO_MIN;
+
+        syslog(LOG_DEBUG, "libadafruit-bbio: gpio_set_value: USR LED path\n");
 
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", led);
         if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
     } else if (beaglebone_blue()) {
-        fprintf(stderr, "gpio_set_value: beaglebone_blue() is true\n");
+        syslog(LOG_DEBUG, "libadafruit-bbio: gpio_set_value: beaglebone_blue() is true\n");
         switch(gpio) {
             case USR_LED_RED:
                snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -407,18 +431,10 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
                 break;
         }
     } else {
-        fprintf(stderr, "gpio_set_value: default gpio path\n");
+        syslog(LOG_DEBUG, "libadafruit-bbio: gpio_set_value: default gpio path\n");
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
-    fprintf(stderr, "gpio_set_value: filename=%s\n", filename);
-
-    // if(gpio == USR_LED_RED) {
-    //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-    // } else if(gpio == USR_LED_GREEN) {
-    //     snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-    // } else {
-    //     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-    // }
+    syslog(LOG_DEBUG, "libadafruit-bbio: gpio_set_value: filename=%s\n", filename);
 
     fd = open(filename, O_WRONLY);
     if (fd < 0) {
