@@ -538,7 +538,6 @@ int get_spi_bus_path_number(unsigned int spi)
 
 /*
    Refer to: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
-
    Robert C. Nelson maintains the BeagleBoard.org Debian images and
    suggested adding this check to see if u-boot overlays are enabled.
 
@@ -554,7 +553,7 @@ int uboot_overlay_enabled(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
-       syslog(LOG_ERR, "libadafruit-bbio: error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "Adafruit_BBIO: error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
        return -1;
     }
     uboot_overlay = fgetc(file);
@@ -578,7 +577,7 @@ int pocketbeagle(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: pocketbeagle() failed to run cmd=%s\n", cmd);
-       syslog(LOG_ERR, "libadafruit-bbio: error: pocketbeagle() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "Adafruit_BBIO: error: pocketbeagle() failed to run cmd=%s\n", cmd);
        return -1;
     }
     pocketbeagle = fgetc(file);
@@ -606,7 +605,7 @@ int beaglebone_blue(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: beaglebone_blue() failed to run cmd=%s\n", cmd);
-       syslog(LOG_ERR, "libadafruit-bbio: error: beaglebone_blue() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "Adafruit_BBIO: error: beaglebone_blue() failed to run cmd=%s\n", cmd);
        return -1;
     }
     blue = fgetc(file);
@@ -776,7 +775,7 @@ void initlog(int level, const char* ident, int option)
     option = BBIO_LOG_OPTION;
   }
   openlog(ident, option, LOG_LOCAL1);
-  syslog(LOG_NOTICE, "libadafruit-bbio version %s initialized", "<unknown>");
+  syslog(LOG_NOTICE, "Adafruit_BBIO: version %s initialized", "<unknown>");
 
   initialized = 1;
 }
