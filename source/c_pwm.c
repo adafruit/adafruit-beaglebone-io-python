@@ -315,6 +315,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     char pwm_export_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/export"
     char pwm_path[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1"
     char pwm_path_udev[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm-0:1"
+    char ecap_path_udev[85];// "/sys/devices/platform/ocp/48300000.epwmss/48300100.ecap/pwm/pwmchip0/pwm-0:0/"
     char duty_path[95]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1/duty_cycle"
     char period_path[95];
     char polarity_path[95];
@@ -389,11 +390,14 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     }
 
     snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
-    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: %s, %s", key, pwm_path);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path: %s", key, pwm_path);
 
     //pwm with udev patch
     snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[66], p->index);
-    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: %s, %s", key, pwm_path_udev);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
+    //ecap output with udev patch
+    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[67], p->index);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
 
     // Export PWM if hasn't already been
     e = stat(pwm_path, &s);
@@ -427,21 +431,32 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     e = stat(pwm_path, &s);
     if (-1 == e) {
         if (ENOENT == errno) {
-            // Directory still doesn't exist, exit with error
-            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s %s doesn't exist", key, pwm_path);
-            //return BBIO_GEN;
+            // Directory still doesn't exist, try the new udev pwm path format in 4.14 kernel
+            syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: key: %s pwm_path: %s doesn't exist", key, pwm_path);
 
             e = stat(pwm_path_udev, &s);
             if (-1 == e) {
                 if (ENOENT == errno) {
-                    // Directory still doesn't exist, exit with error
-                    syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s %s doesn't exist", key, pwm_path_udev);
-                    return BBIO_GEN;
+                    // Directory still doesn't exist, try the new udev ecap path format in 4.14 kernel
+                    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: key: %s pwm_path_udev: %s doesn't exist", key, pwm_path_udev);
+                    e = stat(ecap_path_udev, &s);
+                    if (-1 == e) {
+                        if (ENOENT == errno) {
+                            // Directory still doesn't exist, exit with error
+                            syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: key: %s ecap_path_udev: %s doesn't exist", key, ecap_path_udev);
+                            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: path for %s doesn't exist", key);
+                            return BBIO_GEN;
+                        }
+                    } else {
+                        strncpy(pwm_path, ecap_path_udev, sizeof(ecap_path_udev));
+                    }
                 }
+            } else {
+              strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path_udev));
             }
-            strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path_udev));
         }
     }
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: pwm_path=%s\n", pwm_path);
 
     snprintf(duty_path, sizeof(duty_path), "%s/duty_cycle", pwm_path);
     snprintf(enable_path, sizeof(enable_path), "%s/enable", pwm_path);
