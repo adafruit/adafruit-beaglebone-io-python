@@ -661,7 +661,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
         return BBIO_GEN;
     }
     len = snprintf(buffer, sizeof(buffer), "1");
-    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: write(pwm->enable_fd, buffer=%s, len=%d)", buffer, len);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: write 1 to pwm->enable_fd\n");
     lseek(pwm->enable_fd, 0, SEEK_SET);
     if (write(pwm->enable_fd, buffer, len) < 0) {
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_start: %s couldn't write enable: %i-%s",
