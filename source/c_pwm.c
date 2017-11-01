@@ -336,7 +336,9 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     }
 
     // Make sure that one of the universal capes is loaded
-    if (!( device_tree_loaded("cape-univ-audio") // from cdsteinkuehler/beaglebone-universal-io
+    if( !uboot_overlay_enabled() // only check kernel overlays if u-boot overlays are not being used
+        &&
+        !( device_tree_loaded("cape-univ-audio") // from cdsteinkuehler/beaglebone-universal-io
         || device_tree_loaded("cape-univ-emmc")  // ""
         || device_tree_loaded("cape-univ-hdmi")  // ""
         || device_tree_loaded("cape-universal")  // ""
@@ -349,8 +351,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         || device_tree_loaded("univ-nhdmi")))    // ""
     {
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s no suitable cape loaded", key);
-        //FIXME; Assume U-Boot did the work...
-        //return BBIO_CAPE;
+        return BBIO_CAPE;
     }
     // Do pinmuxing
     if(!strcmp(key, "P9_28")) {

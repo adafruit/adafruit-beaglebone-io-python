@@ -560,8 +560,10 @@ int uboot_overlay_enabled(void) {
     pclose(file);
 
     if(uboot_overlay == '1') {
+      syslog(LOG_DEBUG, "Adafruit_BBIO: uboot_overlay_enabled() is true\n");
       return 1;
     } else {
+      syslog(LOG_DEBUG, "Adafruit_BBIO: uboot_overlay_enabled() is false\n");
       return 0;
     }
 }
