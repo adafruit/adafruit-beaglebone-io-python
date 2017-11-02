@@ -1,12 +1,14 @@
-# Adafruit's BeagleBone IO Python Library
+# Adafruit BeagleBone I/O Python Library (Adafruit_BBIO)
 
-This is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone using the Linux 3.8 Kernel and above (latest releases).
+* Adafruit_BBIO is a set of Python tools to allow GPIO, PWM, and ADC access on the BeagleBone
 
-It is recommended to use an official BeagleBoard.org Debian image:
-https://beagleboard.org/latest-images
+* It is recommended to use an [official BeagleBoard.org Debian image](https://beagleboard.org/latest-images)
+  * Currently recommended image: [Stretch Snapshot iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29) with [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.0-rc7-ti-r6](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29)
+    * note: Cloud9 IDE is now fully compatible with Adafruit_BBIO as udev is configured to enable non-root control of GPIO and PWM _(refer to commit [b65cbf8](https://github.com/adafruit/adafruit-beaglebone-io-python/commit/b65cbf8e41b444bad7c4ef6cfd4f88a30210fd78))_
 
+* Adafruit_BBIO supports Linux kernels 3.8 through 4.14
 
-**NOTE: This library may have breaking changes as development continues. Please read the changelog.**
+* New versions of Adafruit_BBIO may break backwards compility. Please read the [changelog](CHANGELOG.md).
 
 ## Installation on Debian**
 
