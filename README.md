@@ -8,9 +8,9 @@
 
 * Adafruit_BBIO supports Linux kernels 3.8 through 4.14
 
-* New versions of Adafruit_BBIO may break backwards compility. Please read the [changelog](CHANGELOG.md).
+* New versions of Adafruit_BBIO may break backwards compatibility. Please read the [changelog](CHANGELOG.md).
 
-## Installation on Debian**
+## Installation on Debian
 
 Easiest:
 ```
@@ -132,16 +132,47 @@ Detecting events:
     #read_raw returns non-normalized value 
     value = ADC.read_raw("P9_40")
 
+### [UART](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart)
+* Use [`config-pin` to set pin mode](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) for [UART1 and UART2 pins](http://beagleboard.org/static/images/cape-headers-serial.png)
+```
+config-pin P9.21 uart  # UART2_TXD
+config-pin P9.22 uart  # UART2_RXD
+config-pin P9.24 uart  # UART1_TXD
+config-pin P9.26 uart  # UART1_RXD
+```
+* [Install pyserial](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart#using-uart-with-python)
+```
+sudo pip install pyserial
+```
+* [Test UART1](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart#using-uart-with-python)
+```
+import Adafruit_BBIO.UART as UART
+import serial
+
+UART.setup("UART1")
+
+ser = serial.Serial(port = "/dev/ttyO1", baudrate=9600)
+ser.close()
+ser.open()
+if ser.isOpen():
+	print "Serial is open!"
+    ser.write("Hello World!")
+ser.close()
+```
+* [Loopback test with UART1 and UART2](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart#testing-and-using-the-uart)
+
 ## Running tests
 
 Install py.test to run the tests. You'll also need the python compiler package for pytest:
-
-    pip install -U pytest 
-
+```
+sudo pip install pytest
+```
 Execute the following in the root of the project:
+```
+sudo pytest
+```
+NOTE: `sudo` should not be required when running [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29) with [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.x](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29) as udev configures group ownership and permission for [GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules)
 
-    pytest
-    
 ## Credits
 
 The BeagleBone IO Python library was originally forked from the excellent MIT Licensed [RPi.GPIO](https://code.google.com/p/raspberry-gpio-python) library written by Ben Croston.
