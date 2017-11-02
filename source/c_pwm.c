@@ -412,6 +412,10 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
             }
             fprintf(f, "%d", p->index);
             fclose(f);
+            /* sleep to avoid race condition as udev needs the
+               opportunity to set group ownership and permission */
+            syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: sleep 100 ms after export to avoid udev race condition");
+            usleep(100 * 1000); /* 100 ms */
         } else {
             syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't stat %s: %i-%s",
                    key, pwm_path, errno, strerror(errno));
