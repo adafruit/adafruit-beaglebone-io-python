@@ -1,3 +1,41 @@
+1.0.6
+----
+* Drew Fustini (39):
+  * Add -Wno-unit_address_vs_reg to avoid dtc warning
+  * check if board is BeagleBone Blue or PocketBeagle
+  * check if BeagleBone Blue before accessing non-standard LEDs
+  * Add test for GPIO regression #178
+  * change syslog mask level to DEBUG
+  * add "Adafruit_BBIO" to syslog()
+  * update test for issue #178
+  * remove polarity "hack" for PWM #170
+  * move pwm_set_polarity() after period is set
+  * add test for issue #170
+  * only check kernel overlays if u-boot overlays are not being used
+  * Attempt to use udev ecap path for pwm path
+  * add test script for all BeagleBone PWM outputs
+  * update PWM test for 4.14 kernel udev paths
+    * * minor change to pwm debug logging
+  * sleep to avoid udev race condition #185
+    
+* Mark A. Yoder (1):
+  * Added BAT25, BAT50, BAT75, BAT100 and WIFI LEDs
+
+* Peter Lawler (1):
+  * Missing CR/LF
+    
+* Robert Nelson (10):
+  * source/common.c: add initial PocketBeagle values
+  * source/common.c: PocketBeagle, no slots file, everything built-in
+  * source/common.c: PocketBeagle, no slots file disable here too
+  * source/c_pwm.c: HACK: U-Boot pre-setup everything, dont search for specific overlay
+  * source/c_pwm.c: HACK: PocketBeagle: v4.14.x
+  * source/c_pwm.c: debug pwm_path/pwm_path_udev
+  * source/c_pwm.c: pwm: add support for pwmchipX/pwm-X:Y syntax
+  * source/c_pwm.c: disable pwm_set_polarity (broken in v4.9.x/v4.14.x)
+  * source/common.c: Blue Fix GP0_3 id
+  * source/common.c: PocketBeagle Fix P2.24
+
 1.0.5
 ----
 * @pdp7 (5):
