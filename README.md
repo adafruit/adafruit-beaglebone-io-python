@@ -29,6 +29,11 @@ git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git
 cd adafruit-beaglebone-io-python
 sudo python setup.py install
 ```
+
+Upgrade Adafruit_BBIO to latest version on [PyPI](https://pypi.python.org/pypi/Adafruit_BBIO):
+```
+sudo pip install --upgrade Adafruit_BBIO
+```
     
 ## Usage
 
