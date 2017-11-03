@@ -39,6 +39,28 @@ sudo pip install --upgrade Adafruit_BBIO
 
 Using the library is very similar to the excellent RPi.GPIO library used on the Raspberry Pi. Below are some examples.
 
+### config-pin
+
+[config-pin](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) is now used on the official BeagleBoard.org Debian Jessie and Stretch images to control pin mode (e.g. pin mux).
+
+```
+debian@beaglebone:~$ config-pin -q P9_14
+P9_14 Mode: pwm
+
+debian@beaglebone:~$ config-pin -l P9_14
+default gpio gpio_pu gpio_pd pwm
+
+debian@beaglebone:~$ config-pin P9_14 gpio
+
+debian@beaglebone:~$ config-pin -q P9_14
+P9_14 Mode: gpio Direction: in Value: 0
+
+debian@beaglebone:~$ config-pin P9_14 pwm
+
+debian@beaglebone:~$ config-pin -q P9_14
+P9_14 Mode: pwm
+```
+
 ### GPIO Setup
 
 Import the library, and setup as GPIO.OUT or GPIO.IN::
