@@ -1,5 +1,14 @@
 1.0.6
 ----
+* Currently recommended image: [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29)
+  * Install [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.x](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29) to enable [non-root control of GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules) [_(commit)_](https://github.com/adafruit/adafruit-beaglebone-io-python/commit/b65cbf8e41b444bad7c4ef6cfd4f88a30210fd78)
+
+**Features:**
+* Add support for Linux 4.14 kernel including new "udev" style for PWM entries in /sys
+* Fix GPIO regression due to BeagleBone Blue LED support (issue #178)
+* Add support for the PocketBeagle (issue #172)
+
+**shortlog:**
 * Drew Fustini (39):
   * Add -Wno-unit_address_vs_reg to avoid dtc warning
   * check if board is BeagleBone Blue or PocketBeagle
@@ -15,7 +24,7 @@
   * Attempt to use udev ecap path for pwm path
   * add test script for all BeagleBone PWM outputs
   * update PWM test for 4.14 kernel udev paths
-    * * minor change to pwm debug logging
+  * minor change to pwm debug logging
   * sleep to avoid udev race condition #185
     
 * Mark A. Yoder (1):
