@@ -109,11 +109,11 @@ BBIO_err initialize_pwm(void)
         }
 #endif
         pwm_initialized = 1;
-        syslog(LOG_INFO, "Adafruit_BBIO: initialize_pwm: OK");
+        syslog(LOG_DEBUG, "Adafruit_BBIO: initialize_pwm: OK");
         return BBIO_OK;
     }
 
-    syslog(LOG_INFO, "Adafruit_BBIO: initialize_pwm: OK");
+    syslog(LOG_DEBUG, "Adafruit_BBIO: initialize_pwm: OK");
     return BBIO_OK;
 }
 
@@ -572,7 +572,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
 
     export_pwm(new_pwm);
 
-    syslog(LOG_INFO, "Adafruit_BBIO: pwm_setup: %s OK", key);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: %s OK", key);
     return BBIO_OK;
 }
 
@@ -674,7 +674,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     }
 #endif
 
-    syslog(LOG_INFO, "Adafruit_BBIO: pwm_start: %s OK", key);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: %s OK", key);
     return BBIO_OK;
 }
 
@@ -738,7 +738,7 @@ BBIO_err pwm_disable(const char *key)
         }
     }
 
-    syslog(LOG_INFO, "Adafruit_BBIO: pwm_disable: %s OK", key);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_disable: %s OK", key);
     return BBIO_OK;
 }
 
