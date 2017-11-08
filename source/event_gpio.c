@@ -196,7 +196,7 @@ int open_value_file(unsigned int gpio)
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
     } else if (beaglebone_blue()) {
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: beaglebone_blue() is true\n");
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: beaglebone_blue() is true\n");
         switch(gpio) {
             case USR_LED_RED:
                 snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -224,10 +224,10 @@ int open_value_file(unsigned int gpio)
                 break;
         }
     } else {
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: default gpio path\n");
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: default gpio path\n");
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: filename=%s\n", filename);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: filename=%s\n", filename);
     
     // if(gpio == USR_LED_RED) {     // red LED
     //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -327,7 +327,7 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
             return BBIO_SYSFS;
         }
 
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_direction: %u OK", gpio);
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_direction: %u OK", gpio);
         return BBIO_OK;
 }
 
@@ -359,7 +359,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
         *value = INPUT;
     }
 
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_direction: %u OK", gpio);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_direction: %u OK", gpio);
     return BBIO_OK;
 }
 
@@ -396,14 +396,14 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         char *usr_led_trigger[] = { "heartbeat", "mmc0", "cpu0", "mmc1" }; 
         int led = gpio -  USR_LED_GPIO_MIN;
 
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: USR LED path\n");
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: USR LED path\n");
 
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", led);
         if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
     } else if (beaglebone_blue()) {
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: beaglebone_blue() is true\n");
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: beaglebone_blue() is true\n");
         switch(gpio) {
             case USR_LED_RED:
                snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -431,10 +431,10 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
                 break;
         }
     } else {
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: default gpio path\n");
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: default gpio path\n");
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: filename=%s\n", filename);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: filename=%s\n", filename);
 
     fd = open(filename, O_WRONLY);
     if (fd < 0) {
@@ -457,7 +457,7 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
         return BBIO_SYSFS;
     }
 
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: %u %u OK", gpio, value);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: %u %u OK", gpio, value);
     return BBIO_OK;
 }
 
@@ -489,7 +489,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
         *value = 0;
     }
 
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_value: %u OK", gpio);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_value: %u OK", gpio);
     return BBIO_OK;
 }
 
