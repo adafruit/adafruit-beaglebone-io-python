@@ -1,3 +1,15 @@
+1.0.7
+----
+* **Fixes:**
+  * Issue #188:  GPIO is extremely slow (20ms to toggle)
+
+* **shortlog:**
+Drew Fustini (4):
+      Update README.md
+      add config-pin example to README
+      Filter DEBUG syslog to avoid poor performance #188
+      Change log level from INFO to DEBUG #188
+
 1.0.6
 ----
 * Currently recommended image: [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29)
