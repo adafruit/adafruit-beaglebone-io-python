@@ -582,7 +582,7 @@ PyMODINIT_FUNC initGPIO(void)
 
    define_constants(module);
 
-   initlog(LOG_DEBUG, NULL, BBIO_LOG_OPTION);
+   initlog(LOG_INFO, NULL, BBIO_LOG_OPTION);
 
    if (!PyEval_ThreadsInitialized())
       PyEval_InitThreads();

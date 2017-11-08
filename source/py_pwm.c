@@ -252,7 +252,7 @@ PyMODINIT_FUNC initPWM(void)
 
    define_constants(module);
 
-   initlog(LOG_DEBUG, NULL, BBIO_LOG_OPTION);
+   initlog(LOG_INFO, NULL, BBIO_LOG_OPTION);
 
 #if PY_MAJOR_VERSION > 2
     return module;
