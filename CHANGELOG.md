@@ -1,14 +1,14 @@
 1.0.7
 ----
-* **Fixes:**
-  * Issue #188:  GPIO is extremely slow (20ms to toggle)
+**Fixes:**
+* Issue #188:  GPIO is extremely slow (20ms to toggle)
 
-* **shortlog:**
-Drew Fustini (4):
-      Update README.md
-      add config-pin example to README
-      Filter DEBUG syslog to avoid poor performance #188
-      Change log level from INFO to DEBUG #188
+**shortlog:**
+* Drew Fustini (4):
+  * Update README.md
+  * add config-pin example to README
+  * Filter DEBUG syslog to avoid poor performance #188
+  * Change log level from INFO to DEBUG #188
 
 1.0.6
 ----
