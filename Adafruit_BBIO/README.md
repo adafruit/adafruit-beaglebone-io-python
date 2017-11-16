@@ -58,7 +58,7 @@ $ cat /sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position
 
 ### eQEP2
 
-Pins: `P8.11, P8.12
+Pins: `P8.11`, `P8.12`
 
 ```
 $ config-pin P8.11 qep 
@@ -69,7 +69,8 @@ $ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 ### eQEP2b
 
 Note: alternate pins for eQEP2 (mutually exclusive)
-Pins: `P8.11, P8.12
+
+Pins: `P8.11`, `P8.12`
 
 ```
 $ config-pin P8.41 qep 
