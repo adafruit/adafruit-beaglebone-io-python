@@ -2,7 +2,7 @@
 
 Initially based on the [PyBBIO](https://github.com/graycatlabs/PyBBIO/bbio/libraries/RotaryEncoder/rotary_encoder.py) rotary encoder code.
 
-This module enables access to the Beaglebone's enhanced Quadrature Encoder Pulse (eQEP) inputs.
+This module enables access to the Beaglebone Black enhanced Quadrature Encoder Pulse (eQEP) modules: eQEP0, eQEP1 and eQEP2.
 
 ## Prerequisites
 
@@ -38,6 +38,8 @@ TBD
 
 ## eQEP configuraton
 
+Note: if either eQEP 1 or eQEP 2 are used on the Beaglebone Black, video must be disabled, as their pins are shared with the LCD_DATAx lines of the HDMI interface.
+
 ### eQEP0
 
 Pins: `P9_27`, `P9_92`
@@ -60,6 +62,8 @@ $ cat /sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position
 
 ### eQEP2
 
+#### eQEP2
+
 Pins: `P8.11`, `P8.12`
 
 ```
@@ -68,7 +72,7 @@ $ config-pin P8.12 qep
 $ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 ```
 
-### eQEP2b
+#### eQEP2b
 
 Note: alternate pins for eQEP2 (mutually exclusive)
 
