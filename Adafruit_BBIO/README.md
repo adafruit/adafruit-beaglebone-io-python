@@ -1,21 +1,21 @@
 # Adafruit_BBIO.Encoder module
 
-Initially based on the [PyBBIO](https://github.com/graycatlabs/PyBBIO/bbio/libraries/RotaryEncoder/rotary_encoder.py) rotary encoder code.
-
 This module enables access to the Beaglebone Black enhanced Quadrature Encoder Pulse (eQEP) modules: eQEP0, eQEP1 and eQEP2.
+
+Initially based on the [PyBBIO](https://github.com/graycatlabs/PyBBIO/bbio/libraries/RotaryEncoder/rotary_encoder.py) rotary encoder code.
 
 ## Prerequisites
 
 These instructions are based on a 4.4.x Linux kernel.
 
-In order to use all eQEP pins the BeagleBone must:
+In order to use all eQEP pins the BeagleBone must boot with the [cape-universal](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) enabled, and load the cape-universal overlay
 
-1. boot with cape-universal enabled, and
-2. load the cape-universala overlay
+```
+enable_uboot_cape_universal=1
+```
 
 Notes:
-- It would seem that `cape_universal` is [enabled by default already](https://groups.google.com/d/msg/beagleboard/2D5Pz3r7ZZ8/bLKcvHbGDgAJ) from kernel 4.1.x onwards. As such, the first step is not necessary.
-- An alternative option to the `cape-universala` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
+- An alternative option to the `cape-universal` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
 
 ### Install/upgrade the latest Device Tree overlays
 
@@ -25,23 +25,27 @@ sudo apt-get upgrade bb-cape-overlays
 
 ### Load the universal cape
 
-Modify the `/boot/uEnv.txt` file to contain these two lines: 
+If it doesn't already contain it, modify the `/boot/uEnv.txt` file to contain this line: 
 
 ```
-cmdline=coherent_pool=1M net.ifnames=0 quiet cape_universal=enable
+enable_uboot_cape_universal=1
 ```
 
-```
-cape_enable=bone_capemgr.enable_partno=cape-universala
-```
+Notes:
 
-### Check slots
+- Some older documentation recommends using these two lines instead. They are meant to load deprecated kernel-based overlays and it's not recommended to use them. Use the new way of [loading overlays via uboot](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays) instead, as instructed above.
 
-TBD
+  ```
+  cmdline=cape_universal=enable # Plus some other options
+  ```
+  ```
+  cape_enable=bone_capemgr.enable_partno=cape-universala
+  ```
+- TBD: check the overlays that are currently loaded
 
 ## eQEP configuraton
 
-Note: if either eQEP 1 or eQEP 2 are used on the Beaglebone Black, video must be disabled, as their pins are shared with the LCD_DATAx lines of the HDMI interface.
+Note: if either eQEP1 or eQEP2b are used on the Beaglebone Black, video must be disabled, as their pins are shared with the LCD_DATAx lines of the HDMI interface.
 
 ### eQEP0
 
