@@ -15,6 +15,7 @@ enable_uboot_cape_universal=1
 ```
 
 Notes:
+- It seems that the `cape-universal` cape _does only enable access to eQEP0 and eQEP2_. TBD: check how to load [`cape-universala`](https://github.com/cdsteinkuehler/beaglebone-universal-io/pull/30)
 - An alternative option to the `cape-universal` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
 
 ### Install/upgrade the latest Device Tree overlays
