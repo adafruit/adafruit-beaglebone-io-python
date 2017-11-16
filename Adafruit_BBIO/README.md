@@ -1,6 +1,8 @@
-# Adafruit_BBIO.Encoder Class
+# Adafruit_BBIO.Encoder module
 
 Initially based on the [PyBBIO](https://github.com/graycatlabs/PyBBIO/bbio/libraries/RotaryEncoder/rotary_encoder.py) rotary encoder code.
+
+This module enables access to the Beaglebone's enhanced Quadrature Encoder Pulse (eQEP) inputs.
 
 ## Prerequisites
 
@@ -70,7 +72,7 @@ $ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 
 Note: alternate pins for eQEP2 (mutually exclusive)
 
-Pins: `P8.11`, `P8.12`
+Pins: `P8.41`, `P8.42`
 
 ```
 $ config-pin P8.41 qep 
