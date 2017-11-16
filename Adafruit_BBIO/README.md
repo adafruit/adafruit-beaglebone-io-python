@@ -10,10 +10,12 @@ These instructions are based on a 4.4.x Linux kernel.
 
 In order to use all eQEP pins the BeagleBone must:
 
-- boot with cape-universal enabled, and
-- load the cape-universala overlay
+1. boot with cape-universal enabled, and
+2. load the cape-universala overlay
 
-Note: an alternative option to the `cape-universala` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
+Notes:
+- It would seem that `cape_universal` is [enabled by default already](https://groups.google.com/d/msg/beagleboard/2D5Pz3r7ZZ8/bLKcvHbGDgAJ) from kernel 4.1.x onwards. As such, the first step is not necessary.
+- An alternative option to the `cape-universala` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
 
 ### Install/upgrade the latest Device Tree overlays
 
