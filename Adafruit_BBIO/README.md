@@ -13,6 +13,7 @@ In order to use all eQEP pins the BeagleBone must:
 - boot with cape-universal enabled, and
 - load the cape-universala overlay
 
+Note: an alternative option to the `cape-universala` overlay would be to load one of the [dedicated eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts). 
 
 ### Install/upgrade the latest Device Tree overlays
 
@@ -83,3 +84,7 @@ $ config-pin P8.41 qep
 $ config-pin P8.42 qep
 $ cat /sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position
 ```
+## Further reading
+
+- [Beaglebone encoder inputs](https://github.com/Teknoman117/beaglebot/tree/master/encoders)
+- [Beaglebone eQEP overlays](https://github.com/Teknoman117/beaglebot/tree/master/encoders/dts)
