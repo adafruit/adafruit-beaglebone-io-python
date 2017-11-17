@@ -92,7 +92,6 @@ class RotaryEncoder(object):
 
     self._logger = logging.getLogger(__name__)
     self._logger.addHandler(logging.NullHandler())
-    #self._logger.setLevel(logging.DEBUG)
 
     # Configure eqep0
     self._logger.info("Configuring eqep0, pins: P9.27, P9.92")
