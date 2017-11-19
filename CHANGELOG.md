@@ -1,3 +1,32 @@
+1.0.8
+----
+**Fixes:**
+* Issue #196: cache board type to avoid poor performance
+* Issue #192: fix PocketBeagle PWM pin typo
+* Issue #191: turn off RotaryEncoder's debug output by default
+* Issue #188: GPIO is extremely slow (20ms to toggle)
+* Issue #186: problems with UART
+
+**shortlog:**
+* David Planella (12):
+  * Copy Encoder module comments to README.md
+  * Formatted Encoder README in markdown
+  * Fixed Encoder README formatting
+  * Removed QEP instructions from Encoder module
+  * Fixes to Encoder README
+  * Updated Encoder README
+  * Encoder README: added info on dedicated overlays
+  * Encoder README: updated info on pre-requisites
+  * Encoder README update
+  * Encoder README update
+  * Add logging support, turn off unconditional debug output
+  * Encoder: remove unused logging code
+
+* Drew Fustini (3):
+  * Merge pull request #195 from dplanella/master
+  * Fix PocketBeagle PWM pin typo (#192)
+  * cache board type to avoid poor performance (#196)
+
 1.0.7
 ----
 **Fixes:**
