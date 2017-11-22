@@ -14,7 +14,7 @@ class TestLED:
         prefix = "/sys/class/leds/beaglebone:green:{0}/brightness"
         path = prefix.format(led.lower())
         value = self.read_led_file(path)
-        if value < 0:
+        if value == "":
             path = prefix.format(name)
             value = self.read_led_file(path)
         if state == 1:
@@ -27,7 +27,7 @@ class TestLED:
             return open(path).read()
         except (IOError, e):
             if e.errno == errno.ENOENT:
-                return -1
+                return ""
 
     def set_all_leds(self, state):
         test_leds = { "USR0": "heartbeat", \
