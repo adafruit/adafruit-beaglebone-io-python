@@ -25,7 +25,7 @@ class TestLED:
     def read_led_file(self, path):
         try:
             return open(path).read()
-        except IOError, e:
+        except (IOError, e):
             if e.errno == errno.ENOENT:
                 return -1
 
