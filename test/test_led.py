@@ -34,7 +34,7 @@ class TestLED:
                       "USR1": "mmc0", \
                       "USR2": "cpu0", \
                       "USR3": "mmc1" }
-        for led, name in test_leds.iteritems():
+        for led, name in test_leds.items():
             self.set_brightness(state, led, name)
             GPIO.cleanup()
    
