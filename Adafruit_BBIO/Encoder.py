@@ -3,53 +3,62 @@
 from subprocess import check_output, STDOUT, CalledProcessError
 import os
 import logging
+import itertools
+
+eQEP0 = 0
+eQEP1 = 1
+eQEP2 = 2
+eQEP2b = 3
+
+_OCP_PATH = "/sys/devices/platform/ocp"
+_eQEP_DEFS = [
+   {'channel': 'eQEP0', 'pin_A': 'P9_92', 'pin_B': 'P9_27',
+       'sys_path': os.path.join(_OCP_PATH, '48300000.epwmss/48300180.eqep')},
+   {'channel': 'eQEP1', 'pin_A': 'P8_35', 'pin_B': 'P8_33',
+       'sys_path': os.path.join(_OCP_PATH, '48302000.epwmss/48302180.eqep')},
+   {'channel': 'eQEP2', 'pin_A': 'P8_12', 'pin_B': 'P8_11',
+       'sys_path': os.path.join(_OCP_PATH, '48304000.epwmss/48304180.eqep')},
+   {'channel': 'eQEP2b', 'pin_A': 'P8_41', 'pin_B': 'P8_42',
+       'sys_path': os.path.join(_OCP_PATH, '48304000.epwmss/48304180.eqep')}
+]
 
 
-class QEP :
+class eQEP(object):
+    '''Enhanced Quadrature Encoder Pulse (eQEP) module class. Abstraction
+    for either of the three available channels (eQEP0, eQEP1, eQEP2) on
+    the Beaglebone'''
 
-  def __init__(self, channel=1, debug=False):
-    self.channel = channel
-    self.debug = debug
+    @classmethod
+    def fromdict(cls, d):
+        '''Creates a class instance from a dictionary'''
 
-  def errMsg(self):
-    print("Error accessing 0x%02X: Check your QEP channel" % self.address)
-    return -1
+        allowed = ('channel', 'pin_A', 'pin_B', 'sys_path')
+        df = {k: v for k, v in d.iteritems() if k in allowed}
+        return cls(**df)
 
-# example method from Adafruit_I2C
-# TODO: delete this
-#  def write8(self, reg, value):
-#    "Writes an 8-bit value to the specified register/address"
-#    try:
-#      self.bus.write_byte_data(self.address, reg, value)
-#      if self.debug:
-#        print("Rotary: Wrote 0x%02X to register 0x%02X" % (value, reg))
-#    except IOError as err:
-#      return self.errMsg()
-#
-#
-#if __name__ == '__main__':
-#  try:
-#    qep = Adafruit_BBIO.Encoder.QEP()
-#    print("Default QEP channel is accessible")
-#  except:
-#    print("Error accessing default Rotary bus")
+    def __init__(self, channel, pin_A, pin_B, sys_path):
+        '''Initialize the eQEP module
 
+        Attributes:
+            channel (str): eQEP channel name. E.g. "eQEP0", "eQEP1", etc.
+                Note that "eQEP2" and  "eQEP2b" are channel aliases for the
+                same module, but on different (mutually-exclusive) sets of
+                pins
+            pin_A (str): physical input pin for the A signal of the
+                rotary encoder
+            pin_B (str): physical input pin for the B signal of the
+                rotary encoder
+            sys_path (str): sys filesystem path to access the attributes
+                of this eQEP module
+
+        '''
+        self.channel = channel
+        self.pin_A = pin_A
+        self.pin_B = pin_B
+        self.sys_path = sys_path
 
 
 class RotaryEncoder(object):
-  # TODO: check that kernel 4.1+
-  # TODO: use config-pin to set qep mode
-  OCP_PATH = "/sys/devices/platform/ocp"
-  _eqep_dirs = [
-    '%s/48300000.epwmss/48300180.eqep' % OCP_PATH,
-    '%s/48302000.epwmss/48302180.eqep' % OCP_PATH,
-    '%s/48304000.epwmss/48304180.eqep' % OCP_PATH
-  ]
-
-  EQEP0 = 0
-  EQEP1 = 1
-  EQEP2 = 2
-  EQEP2b = 3
 
   def _run_cmd(self, cmd):
     '''Runs a command. If not successful (i.e. error code different than zero),
@@ -93,64 +102,19 @@ class RotaryEncoder(object):
     self._logger = logging.getLogger(__name__)
     self._logger.addHandler(logging.NullHandler())
 
-    # Configure eqep0
-    self._logger.info("Configuring eqep0, pins: P9.27, P9.92")
+    # Configure eqep module
+    self._eqep = eQEP.fromdict(_eQEP_DEFS[eqep_num])
+    self._logger.info(
+        "Configuring: {}, pin A: {}, pin B: {}, sys path: {}".format(
+            self._eqep.channel, self._eqep.pin_A, self._eqep.pin_B,
+            self._eqep.sys_path))
 
-    pin = "P9_27"
-    self.config_pin(pin)
+    self.config_pin(self._eqep.pin_A)
+    self.config_pin(self._eqep.pin_B)
 
-    pin = "P9_92"
-    self.config_pin(pin)
-
-    path = "/sys/devices/platform/ocp/48300000.epwmss/48300180.eqep/position"
-    self.cat_file(path)
-
-    # Configure eqep1
-    self._logger.info("Configuring eqep1, pins: P8.33, P8.35")
-
-    pin = "P8.33"
-    self.config_pin(pin)
-
-    pin = "P8.35"
-    self.config_pin(pin)
-
-    path = "/sys/devices/platform/ocp/48302000.epwmss/48302180.eqep/position"
-    self.cat_file(path);
-
-    # Configure eqep2
-    self._logger.info("Configuring eqep2, pins: P8.11, P8.12")
-
-    pin = "P8.11"
-    self.config_pin(pin)
-
-    pin = "P8.12"
-    self.config_pin(pin)
-
-    path = "/sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position"
-    self.cat_file(path);
-
-    # Configure eqep2b
-    self._logger.info("Configuring eqep2, pins: P8.41, P8.42")
-
-    pin = "P8.41"
-    self.config_pin(pin)
-
-    pin = "P8.42"
-    self.config_pin(pin)
-
-    path = "/sys/devices/platform/ocp/48304000.epwmss/48304180.eqep/position"
-    self.cat_file(path);
-
-    self._logger.debug("RotaryEncoder(): eqep_num: {0}".format(eqep_num))
-    self._logger.debug("RotaryEncoder(): self._eqep_dirs[0]: {0}".format(self._eqep_dirs[0]))
-    self._logger.debug("RotaryEncoder(): self._eqep_dirs[1]: {0}".format(self._eqep_dirs[1]))
-    self._logger.debug("RotaryEncoder(): self._eqep_dirs[2]: {0}".format(self._eqep_dirs[2]))
-    self._logger.debug("RotaryEncoder(): self._eqep_dirs[eqep_num: {0}]: {1}".format(eqep_num, self._eqep_dirs[eqep_num]))
-
-    assert 0 <= eqep_num <= 3 , "eqep_num must be between 0 and 3"
-
-    self.base_dir = self._eqep_dirs[eqep_num]
-    self._logger.debug("RotaryEncoder(): self.base_dir: {0}".format(self.base_dir))
+    self.base_dir = self._eqep.sys_path
+    self._logger.debug(
+        "RotaryEncoder(): self.base_dir: {0}".format(self.base_dir))
 
     self.enable()
 
@@ -220,6 +184,7 @@ class RotaryEncoder(object):
     In relative mode, this attribute represents the position of the
     encoder at the last unit timer overflow.
     '''
+    self._logger.debug("Channel: {}".format(self._eqep.channel))
     position_file = "%s/position" % self.base_dir
     self._logger.debug("getPosition(): position_file: {0}".format(position_file))
     position_handle = open(position_file, 'r')
