@@ -301,7 +301,7 @@ pwm_t pwm_table[] = {
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_8"},
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_36"},
   { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_10"},
-  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_13"},
+  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_33"},
   { "ehrpwm1", 3, 0, 6, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P2_1"},
   { "ehrpwm2", 6, 1, 3, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P2_3"},
   { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
@@ -601,23 +601,30 @@ int pocketbeagle(void) {
 */
 int beaglebone_blue(void) {
     const char *cmd = "/bin/grep -c 'TI AM335x BeagleBone Blue' /proc/device-tree/model";
-    char blue;
+    // cache the value to avoid poor performance
+    // in functions that are called frequently like
+    // gpio_set_value() in source/event_gpio.c
+    static int initialized = 0;
+    static int retval = 0;
     FILE *file = NULL;
 
-    file = popen(cmd, "r");
-    if (file == NULL) {
-       fprintf(stderr, "error: beaglebone_blue() failed to run cmd=%s\n", cmd);
-       syslog(LOG_ERR, "Adafruit_BBIO: error: beaglebone_blue() failed to run cmd=%s\n", cmd);
-       return -1;
+    //fprintf(stderr, "beaglebone_blue(): initialized=[%d] retval=[%d]\n", initialized, retval);
+    if(!initialized) {
+      initialized = 1;
+      //fprintf(stderr, "beaglebone_blue(): not initialized\n");
+      file = popen(cmd, "r");
+      if (file == NULL) {
+         fprintf(stderr, "Adafruit_BBIO: error in beaglebone_blue(): failed to run cmd=%s\n", cmd);
+         syslog(LOG_ERR, "Adafruit_BBIO: error in beaglebone_blue(): failed to run cmd=%s\n", cmd);
+         return -1;
+      }
+      if( fgetc(file) == '1' ) {
+         retval = 1;
+      }
+      pclose(file);
     }
-    blue = fgetc(file);
-    pclose(file);
 
-    if(blue == '1') {
-      return 1;
-    } else {
-      return 0;
-    }
+    return retval;
 }
 
 

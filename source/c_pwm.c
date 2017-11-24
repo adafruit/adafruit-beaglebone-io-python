@@ -553,6 +553,9 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         close(period_fd);
         close(duty_fd);
         close(polarity_fd);
+#ifdef BBBVERSION41
+        close(enable_fd);
+#endif
         syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't malloc pwm_exp: %i-%s",
                key, errno, strerror(errno));
         return BBIO_MEM; // out of memory
@@ -717,6 +720,9 @@ BBIO_err pwm_disable(const char *key)
 #endif
 
             //close the fd
+#ifdef BBBVERSION41
+            close(pwm->enable_fd);
+#endif
             close(pwm->period_fd);
             close(pwm->duty_fd);
             close(pwm->polarity_fd);
