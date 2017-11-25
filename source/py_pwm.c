@@ -217,8 +217,8 @@ static const char moduledocstring[] = "PWM functionality of a BeagleBone using P
 PyMethodDef pwm_methods[] = {
     {"start", (PyCFunction)py_start_channel, METH_VARARGS | METH_KEYWORDS, "Set up and start the PWM channel.  channel can be in the form of 'P8_10', or 'EHRPWM2A'"},
     {"stop", (PyCFunction)py_stop_channel, METH_VARARGS | METH_KEYWORDS, "Stop the PWM channel.  channel can be in the form of 'P8_10', or 'EHRPWM2A'"},
-    { "set_duty_cycle", (PyCFunction)py_set_duty_cycle, METH_VARARGS, "Change the duty cycle\ndutycycle - between 0.0 and 100.0" },
-    { "set_frequency", (PyCFunction)py_set_frequency, METH_VARARGS, "Change the frequency\nfrequency - frequency in Hz (freq > 0.0)" },
+    { "set_duty_cycle", (PyCFunction)py_set_duty_cycle, METH_VARARGS | METH_KEYWORDS, "Change the duty cycle\ndutycycle - between 0.0 and 100.0" },
+    { "set_frequency", (PyCFunction)py_set_frequency, METH_VARARGS | METH_KEYWORDS, "Change the frequency\nfrequency - frequency in Hz (freq > 0.0)" },
     {"cleanup", py_cleanup, METH_VARARGS, "Clean up by resetting all GPIO channels that have been used by this program to INPUT with no pullup/pulldown and no event detection"},
     //{"setwarnings", py_setwarnings, METH_VARARGS, "Enable or disable warning messages"},
     {NULL, NULL, 0, NULL}
