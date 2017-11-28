@@ -39,6 +39,22 @@ sudo pip install --upgrade Adafruit_BBIO
 
 Using the library is very similar to the excellent RPi.GPIO library used on the Raspberry Pi. Below are some examples.
 
+### Pin Numbers
+
+Please note that there is no '0' prefix for the pin numbers.  For example, pin 7 on header P8 is `P8_7`.
+
+**Correct:**
+```
+GPIO.setup("P8_7", OUT )
+```
+
+**INCORRECT:**
+```
+GPIO.setup("P8_07", OUT )
+```
+
+Refer to `pins_t table[]` in [common.c](https://github.com/adafruit/adafruit-beaglebone-io-python/blob/master/source/common.c#L73) all the pin labels.
+
 ### config-pin
 
 [config-pin](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) is now used on the official BeagleBoard.org Debian Jessie and Stretch images to control pin mode (e.g. pin mux).
