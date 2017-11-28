@@ -10,9 +10,10 @@ These instructions are based on:
 - `bb-cape-overlays` package: version 4.4.20171120.0-0rcnee1~stretch+20171120 or later
 - `bb-customizations` package: version 1.20171123-0rcnee0~stretch+20171123 or later
 
-It's recommended to run the following command to ensure you have the latest required packages:
+It's recommended to run the following commands to ensure you have the latest required packages:
 
 ```
+sudo apt update
 sudo apt upgrade bb-cape-overlays bb-customizations
 ```
 
