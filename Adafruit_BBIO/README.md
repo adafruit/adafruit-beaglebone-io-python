@@ -2,6 +2,30 @@
 
 This module enables access to the Beaglebone Black enhanced Quadrature Encoder Pulse (eQEP) modules: eQEP0, eQEP1 and eQEP2/eQEP2b.
 
+## Usage
+
+On a recent Beaglebone Debian image, access to the eQEP0 and eQEP2 channels should work out of the box:
+
+```python
+import Adafruit_BBIO.Encoder as Encoder
+
+'''
+Each channel can be accessed and initialized using its corresponding
+channel name constants:
+
+    Encoder.eQEP0
+    Encoder.eQEP1  # Pins only available when video is disabled
+    Encoder.eQEP2
+    Encoder.eQEP2b # Pins only available when video is disabled
+'''
+
+# Instantiate the class to access channel eQEP2, and only initialize
+# that channel
+myEncoder = Encoder.RotaryEncoder(Encoder.eQEP2)
+```
+
+If you need to use further channels, read on the prerequisites in the following section.
+
 ## Prerequisites
 
 These instructions are based on:
