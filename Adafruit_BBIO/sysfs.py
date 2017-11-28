@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2014 MIT OpenCourseWare
+# TODO: the copyright assignment above is boiler plate. Copyright needs to be
+#       properly assigned.
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -32,7 +34,8 @@
 #     - David Planella <david.planella@ubuntu.com>
 
 """
-Simplistic Python SysFS interface.
+Simplistic Python SysFS interface. It enables access to the sys filesystem device
+nodes and to get and set their exposed attributes.
 
 Usage examples::
     from sysfs import sys
