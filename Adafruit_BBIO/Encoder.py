@@ -6,7 +6,8 @@ import logging
 import itertools
 import platform
 
-if not platform.release().startswith('4.4'):
+(major, minor, patch) = platform.release().split("-")[0].split(".")
+if not (int(major) >= 4 and int(minor) >=  4):
     raise ImportError(
         'The Encoder module requires Linux kernel version >= 4.4.x.\n'
         'Please upgrade your kernel to use this module.\n'
