@@ -47,7 +47,7 @@ class eQEP(object):
         '''Creates a class instance from a dictionary'''
 
         allowed = ('channel', 'pin_A', 'pin_B', 'sys_path')
-        df = {k: v for k, v in d.iteritems() if k in allowed}
+        df = {k: v for k, v in d.items() if k in allowed}
         return cls(**df)
 
     def __init__(self, channel, pin_A, pin_B, sys_path):
