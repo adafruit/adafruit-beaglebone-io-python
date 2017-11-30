@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Copyright (c) 2014 MIT OpenCourseWare
-# TODO: the copyright assignment above is boiler plate. Copyright needs to be
-#       properly assigned.
+# Copyright (c) 2017 Adafruit Industries
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
