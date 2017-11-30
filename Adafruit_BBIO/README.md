@@ -4,7 +4,7 @@ This module enables access to the Beaglebone Black enhanced Quadrature Encoder P
 
 ## Usage
 
-On a recent Beaglebone Debian image, access to the eQEP0 and eQEP2 channels should work out of the box:
+On a recent Beaglebone Debian image, access to the eQEP0 and eQEP2 channels should work out of the box, at least as root user. To ensure you can run the code as a regular user, read on the prerequisites section below.
 
 ```python
 from Adafruit_BBIO.Encoder import RotaryEncoder, eQEP2
@@ -64,6 +64,8 @@ If you need to use further channels, read on the prerequisites in the following 
 
 ## Prerequisites
 
+### Kernel and packages
+
 These instructions are based on:
 
 - Linux kernel: 4.4.x or later
@@ -77,6 +79,23 @@ sudo apt update
 sudo apt upgrade bb-cape-overlays bb-customizations
 ```
 
+### User permissions
+
+In order to be able to run code that accesses the eQEP modules as a regular user, as opposed to root, that user must be part of the `eqep` group.
+
+To check which users are part of the `eqep` group:
+
+```
+cat /etc/group | grep eqep
+```
+
+To add user `userName` to the `eqep` group (run this command as root):
+```
+usermod -a -G eqep userName
+```
+
+### Capes
+
 In order to use all eQEP pins the BeagleBone must boot with the [cape-universal](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) enabled, and load the `cape-universal` overlay.
 
 This is the default, thus **no further steps are initially required to use eQEP0 and eQEP2**. Simply double-check that the following line is present and not commented out on your `/boot/uEnv.txt` file:
@@ -87,7 +106,7 @@ enable_uboot_cape_universal=1
 
 Note: Some older documentation recommends using the `cmdline` and `cape_enable` options instead. They are meant to load deprecated kernel-based overlays and it's not recommended to use them. Use the new way of [loading overlays via uboot](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays) instead, as instructed above.
 
-### Enabling additional eQEP modules
+#### Enabling additional eQEP modules
 
 The `cape-universal` overlay will enable access to the eQEP0 and eQEP2 modules. As it does not expose pins that are shared with the HDMI interface, eQEP1 and eQEP2b will **not** be available.
 
