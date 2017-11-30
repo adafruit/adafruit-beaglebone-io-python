@@ -4,7 +4,7 @@ from subprocess import check_output, STDOUT, CalledProcessError
 import os
 import logging
 import itertools
-import sysfs
+from .sysfs import Node
 import platform
 
 (major, minor, patch) = platform.release().split("-")[0].split(".")
@@ -72,7 +72,7 @@ class eQEP(object):
         self.pin_A = pin_A
         self.pin_B = pin_B
         self.sys_path = sys_path
-        self.node = sysfs.Node(sys_path)
+        self.node = Node(sys_path)
 
 
 class RotaryEncoder(object):
