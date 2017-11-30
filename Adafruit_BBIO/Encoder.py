@@ -4,6 +4,7 @@ from subprocess import check_output, STDOUT, CalledProcessError
 import os
 import logging
 import itertools
+import sysfs
 import platform
 
 (major, minor, patch) = platform.release().split("-")[0].split(".")
@@ -13,11 +14,16 @@ if not (int(major) >= 4 and int(minor) >=  4):
         'Please upgrade your kernel to use this module.\n'
         'Your Linux kernel version is {}.'.format(platform.release()))
 
+
+# eQEP module channel identifiers
+# eQEP 2 and 2b are the same channel, exposed on two different sets of pins,
+# which are mutually exclusive
 eQEP0 = 0
 eQEP1 = 1
 eQEP2 = 2
 eQEP2b = 3
 
+# Definitions to initialize the eQEP modules
 _OCP_PATH = "/sys/devices/platform/ocp"
 _eQEP_DEFS = [
    {'channel': 'eQEP0', 'pin_A': 'P9_92', 'pin_B': 'P9_27',
@@ -58,21 +64,43 @@ class eQEP(object):
                 rotary encoder
             sys_path (str): sys filesystem path to access the attributes
                 of this eQEP module
+            node (str): sys filesystem device node that contains the
+                readable or writable attributes to control the QEP channel
 
         '''
         self.channel = channel
         self.pin_A = pin_A
         self.pin_B = pin_B
         self.sys_path = sys_path
+        self.node = sysfs.Node(sys_path)
 
 
 class RotaryEncoder(object):
+    '''
+    Rotary encoder class abstraction to control a given QEP channel.
+
+    Constructor:
+        eqep_num: QEP object that determines which channel to control
+
+    Properties:
+        position: current position of the encoder
+        frequency: frequency at which the encoder reports new positions
+        enabled: (read only) true if the module is enabled, false otherwise
+        mode: current mode of the encoder (absolute: 0, relative: 1)
+
+    Methods:
+        enable: enable the QEP channel
+        disable: disable the QEP channel
+        setAbsolute: shortcut for setting the mode to absolute
+        setRelative: shortcut for setting the mode to relative
+        zero: shortcut for setting the position to 0
+    '''
 
     def _run_cmd(self, cmd):
         '''Runs a command. If not successful (i.e. error code different than
         zero), print the stderr output as a warning.
-        '''
 
+        '''
         try:
             output = check_output(cmd, stderr=STDOUT)
             self._logger.info(
@@ -83,164 +111,189 @@ class RotaryEncoder(object):
                 "_run_cmd(): cmd='{}' return code={} output={}".format(
                     " ".join(cmd), e.returncode, e.output))
 
-    def config_pin(self, pin):
-        '''
-        config_pin()
-        Config pin for QEP
-        '''
+    def _config_pin(self, pin):
+        '''Configures a pin in QEP mode using the `config-pin` binary'''
 
         self._run_cmd(["config-pin", pin, "qep"])
 
-    def cat_file(self, path):
-        '''
-        cat_file()
-        Print contents of file
-        '''
-
-        self._run_cmd(["cat", path])
-
     def __init__(self, eqep_num):
-        '''
-        RotaryEncoder(eqep_num)
-        Creates an instance of the class RotaryEncoder.
-        eqep_num determines which eQEP pins are set up.
-        eqep_num can be: EQEP0, EQEP1, EQEP2 or EQEP2b based on which pins \
-        the rotary encoder is connected to.
-        '''
+        '''Creates an instance of the class RotaryEncoder.
 
+        Arguments:
+           eqep_num: determines which eQEP pins are set up.
+               Allowed values: EQEP0, EQEP1, EQEP2 or EQEP2b,
+               based on which pins the physical rotary encoder
+               is connected to.
+
+        '''
+        # nanoseconds factor to convert period to frequency and back
+        self._NS_FACTOR = 1000000000
+
+        # Set up logging at the module level
         self._logger = logging.getLogger(__name__)
         self._logger.addHandler(logging.NullHandler())
 
-        # Configure eqep module
+        # Initialize the eQEP channel structures
         self._eqep = eQEP.fromdict(_eQEP_DEFS[eqep_num])
         self._logger.info(
             "Configuring: {}, pin A: {}, pin B: {}, sys path: {}".format(
                 self._eqep.channel, self._eqep.pin_A, self._eqep.pin_B,
                 self._eqep.sys_path))
 
-        self.config_pin(self._eqep.pin_A)
-        self.config_pin(self._eqep.pin_B)
+        # Configure the pins for the given channel
+        self._config_pin(self._eqep.pin_A)
+        self._config_pin(self._eqep.pin_B)
 
-        self.base_dir = self._eqep.sys_path
         self._logger.debug(
-            "RotaryEncoder(): self.base_dir: {0}".format(self.base_dir))
+            "RotaryEncoder(): sys node: {0}".format(self._eqep.sys_path))
 
+        # Enable the channel upon initialization
         self.enable()
 
+    @property
+    def enabled(self):
+        '''Returns the enabled status of the module:
+
+            true: module is enabled
+            false: module is disabled
+        '''
+        isEnabled = bool(int(self._eqep.node.enabled))
+
+        return isEnabled
+
+    def _setEnable(self, enabled):
+        '''Turns the eQEP hardware ON or OFF
+
+           value (int): 1 represents enabled, 0 is disabled
+
+        '''
+        enabled = int(enabled)
+        if enabled < 0 or enabled > 1:
+            raise ValueError(
+                'The "enabled" attribute can only be set to 0 or 1. '
+                'You attempted to set it to {}.'.format(enabled))
+
+        self._eqep.node.enabled = str(enabled)
+        self._logger.info("Channel: {}, enabled: {}".format(
+            self._eqep.channel, self._eqep.node.enabled))
+
     def enable(self):
-        '''
-        enable()
-        Turns the eQEP hardware ON
-        '''
-        enable_file = "%s/enabled" % self.base_dir
-        self._logger.debug("enable(): enable_file: {0}".format(enable_file))
-        self._logger.warning(
-          "enable(): TODO: not implemented, write 1 to {}".format(enable_file))
-        # return sysfs.kernelFileIO(enable_file, '1')
+        '''Turns the eQEP hardware ON'''
+
+        self._setEnable(1)
 
     def disable(self):
+        '''Turns the eQEP hardware OFF'''
+
+        self._setEnable(0)
+
+    @property
+    def mode(self):
+        '''Returns the mode the eQEP hardware is in (absolute or relative).
+
         '''
-        disable()
-        Turns the eQEP hardware OFF
+        mode = int(self._eqep.node.mode)
+
+        if mode == 0:
+            mode_name = "absolute"
+        elif mode == 1:
+            mode_name = "relative"
+        else:
+            mode_name = "invalid"
+
+        self._logger.debug("getMode(): Channel {}, mode: {} ({})".format(
+            self._eqep.channel, mode, mode_name))
+
+        return mode
+
+    @mode.setter
+    def mode(self, mode):
+        '''Sets the eQEP mode as absolute (0) or relative (1).
+        See the setAbsolute() and setRelative() methods for
+        more information.
+
         '''
-        enable_file = "%s/enabled" % self.base_dir
-        self._logger.debug("disable(): enable_file: {0}".format(enable_file))
-        self._logger.warning(
-            "disable(): TODO: not implemented, write 0 to {}".format(
-                enable_file))
-        # return sysfs.kernelFileIO(enable_file, '0')
+        mode = int(mode)
+        if mode < 0 or mode > 1:
+            raise ValueError(
+                'The "mode" attribute can only be set to 0 or 1. '
+                'You attempted to set it to {}.'.format(mode))
+
+        self._eqep.node.mode = str(mode)
+        self._logger.debug("Mode set to: {}".format(
+            self._eqep.node.mode))
 
     def setAbsolute(self):
-        '''
-        setAbsolute()
-        Set mode as Absolute
+        '''Sets the eQEP mode as Absolute:
         The position starts at zero and is incremented or
         decremented by the encoder's movement
+
         '''
-        mode_file = "%s/mode" % self.base_dir
-        self._logger.debug("setAbsolute(): mode_file: {0}".format(mode_file))
-        self._logger.warning(
-            "setAbsolute(): TODO: not implemented, write 0 to {}".format(
-                mode_file))
-        # return sysfs.kernelFileIO(mode_file, '0')
+        self.mode = 0
 
     def setRelative(self):
-        '''
-        setRelative()
-        Set mode as Relative
+        '''Sets the eQEP mode as Relative:
         The position is reset when the unit timer overflows.
-        '''
-        mode_file = "%s/mode" % self.base_dir
-        self._logger.debug("setRelative(): mode_file: {0}".format(mode_file))
-        self._logger.warning(
-            "setRelative(): TODO: not implemented, write 1 to {}".format(
-                mode_file))
-        # return sysfs.kernelFileIO(mode_file, '1')
 
-    def getMode(self):
         '''
-        getMode()
-        Returns the mode the eQEP hardware is in.
-        '''
-        mode_file = "%s/mode" % self.base_dir
-        self._logger.debug("getMode(): mode_file: {0}".format(mode_file))
-        self._logger.warning("getMode(): TODO: read mode_file")
-        # return sysfs.kernelFileIO(mode_file)
+        self.mode = 1
 
-    def getPosition(self):
-        '''
-        getPosition()
-        Get the current position of the encoder.
+    @property
+    def position(self):
+        '''Returns the current position of the encoder.
         In absolute mode, this attribute represents the current position
         of the encoder.
         In relative mode, this attribute represents the position of the
         encoder at the last unit timer overflow.
-        '''
-        self._logger.debug("Channel: {}".format(self._eqep.channel))
-        position_file = "%s/position" % self.base_dir
-        self._logger.debug(
-            "getPosition(): position_file: {0}".format(position_file))
-        position_handle = open(position_file, 'r')
-        self._logger.debug(
-            "getPosition(): position_handle: {0}".format(position_handle))
-        position = position_handle.read()
-        self._logger.debug("getPosition(): position: {0}".format(position))
-        # return sysfs.kernelFileIO(position_file)
 
-        return position
+        '''
+        position = self._eqep.node.position
 
-    def setFrequency(self, freq):
-        '''
-        setFrequency(freq)
-        Set the frequency in Hz at which the driver reports new positions.
-        '''
-        period_file = "%s/period" % self.base_dir
-        self._logger.debug(
-            "setFrequency(): period_file: {0}".format(period_file))
-        self._logger.debug("setFrequency(): freq: {0}".format(freq))
-        self._logger.debug(
-            "setFrequency(): 1000000000/freq: {0}".format(1000000000/freq))
-        self._logger.debug("setFrequency(): str(1000000000/freq)): {0}".format(
-            str(1000000000/freq)))
-        self._logger.warning(
-          "setFrequency(): TODO: not implemented, set {} to {}".format(
-            period_file, str(1000000000/freq)))
-        # return sysfs.kernelFileIO(period_file, str(1000000000/freq))
+        self._logger.debug("Get position: Channel {}, position: {}".format(
+            self._eqep.channel, position))
 
-    def setPosition(self, val):
+        return int(position)
+
+    @position.setter
+    def position(self, position):
+        '''Sets the current position to a new value'''
+
+        position = int(position)
+        self._eqep.node.position = str(position)
+
+        self._logger.debug("Set position: Channel {}, position: {}".format(
+            self._eqep.channel, position))
+
+
+    @property
+    def frequency(self):
+        '''Sets the frequency in Hz at which the driver reports
+        new positions.
+
         '''
-        setPosition(value)
-        Give a new value to the current position
+        frequency = self._eqep.node.period / self._NS_FACTOR
+
+        self._logger.debug(
+            "Set frequency(): Channel {}, frequency: {} Hz, "
+            "period: {} ns".format(
+                self._eqep.channel, frequency, period))
+
+        return frequency
+
+    @frequency.setter
+    def frequency(self, frequency):
+        '''Sets the frequency in Hz at which the driver reports
+        new positions.
+
         '''
-        position_file = "%s/position" % self.base_dir
-        self._logger.warning(
-          "setPosition(): TODO: not implemented, write position to {}".format(
-            position_file))
-        # return sysfs.kernelFileIO(position_file, str(val))
+        period = self._NS_FACTOR / frequency  # Period in nanoseconds
+        self._eqep.node.period = str(period)
+        self._logger.debug(
+            "Set frequency(): Channel {}, frequency: {} Hz, "
+            "period: {} ns".format(
+                self._eqep.channel, frequency, period))
 
     def zero(self):
-        '''
-        zero()s
-        Set the current position to 0
-        '''
-        return self.setPosition(0)
+        '''Resets the current position to 0'''
+
+        self.position = 0
