@@ -28,7 +28,7 @@ cur_position = myEncoder.position
 
 # Position can also be set as a property
 next_position = 15
-myEncoder.position = 15
+myEncoder.position = next_position
 
 # Reset position to 0
 myEncoder.zero()
