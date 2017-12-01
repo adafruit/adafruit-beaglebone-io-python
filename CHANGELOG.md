@@ -1,3 +1,62 @@
+1.0.9
+----
+**Features:**
+* Issue #194: Encoder position cannot be set
+* PR #205: Encoder: add support for reading/writing sysfs attributes
+
+**Fixes:**
+* Issue #198: use https for DEFAULT_URL in distribute_setup.py
+* Issue #197: Fix leak of pwm enable file descriptor
+* Issue #189: Fix seg fault of PWM in Python 3.6
+* Issue #180: Clarify there is no 0 prefix for pin lables
+* PR #201: Encoder: do kernel check, PEP8 cleanup
+* PR #202: Encoder: corrected kernel check logic
+* PR #207: Encoder: improved usage documentation
+* PR #210: Encoder: fix sysfs import, make code Python 3 compatible
+* PR #212: Encoder: fix Python 3 compatibility
+* PR #213: Encoder: fix frequency calculation from period
+
+**shortlog:**
+* David Planella (18):
+  * Encoder: initialize only the given channel
+  * Sync from master
+  * Encoder: do kernel check, PEP8 cleanup
+  * Encoder: added sysfs module
+  * Encoder: use sysfs to write QEP attributes
+  * Encoder: corrected kernel check logic
+  * Merge pull request #2 from adafruit/master
+  * Encoder: convert get/set methods to properties, update apidoc strings
+  * Encoder: updated README
+  * Encoder: add README apt install clarification
+  * Encoder: copyright assignment note, updated comments
+  * Encoder: added usage notes
+  * Encoder: improved usage documentation
+  * Encoder: minor fix to usage example
+  * Encoder: added a note about permissions
+  * Encoder: switched sysfs to be a relative import compatible with Python 2 and 3
+  * Encoder: use items() instead of iteritems() to be Python 3 compatible
+  * Encoder: fix frequency getter
+
+* Drew Fustini (18):
+  * use https for DEFAULT_URL in distribute_setup.py (#198)
+  * fix except syntax for Python 3
+  * use dict.items() instead of dict.iteritems() for Python 3
+  * fix error in set_brightness()
+  * close enable_fd when stopping PWM output (#197)
+  * Merge pull request #199 from dplanella/patch-1
+  * Fix leak of pwm enable file descriptor (#197)
+  * Merge pull request #201 from dplanella/encoder-cleanup
+  * remove test_rotary.py as not valid for pytest
+  * Fix seg fault of PWM in Python 3.6 (#189)
+  * Merge pull request #202 from dplanella/patch-2
+  * Clarify there is no 0 prefix for pin lables (#180)
+  * Merge pull request #205 from dplanella/encoder-sysfs
+  * assign copyright for new file to Adafruit Industries
+  * Add bash scripts to help install and test
+  * Merge pull request #212 from dplanella/patch-4
+  * Merge pull request #207 from dplanella/patch-3
+  * Merge pull request #213 from dplanella/fix-encoder-frequency
+
 1.0.8
 ----
 **Fixes:**
