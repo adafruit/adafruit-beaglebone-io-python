@@ -271,12 +271,13 @@ class RotaryEncoder(object):
         new positions.
 
         '''
-        frequency = self._eqep.node.period / self._NS_FACTOR
+        frequency = self._NS_FACTOR / int(self._eqep.node.period) 
 
         self._logger.debug(
             "Set frequency(): Channel {}, frequency: {} Hz, "
             "period: {} ns".format(
-                self._eqep.channel, frequency, period))
+                self._eqep.channel, frequency,
+                self._eqep.node.period))
 
         return frequency
 
