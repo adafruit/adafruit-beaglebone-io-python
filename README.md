@@ -1,6 +1,6 @@
 # Adafruit BeagleBone I/O Python Library (Adafruit_BBIO)
 
-* Adafruit_BBIO is a set of Python tools to allow [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc) and [UART](README.md#uart) access on the BeagleBone
+* Adafruit_BBIO is a set of Python tools to allow [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc), [UART](README.md#uart) and [eQEP](README.md#eqep) (Quadrature Encoder) access on the BeagleBone
 
 * It is recommended to use an [official BeagleBoard.org Debian image](https://beagleboard.org/latest-images)
   * **Currently recommended image: [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29)**
@@ -245,6 +245,10 @@ spi = SPI(2,1)
 print(spi.xfer2([32, 11, 110, 22, 220]))
 spi.close() 
 ```
+
+### eQEP
+
+To use the enhanced Quadrature Encoder Pulse (eQEP) module, please refer to the [`Encoder` module's documentation](https://github.com/adafruit/adafruit-beaglebone-io-python/tree/master/Adafruit_BBIO#usage).
 
 ## Running tests
 
