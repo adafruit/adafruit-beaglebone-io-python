@@ -11,7 +11,8 @@ The channel identifiers are available as module variables :data:`eQEP0`,
 
 Example:
     To use the module, you can connect a rotary encoder to your Beaglebone
-    and then simply instantiate the :class:`RotaryEncoder` class to read its position::
+    and then simply instantiate the :class:`RotaryEncoder` class to read its
+    position::
 
         from Adafruit_BBIO.Encoder import RotaryEncoder, eQEP2
 
@@ -65,7 +66,8 @@ from .sysfs import Node
 import platform
 
 (major, minor, patch) = platform.release().split("-")[0].split(".")
-if not (int(major) >= 4 and int(minor) >=  4):
+if not (int(major) >= 4 and int(minor) >= 4) \
+   and platform.node() == 'beaglebone':
     raise ImportError(
         'The Encoder module requires Linux kernel version >= 4.4.x.\n'
         'Please upgrade your kernel to use this module.\n'
@@ -76,16 +78,16 @@ eQEP0 = 0
 '''eQEP0 channel identifier, pin A-- P9.92, pin B-- P9.27 on Beaglebone
 Black.'''
 eQEP1 = 1
-'''eQEP1 channel identifier, pin A-- P9.35, pin B-- P9.33 on Beaglebone 
+'''eQEP1 channel identifier, pin A-- P9.35, pin B-- P9.33 on Beaglebone
 Black.'''
 eQEP2 = 2
 '''eQEP2 channel identifier, pin A-- P8.12, pin B-- P8.11 on Beaglebone Black.
 Note that there is only one eQEP2 module. This is one alternative set of pins
 where it is exposed, which is mutually-exclusive with eQEP2b'''
 eQEP2b = 3
-'''eQEP2(b) channel identifier, pin A-- P8.41, pin B-- P8.42 on Beaglebone Black.
-Note that there is only one eQEP2 module. This is one alternative set of pins
-where it is exposed, which is mutually-exclusive with eQEP2'''
+'''eQEP2(b) channel identifier, pin A-- P8.41, pin B-- P8.42 on Beaglebone
+Black. Note that there is only one eQEP2 module. This is one alternative set of
+pins where it is exposed, which is mutually-exclusive with eQEP2'''
 
 # Definitions to initialize the eQEP modules
 _OCP_PATH = "/sys/devices/platform/ocp"
@@ -318,14 +320,13 @@ class RotaryEncoder(object):
         self._logger.debug("Set position: Channel {}, position: {}".format(
             self._eqep.channel, position))
 
-
     @property
     def frequency(self):
         '''Sets the frequency in Hz at which the driver reports
         new positions.
 
         '''
-        frequency = self._NS_FACTOR / int(self._eqep.node.period) 
+        frequency = self._NS_FACTOR / int(self._eqep.node.period)
 
         self._logger.debug(
             "Set frequency(): Channel {}, frequency: {} Hz, "
@@ -352,3 +353,4 @@ class RotaryEncoder(object):
         '''Resets the current position to 0'''
 
         self.position = 0
+

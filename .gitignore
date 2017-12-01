@@ -56,3 +56,6 @@ test-driver
 docs/_build
 docs/_static
 docs/_templates
+
+# vim temp files
+*~
