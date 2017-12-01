@@ -263,14 +263,6 @@ pins_t table[] = {
   { NULL, NULL, 0, 0, 0 }
 };
 
-typedef struct uart_t { 
-    const char *name; 
-    const char *path;
-    const char *dt; 
-    const char *rx;
-    const char *tx;
-} uart_t;
-
 uart_t uart_table[] = {
   { "UART1", "/dev/ttyO1", "ADAFRUIT-UART1", "P9_26", "P9_24"},
   { "UART2", "/dev/ttyO2", "ADAFRUIT-UART2", "P9_22", "P9_21"},

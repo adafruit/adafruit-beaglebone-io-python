@@ -64,6 +64,17 @@ typedef struct pwm_t {
   const char *key;  // Pin name eg P9_21
 } pwm_t;
 
+
+typedef struct uart_t {
+    const char *name;
+    const char *path;
+    const char *dt;
+    const char *rx;
+    const char *tx;
+} uart_t;
+
+extern uart_t uart_table[];
+
 extern int gpio_mode;
 extern int gpio_direction[120];
 

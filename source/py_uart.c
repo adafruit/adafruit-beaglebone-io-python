@@ -25,6 +25,7 @@ SOFTWARE.
 #include "constants.h"
 #include "common.h"
 #include "c_uart.h"
+#include "c_pinmux.h"
 
 const char *valid_uarts[4] = {"UART1", "UART2", "UART4", "UART5"};
 
@@ -60,6 +61,29 @@ static PyObject *py_setup_uart(__attribute__ ((unused)) PyObject *self, PyObject
         PyErr_SetString(PyExc_RuntimeError, "Unable to export UART channel.");
         return NULL;        
     }
+
+#ifdef BBBVERSION41
+    uart_t *p;
+    for (p = uart_table; p->name != NULL; ++p) {
+        if (strcmp(p->name, channel) == 0) {
+            err = set_pin_mode(p->rx, "uart");
+            //Check if set_pin_mode() returned no error
+            if (err != BBIO_OK) {
+                fprintf(stderr, "py_setup_uart(%s): set_pin_mode() failed for pin=%s", channel, p->rx);
+                PyErr_SetString(PyExc_ValueError, "Set pin mode failed for uart channel.");
+                return NULL;
+            }
+
+            err = set_pin_mode(p->tx, "uart");
+            //Check if set_pin_mode() returned no error
+            if (err != BBIO_OK) {
+                fprintf(stderr, "py_setup_uart(%s): set_pin_mode() failed for pin=%s", channel, p->tx);
+                PyErr_SetString(PyExc_ValueError, "Set pin mode failed for uart channel.");
+                return NULL;
+            }
+        }
+    }
+#endif
 
     Py_RETURN_NONE;
 }
