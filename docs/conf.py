@@ -107,10 +107,12 @@ html_sidebars = {
     ]
 }
 
-html_theme = "default"
-html_theme_options = {
-    #"show_related": "true"
-}
+# Use the readthedocs theme if the documentation is being built there
+on_rtd = os.environ.get('READTHEDOCS') == 'True'
+if on_rtd:
+    html_theme = 'default'
+else:
+    html_theme = 'alabaster'
 
 # -- Options for HTMLHelp output ------------------------------------------
 
