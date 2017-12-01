@@ -204,6 +204,49 @@ ser.close()
 ```
 * [Loopback test with UART1 and UART2](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart#testing-and-using-the-uart)
 
+
+### [SPI](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/spi)
+* Use [`config-pin` to set pin mode](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) for [SPI pins](http://beagleboard.org/static/images/cape-headers-spi.png)
+  * SPI0
+    * SPI0_CS0: `config-pin p9.17 spi_cs`
+    * SPI0_D1: `config-pin p9.18 spi`
+    * SPI0_D0: `config-pin p9.21 spi`
+    * SPI0_SCLK: `config-pin p9.22 spi_sclk`
+  * SPI1
+    * SPI1_CS0: `config-pin p9.20 spi_cs`
+    * SPI1_CS0: `config-pin p9.28 spi_cs`
+    * SPI1_CS1: `config-pin p9.19 spi_cs`
+    * SPI1_CS1: `config-pin p9.42 spi_cs`
+    * SPI1_D0: `config-pin p9.29 spi`
+    * SPI1_D1: `config-pin p9.30 spi`
+    * SPI1_SCLK: `config-pin p9.31 spi_sclk`
+* Example:
+```
+from Adafruit_BBIO.SPI import SPI
+#spi = SPI(bus, device) #/dev/spidev<bus>.<device>
+
+# /dev/spidev0.0
+spi = SPI(1,0)
+print(spi.xfer2([32, 11, 110, 22, 220]))
+spi.close() 
+
+# /dev/spidev0.1
+spi = SPI(1,1)
+print(spi.xfer2([32, 11, 110, 22, 220]))
+spi.close() 
+
+# /dev/spidev1.0
+spi = SPI(2,0)
+print(spi.xfer2([32, 11, 110, 22, 220]))
+spi.close() 
+
+# /dev/spidev1.1
+spi = SPI(2,1)
+print(spi.xfer2([32, 11, 110, 22, 220]))
+spi.close() 
+```
+
+
 ## Running tests
 
 Install py.test to run the tests. You'll also need the python compiler package for pytest:
