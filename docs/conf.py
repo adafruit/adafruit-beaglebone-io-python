@@ -100,19 +100,22 @@ html_static_path = ['_static']
 #
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
-html_sidebars = {
-    '**': [
-        'searchbox.html',
-        'localtoc.html'
-    ]
-}
 
 # Use the readthedocs theme if the documentation is being built there
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     html_theme = 'default'
+    html_theme_options = {
+        'collapse_navigation': False,
+    }
 else:
     html_theme = 'alabaster'
+    html_sidebars = {
+        '**': [
+            'searchbox.html',
+            'localtoc.html'
+        ]
+    }
 
 # -- Options for HTMLHelp output ------------------------------------------
 
