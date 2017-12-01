@@ -6,9 +6,8 @@
 Adafruit Beaglebone IO Python API
 =================================
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+The Adafruit Beaglebone IO API enables access to the Beaglebone's GPIO, PWM,
+ADC, UART and eQEP hardware modules from Python programs.
 
 :mod:`Encoder` --- Quadrature Encoder interface
 -----------------------------------------------
