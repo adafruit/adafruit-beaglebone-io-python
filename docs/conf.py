@@ -102,11 +102,15 @@ html_static_path = ['_static']
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 html_sidebars = {
     '**': [
-        'relations.html',  # needs 'show_related': True theme option to display
         'searchbox.html',
+        'localtoc.html'
     ]
 }
 
+html_theme = "default"
+html_theme_options = {
+    #"show_related": "true"
+}
 
 # -- Options for HTMLHelp output ------------------------------------------
 
