@@ -209,8 +209,8 @@ ser.close()
 * Use [`config-pin` to set pin mode](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) for [SPI pins](http://beagleboard.org/static/images/cape-headers-spi.png)
   * SPI0
     * SPI0_CS0: `config-pin p9.17 spi_cs`
-    * SPI0_D1: `config-pin p9.18 spi`
     * SPI0_D0: `config-pin p9.21 spi`
+    * SPI0_D1: `config-pin p9.18 spi`
     * SPI0_SCLK: `config-pin p9.22 spi_sclk`
   * SPI1
     * SPI1_CS0: `config-pin p9.20 spi_cs`
@@ -245,7 +245,6 @@ spi = SPI(2,1)
 print(spi.xfer2([32, 11, 110, 22, 220]))
 spi.close() 
 ```
-
 
 ## Running tests
 
