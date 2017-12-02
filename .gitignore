@@ -59,3 +59,4 @@ docs/_templates
 
 # vim temp files
 *~
+*.swp

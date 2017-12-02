@@ -9,6 +9,15 @@ hardware.
 The channel identifiers are available as module variables :data:`eQEP0`,
 :data:`eQEP1`, :data:`eQEP2` and :data:`eQEP2b`.
 
+=======  =======  =======  ===================================================
+Channel  Pin A    Pin B    Notes
+=======  =======  =======  ===================================================
+eQEP0    P9.27    P9.92
+eQEP1    P8.33    P8.35    Only available with video disabled
+eQEP2    P8.11    P8.12    Only available with eQEP2b unused (same channel)
+eQEP2b   P8.41    P8.42    Only available with video disabled and eQEP2 unused
+=======  =======  =======  ===================================================
+
 Example:
     To use the module, you can connect a rotary encoder to your Beaglebone
     and then simply instantiate the :class:`RotaryEncoder` class to read its

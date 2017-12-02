@@ -22,7 +22,7 @@ ADC, UART and eQEP hardware modules from Python programs.
 :mod:`PWM` --- Pulse Width Modulation interface
 -----------------------------------------------
 
-Enables access to the Pulse Width Modulation (PWM) module, to easily and 
+Enables access to the Pulse Width Modulation (PWM) module, to easily and
 accurately generate a PWM output signal of a given duty cycle and
 frequency.
 
@@ -160,7 +160,7 @@ This module defines an object type that allows Serial Peripheral Interface
 (SPI) bus transactions on hosts running the Linux kernel. The host kernel
 must have SPI support and SPI device interface support.
 
-Because the SPI device interface is opened R/W, users of this module 
+Because the SPI device interface is opened R/W, users of this module
 usually must have root permissions or be members of a group with granted
 access rights.
 
@@ -184,22 +184,22 @@ Example::
     # /dev/spidev0.0
     spi = SPI(1, 0)
     print(spi.xfer2([32, 11, 110, 22, 220]))
-    spi.close() 
+    spi.close()
 
     # /dev/spidev0.1
     spi = SPI(1, 1)
     print(spi.xfer2([32, 11, 110, 22, 220]))
-    spi.close() 
+    spi.close()
 
     # /dev/spidev1.0
     spi = SPI(2, 0)
     print(spi.xfer2([32, 11, 110, 22, 220]))
-    spi.close() 
+    spi.close()
 
     # /dev/spidev1.1
     spi = SPI(2, 1)
     print(spi.xfer2([32, 11, 110, 22, 220]))
-    spi.close() 
+    spi.close()
 
 .. module:: Adafruit_BBIO.SPI
 
@@ -290,7 +290,8 @@ Example::
 :mod:`GPIO` --- General Purpose I/O interface
 ---------------------------------------------
 
-TODO
+This module provides access and control of pins set up as General Purpose
+I/O (GPIO).
 
 .. note::
 
@@ -302,8 +303,10 @@ TODO
 
 .. note::
 
-   When coding with this module, you will often be using pin names for
-   better readability. For easy reference, you can use the
+   When coding with this module, you will be using pin names for
+   better readability. As such, you can specify them in the header 8 or 9
+   form (e.g. "P8_16") or in pin name form (e.g. "GPIO1_14").
+   For easy reference, you can use the
    `Beaglebone pin names table <https://github.com/adafruit/adafruit-beaglebone-io-python/blob/master/source/common.c#L73>`_
 
 
@@ -326,10 +329,106 @@ Example::
 
 .. module:: Adafruit_BBIO.GPIO
 
-.. function:: setup()
+.. function:: setup(channel, direction[, pull_up_down=:data:`PUD_OFF`, initial=None, delay=0])
 
-   :param str channel: UART channel to set up. One of "UART1", "UART2",
-       "UART4" or "UART5"
+   Set up the given GPIO channel, its direction and (optional) pull/up down control
+
+   :param str channel: GPIO channel to set up (e.g. "P8_16").
+   :param int direction: GPIO channel direction (:data:`IN` or :data:`OUT`).
+   :param int pull_up_down: pull-up/pull-down resistor configuration
+       (:data:`PUD_OFF`, :data:`PUD_UP` or :data:`PUD_DOWN`).
+   :param int initial: initial value for an output channel (:data:`LOW`/:data:`HIGH`).
+   :param int delay: time in milliseconds to wait after exporting the GPIO pin.
+
+.. function:: cleanup()
+
+   Clean up by resetting all GPIO channels that have been used by
+   the application to :data:`IN` with no pullup/pulldown and no event
+   detection.
+
+.. function:: output(channel, value)
+
+   Set the given output channel to the given digital value.
+
+   :param str channel: GPIO channel to output the value to (e.g. "P8_16").
+   :param value: value to set the output to-- 0/1 or False/True
+       or :data:`LOW`/:data:`HIGH`.
+   :type value: int or bool
+
+.. function:: input(channel)
+
+   Get the given input channel's digital value.
+
+   :param str channel: GPIO channel to read the value from (e.g. "P8_16").
+   :returns: Channel value–– 0 or 1.
+   :rtype: int
+
+.. function:: add_event_detect(channel, edge[, callback=None, bouncetime=0])
+
+   Enable edge detection events for the given GPIO channel.
+
+   :param str channel: GPIO channel to detect events from (e.g. "P8_16").
+   :param int edge: edge to detect–– :data:`RISING`, :data:`FALLING`
+       or :data:`BOTH`
+   :param func callback: a function to call once the event has been detected.
+   :param int bouncetime: switch bounce timeout in ms for the callback.
+
+.. function:: remove_event_detect(channel)
+
+   Remove edge detection for the given GPIO channel.
+
+   :param str channel: GPIO channel to remove event detection
+       from (e.g. "P8_16").
+
+.. function:: event_detected(channel)
+
+   Checks if an edge event has occured on a given GPIO.
+
+   :note: You need to enable edge detection using :func:`add_event_detect()` first.
+
+   :param str channel: GPIO channel to check for event detection
+       for (e.g. "P8_16").
+   :returns: True if an edge has occured on a given GPIO, False otherwise
+   :rtype: bool
+
+.. function:: add_event_callback(channel, callback[, bouncetime=0])
+
+   Add a callback for an event already defined using :func:`add_event_detect()`
+
+   :param str channel: GPIO channel to add a callback to (e.g. "P8_16").
+   :param func callback: a function to call once the event has been detected.
+   :param int bouncetime: switch bounce timeout in ms for the callback.
+
+.. function:: wait_for_edge(channel, edge[, timeout=-1])
+
+   Wait for an edge on the given channel.
+
+   :param str channel: GPIO channel to wait on (e.g. "P8_16").
+   :param int edge: edge to detect–– :data:`RISING`, :data:`FALLING`
+       or :data:`BOTH`
+   :param int timeout: time to wait for an edge, in milliseconds.
+       -1 will wait forever.
+
+.. function:: gpio_function(channel)
+
+   Return the current GPIO function
+   (:data:`IN`, :data:`IN`, :data:`ALT0`) of the given pin.
+
+   :warning: Currently only returning the direction of the
+       pin (input or output) is supported.
+
+   :param str channel: GPIO pin to query the status of.
+   :returns: 0 if :data:`IN`, 1 if :data:`OUT`
+   :rtype: int
+
+.. function:: setwarnings(gpio_warnings)
+
+   Enable or disable GPIO warning messages.
+
+   :warning: Currently enabling or disabling warnings
+       has no effect.
+
+   :param int gpio_warnings: 0–– disable warnings; 1–– enable warnings
 
 .. attribute:: ALT0
 
@@ -377,18 +476,7 @@ Example::
 
 .. attribute:: VERSION
 
-   GPIO module version.
-
-.. function:: cleanup()
-.. function:: output()
-.. function:: input()
-.. function:: add_event_detect()
-.. function:: remove_event_detect()
-.. function:: add_event_detected()
-.. function:: add_event_callback()
-.. function:: wait_for_edge()
-.. function:: gpio_function()
-.. function:: setwarnings()
+   GPIO module version. Currently unused.
 
 Indices and tables
 ==================
