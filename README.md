@@ -4,7 +4,7 @@
 [![PyPI version](https://badge.fury.io/py/Adafruit_BBIO.svg)](https://badge.fury.io/py/Adafruit_BBIO)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/Adafruit_BBIO.svg)](https://pypi.python.org/pypi/Adafruit_BBIO/)
 
-Adafruit BBIO is an API to enable [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc), [UART](README.md#uart), SPI and eQEP hardware access from Python applications running on the Beaglebone. 
+Adafruit BBIO is an API to enable [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc), [UART](README.md#uart), [SPI](README.md#spi) and [eQEP](README.md#eqep) (Quadrature Encoder) hardware access from Python applications running on the Beaglebone. 
 
 * It is recommended to use an [official BeagleBoard.org Debian image](https://beagleboard.org/latest-images)
   * **Currently recommended image: [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29)**
@@ -249,6 +249,10 @@ spi = SPI(2,1)
 print(spi.xfer2([32, 11, 110, 22, 220]))
 spi.close() 
 ```
+
+### eQEP
+
+To use the enhanced Quadrature Encoder Pulse (eQEP) module, please refer to the [`Encoder` module's documentation](https://github.com/adafruit/adafruit-beaglebone-io-python/tree/master/Adafruit_BBIO#usage).
 
 ## Running tests
 

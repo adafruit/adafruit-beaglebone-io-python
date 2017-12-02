@@ -94,6 +94,8 @@ To add user `userName` to the `eqep` group (run this command as root):
 usermod -a -G eqep userName
 ```
 
+Note: you will need to log out and log back in for the group membership change to take effect.
+
 ### Capes
 
 In order to use all eQEP pins the BeagleBone must boot with the [cape-universal](https://github.com/beagleboard/bb.org-overlays/tree/master/tools/beaglebone-universal-io) enabled, and load the `cape-universal` overlay.
