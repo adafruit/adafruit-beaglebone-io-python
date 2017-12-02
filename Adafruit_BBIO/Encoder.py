@@ -246,7 +246,7 @@ class RotaryEncoder(object):
 
         Returns:
             int: 0 if the eQEP channel is configured in absolute mode,
-                1 if configured in relative mode.
+            1 if configured in relative mode.
         '''
         mode = int(self._eqep.node.mode)
 
