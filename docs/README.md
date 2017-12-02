@@ -3,7 +3,7 @@
 This folder contains the required files to automatically generate the Adafruit Beaglebone I/O Python API documentation, partly from the code docstrings and partly from a reStructuredText-formatted `index.rst` file.
 
 ```
-├── conf.py     <- Sphinx configuration file
+├── conf.py    <- Sphinx configuration file
 ├── index.rst  <- Documentation will be generated based on this
 └── Makefile   <- Auxiliary Makefile to build documentation
 ```
@@ -54,14 +54,15 @@ For the sake of keeping things simple and with less maintenance, the approach of
 
 This has the advantage of having a definition of the API in one place, but it also poses the disadvantage of some duplication, as the C modules do define some docstrings for their objects. Then again, the API itself has hardly changed in the last few years, and the Beaglebone is a mature platform, so it's unlikely that this will pose a significant maintenance overhead.
 
-- The documentation in Python modules follows the Google readable docstring markup, which is fully supported by Sphinx.
-- The documentation in the `index.rst` file is written in [reStructuredText](http://docutils.sourceforge.net/rst.html), with Sphinx markup for defining the objects. 
+- The documentation in the `index.rst` file is written in [reStructuredText](http://docutils.sourceforge.net/rst.html), extended with Sphinx markup for defining the objects.
+- The documentation in Python modules follows the Google readable docstring markup, which also builds upon reStructuredText and is fully supported by Sphinx.
 
 ## Further reference
 
 - [Google readable docstring markup](https://google.github.io/styleguide/pyguide.html?showone=Comments#Comments)
 - [Google docstring examples](http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
-- [More Google docstring examples](http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html))
+- [More Google docstring examples](http://sphinxcontrib-napoleon.readthedocs.io/en/latest/example_google.html)
 - [Sphinx docstring markup](http://www.sphinx-doc.org/en/stable/domains.html#the-python-domain)
+- [reStructuredText primer](http://www.sphinx-doc.org/en/stable/rest.html#rst-primer)
 
 

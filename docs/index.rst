@@ -3,6 +3,10 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+
 Adafruit Beaglebone IO Python API
 =================================
 
@@ -21,6 +25,14 @@ ADC, UART and eQEP hardware modules from Python programs.
 Enables access to the Pulse Width Modulation (PWM) module, to easily and 
 accurately generate a PWM output signal of a given duty cycle and
 frequency.
+
+.. note::
+
+   You need to be part of the ``pwm`` group of the OS running on the
+   Beaglebone to be able to run PWM code as a non-root user. The default
+   user created upon the Debian image installation should already be
+   part of the group. Otherwise, you can use
+   ``sudo usermod -a -G pwm userName`` to add ``userName`` to the group.
 
 .. module:: Adafruit_BBIO.PWM
 
@@ -256,7 +268,6 @@ Example::
 
    .. method:: xfer(values[,delay=0])
 
-      xfer([values]) -> [values]
       Perform an SPI transaction of values. Slave Select (SS or CS) will be
       released and reactivated between blocks.
 
@@ -268,7 +279,6 @@ Example::
 
    .. method:: xfer2(values)
 
-      xfer2([values]) -> [values]
       Perform an SPI transaction of values. Slave Select (SS or CS) will be
       held active between blocks.
 
@@ -281,6 +291,21 @@ Example::
 ---------------------------------------------
 
 TODO
+
+.. note::
+
+   You need to be part of the ``gpio`` group of the OS running on the
+   Beaglebone to be able to run GPIO code as a non-root user. The default
+   user created upon the Debian image installation should already be
+   part of the group. Otherwise, you can use
+   ``sudo usermod -a -G gpio userName`` to add ``userName`` to the group.
+
+.. note::
+
+   When coding with this module, you will often be using pin names for
+   better readability. For easy reference, you can use the
+   `Beaglebone pin names table <https://github.com/adafruit/adafruit-beaglebone-io-python/blob/master/source/common.c#L73>`_
+
 
 Example::
 
