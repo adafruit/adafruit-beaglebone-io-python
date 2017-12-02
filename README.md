@@ -1,6 +1,8 @@
 # Adafruit BeagleBone I/O Python Library (Adafruit_BBIO)
 
 [![Documentation Status](https://readthedocs.org/projects/adafruit-beaglebone-io-python/badge/?version=latest)](http://adafruit-beaglebone-io-python.readthedocs.io/en/latest/?badge=latest)
+[![PyPI version](https://badge.fury.io/py/Adafruit_BBIO.svg)](https://badge.fury.io/py/Adafruit_BBIO)
+[![PyPI pyversions](https://img.shields.io/pypi/pyversions/Adafruit_BBIO.svg)](https://pypi.python.org/pypi/Adafruit_BBIO/)
 
 * Adafruit_BBIO is a set of Python tools to allow [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc) and [UART](README.md#uart) access on the BeagleBone
 
