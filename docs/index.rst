@@ -102,9 +102,8 @@ Example::
    the given UART so that it can be accessed by other software that controls
    its serial lines.
 
-   :param channel: UART channel to set up. One of "UART1", "UART2",
+   :param str channel: UART channel to set up. One of "UART1", "UART2",
        "UART4" or "UART5"
-   :type channel: str
 
 .. function:: cleanup()
 
@@ -153,6 +152,16 @@ Because the SPI device interface is opened R/W, users of this module
 usually must have root permissions or be members of a group with granted
 access rights.
 
+Pins used for SPI0 and SPI1
++++++++++++++++++++++++++++
+
+====  =====  =====  =====  =====
+PORT  CS0    DO     DI      SCLK
+====  =====  =====  =====  =====
+SPI0  P9_17  P9_21  P9_18  P9_22
+SPI1  P9_28  P9_29  P9_30  P9_31
+====  =====  =====  =====  =====
+
 Example::
 
     import Adafruit_BBIO.SPI as SPI
@@ -166,17 +175,17 @@ Example::
     spi.close() 
 
     # /dev/spidev0.1
-    spi = SPI(1,1)
+    spi = SPI(1, 1)
     print(spi.xfer2([32, 11, 110, 22, 220]))
     spi.close() 
 
     # /dev/spidev1.0
-    spi = SPI(2,0)
+    spi = SPI(2, 0)
     print(spi.xfer2([32, 11, 110, 22, 220]))
     spi.close() 
 
     # /dev/spidev1.1
-    spi = SPI(2,1)
+    spi = SPI(2, 1)
     print(spi.xfer2([32, 11, 110, 22, 220]))
     spi.close() 
 
@@ -185,7 +194,7 @@ Example::
 .. class:: SPI(bus, client)
 
    :param bus: bus number.
-   :param client: client number.
+   :param client: client device number.
    :returns: a new SPI object, optionally connected to the specified SPI
        device interface.
    :rtype: :class:`SPI`
@@ -267,6 +276,94 @@ Example::
       :type values: list[int]
       :returns: values transferred
       :rtype: list[int]
+
+:mod:`GPIO` --- General Purpose I/O interface
+---------------------------------------------
+
+TODO
+
+Example::
+
+    # Use the config-pin command line tool to set a pin's function to GPIO
+    # Then you can control it with the GPIO module from Python
+    config-pin P9_14 gpio
+
+    import Adafruit_BBIO.GPIO as GPIO
+
+    # Set up pins as inputs or outputs
+    GPIO.setup("P8_13", GPIO.IN)
+    GPIO.setup("P8_14", GPIO.OUT)
+    GPIO.setup("GPIO0_26", GPIO.OUT)  # Alternative: use actual pin names
+
+    # Write a logic high or logic low
+    GPIO.output("P8_14", GPIO.HIGH)  # You can also write '1' instead
+    GPIO.output("P8_14", GPIO.LOW)   # You can also write '0' instead
+
+.. module:: Adafruit_BBIO.GPIO
+
+.. function:: setup()
+
+   :param str channel: UART channel to set up. One of "UART1", "UART2",
+       "UART4" or "UART5"
+
+.. attribute:: ALT0
+
+   Pin mode-- alternate function 0.
+
+.. attribute:: BOTH
+
+   Edge detection-- detect both edges.
+
+.. attribute:: FALLING
+
+   Edge detection-- detect falling edge.
+
+.. attribute:: HIGH
+
+   Pin status-- logic low.
+
+.. attribute:: IN
+
+   Pin mode-- input.
+
+.. attribute:: LOW
+
+   Pin status-- logic low.
+
+.. attribute:: OUT
+
+   Pin mode-- output.
+
+.. attribute:: PUD_OFF
+
+   Pull-up/pull-down resistor type-- no pull-up/pull-down.
+
+.. attribute:: PUD_DOWN
+
+   Pull-up/pull-down resistor type-- pull-down.
+
+.. attribute:: PUD_UP
+
+   Pull-up/pull-down resistor type-- pull-up.
+
+.. attribute:: RISING
+
+   Edge detection-- detect rising edge.
+
+.. attribute:: VERSION
+
+   GPIO module version.
+
+.. function:: cleanup()
+.. function:: output()
+.. function:: input()
+.. function:: add_event_detect()
+.. function:: remove_event_detect()
+.. function:: add_event_detected()
+.. function:: add_event_callback()
+.. function:: wait_for_edge()
+.. function:: gpio_function()
+.. function:: setwarnings()
 
 Indices and tables
 ==================
