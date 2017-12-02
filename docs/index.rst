@@ -184,11 +184,39 @@ Example::
 
 .. class:: SPI(bus, client)
 
-   :param bus: bus number
-   :param client: client number
+   :param bus: bus number.
+   :param client: client number.
    :returns: a new SPI object, optionally connected to the specified SPI
        device interface.
    :rtype: :class:`SPI`
+
+   .. attribute:: bpw
+
+      Bits per word.
+
+   .. attribute:: cshigh
+
+      Chip Select (CS or Slave Select, SS) active high.
+
+   .. attribute:: loop
+
+      Loopback configuration.
+
+   .. attribute:: lsbfirst
+
+      Least Significant Bit (LSB) first.
+
+   .. attribute:: mode
+
+      SPI mode as two bit pattern of Clock Polarity and Phase [CPOL|CPHA]; min-- 0b00 = 0, max-- 0b11 = 3.
+
+   .. attribute:: msh
+
+      Maximum speed in Hz.
+
+   .. attribute:: threewire
+
+      SI/SO signals are shared.
 
    .. method:: open(bus, device)
 
