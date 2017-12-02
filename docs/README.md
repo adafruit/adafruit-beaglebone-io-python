@@ -8,7 +8,7 @@ This folder contains the required files to automatically generate the Adafruit B
 └── Makefile   <- Auxiliary Makefile to build documentation
 ```
 
-The tools used are [http://www.sphinx-doc.org](Sphinx) to extract the documentation and publish it in HTML format for online viewing, in combination with [Readthedocs](http://readthedocs.io), which automatically executes Sphinx via webhooks triggered by Github commits, and publishes the resulting docs for all tracked branches. Generally Readthedocs will be set up to track stable release branches and master.
+The tools used are [Sphinx](http://www.sphinx-doc.org) to extract the documentation and publish it in HTML format for online viewing, in combination with [Readthedocs](http://readthedocs.io), which automatically executes Sphinx via webhooks triggered by Github commits, and publishes the resulting docs for all tracked branches. Generally Readthedocs will be set up to track stable release branches and master.
 
 ## Building the documentation
 
