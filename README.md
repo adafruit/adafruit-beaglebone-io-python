@@ -1,6 +1,6 @@
 # Adafruit Beaglebone I/O Python API
 
-[![Documentation Status](https://readthedocs.org/projects/adafruit-beaglebone-io-python/badge/?version=latest)](http://adafruit-beaglebone-io-python.readthedocs.io/en/latest/?badge=latest)
+[![Documentation Status](https://readthedocs.org/projects/adafruit-bbio/badge/?version=latest)](http://adafruit-bbio.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/Adafruit_BBIO.svg)](https://badge.fury.io/py/Adafruit_BBIO)
 [![PyPI pyversions](https://img.shields.io/pypi/pyversions/Adafruit_BBIO.svg)](https://pypi.python.org/pypi/Adafruit_BBIO/)
 
