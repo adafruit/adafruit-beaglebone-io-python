@@ -53,3 +53,10 @@ m4/lt~obsolete.m4
 missing
 source/Makefile.in
 test-driver
+docs/_build
+docs/_static
+docs/_templates
+
+# vim temp files
+*~
+*.swp

@@ -1,5 +1,72 @@
 #!/usr/bin/python
 
+"""Quadrature Encoder Pulse interface.
+
+This module enables access to the enhanced Quadrature Encoder Pulse (eQEP)
+channels, which can be used to seamlessly interface with rotary encoder
+hardware.
+
+The channel identifiers are available as module variables :data:`eQEP0`,
+:data:`eQEP1`, :data:`eQEP2` and :data:`eQEP2b`.
+
+=======  =======  =======  ===================================================
+Channel  Pin A    Pin B    Notes
+=======  =======  =======  ===================================================
+eQEP0    P9.27    P9.92
+eQEP1    P8.33    P8.35    Only available with video disabled
+eQEP2    P8.11    P8.12    Only available with eQEP2b unused (same channel)
+eQEP2b   P8.41    P8.42    Only available with video disabled and eQEP2 unused
+=======  =======  =======  ===================================================
+
+Example:
+    To use the module, you can connect a rotary encoder to your Beaglebone
+    and then simply instantiate the :class:`RotaryEncoder` class to read its
+    position::
+
+        from Adafruit_BBIO.Encoder import RotaryEncoder, eQEP2
+
+        # Instantiate the class to access channel eQEP2, and initialize
+        # that channel
+        myEncoder = RotaryEncoder(eQEP2)
+
+        # Get the current position
+        cur_position = myEncoder.position
+
+        # Set the current position
+        next_position = 15
+        myEncoder.position = next_position
+
+        # Reset position to 0
+        myEncoder.zero()
+
+        # Change mode to relative (default is absolute)
+        # You can use setAbsolute() to change back to absolute
+        # Absolute: the position starts at zero and is incremented or
+        #           decremented by the encoder's movement
+        # Relative: the position is reset when the unit timer overflows.
+        myEncoder.setRelative()
+
+        # Read the current mode (0: absolute, 1: relative)
+        # Mode can also be set as a property
+        mode = myEncoder.mode
+
+        # Get the current frequency of update in Hz
+        freq = myEncoder.frequency
+
+        # Set the update frequency to 1 kHz
+        myEncoder.frequency = 1000
+
+        # Disable the eQEP channel
+        myEncoder.disable()
+
+        # Check if the channel is enabled
+        # The 'enabled' property is read-only
+        # Use the enable() and disable() methods to
+        # safely enable or disable the module
+        isEnabled = myEncoder.enabled
+
+"""
+
 from subprocess import check_output, STDOUT, CalledProcessError
 import os
 import logging
@@ -8,20 +75,28 @@ from .sysfs import Node
 import platform
 
 (major, minor, patch) = platform.release().split("-")[0].split(".")
-if not (int(major) >= 4 and int(minor) >=  4):
+if not (int(major) >= 4 and int(minor) >= 4) \
+   and platform.node() == 'beaglebone':
     raise ImportError(
         'The Encoder module requires Linux kernel version >= 4.4.x.\n'
         'Please upgrade your kernel to use this module.\n'
         'Your Linux kernel version is {}.'.format(platform.release()))
 
 
-# eQEP module channel identifiers
-# eQEP 2 and 2b are the same channel, exposed on two different sets of pins,
-# which are mutually exclusive
 eQEP0 = 0
+'''eQEP0 channel identifier, pin A-- P9.92, pin B-- P9.27 on Beaglebone
+Black.'''
 eQEP1 = 1
+'''eQEP1 channel identifier, pin A-- P9.35, pin B-- P9.33 on Beaglebone
+Black.'''
 eQEP2 = 2
+'''eQEP2 channel identifier, pin A-- P8.12, pin B-- P8.11 on Beaglebone Black.
+Note that there is only one eQEP2 module. This is one alternative set of pins
+where it is exposed, which is mutually-exclusive with eQEP2b'''
 eQEP2b = 3
+'''eQEP2(b) channel identifier, pin A-- P8.41, pin B-- P8.42 on Beaglebone
+Black. Note that there is only one eQEP2 module. This is one alternative set of
+pins where it is exposed, which is mutually-exclusive with eQEP2'''
 
 # Definitions to initialize the eQEP modules
 _OCP_PATH = "/sys/devices/platform/ocp"
@@ -37,7 +112,7 @@ _eQEP_DEFS = [
 ]
 
 
-class eQEP(object):
+class _eQEP(object):
     '''Enhanced Quadrature Encoder Pulse (eQEP) module class. Abstraction
     for either of the three available channels (eQEP0, eQEP1, eQEP2) on
     the Beaglebone'''
@@ -51,7 +126,7 @@ class eQEP(object):
         return cls(**df)
 
     def __init__(self, channel, pin_A, pin_B, sys_path):
-        '''Initialize the eQEP module
+        '''Initialize the given eQEP channel
 
         Attributes:
             channel (str): eQEP channel name. E.g. "eQEP0", "eQEP1", etc.
@@ -79,21 +154,11 @@ class RotaryEncoder(object):
     '''
     Rotary encoder class abstraction to control a given QEP channel.
 
-    Constructor:
-        eqep_num: QEP object that determines which channel to control
-
-    Properties:
-        position: current position of the encoder
-        frequency: frequency at which the encoder reports new positions
-        enabled: (read only) true if the module is enabled, false otherwise
-        mode: current mode of the encoder (absolute: 0, relative: 1)
-
-    Methods:
-        enable: enable the QEP channel
-        disable: disable the QEP channel
-        setAbsolute: shortcut for setting the mode to absolute
-        setRelative: shortcut for setting the mode to relative
-        zero: shortcut for setting the position to 0
+    Args:
+        eqep_num (int): determines which eQEP pins are set up.
+            Allowed values: EQEP0, EQEP1, EQEP2 or EQEP2b,
+            based on which pins the physical rotary encoder
+            is connected to.
     '''
 
     def _run_cmd(self, cmd):
@@ -117,15 +182,8 @@ class RotaryEncoder(object):
         self._run_cmd(["config-pin", pin, "qep"])
 
     def __init__(self, eqep_num):
-        '''Creates an instance of the class RotaryEncoder.
+        '''Creates an instance of the class RotaryEncoder.'''
 
-        Arguments:
-           eqep_num: determines which eQEP pins are set up.
-               Allowed values: EQEP0, EQEP1, EQEP2 or EQEP2b,
-               based on which pins the physical rotary encoder
-               is connected to.
-
-        '''
         # nanoseconds factor to convert period to frequency and back
         self._NS_FACTOR = 1000000000
 
@@ -134,7 +192,7 @@ class RotaryEncoder(object):
         self._logger.addHandler(logging.NullHandler())
 
         # Initialize the eQEP channel structures
-        self._eqep = eQEP.fromdict(_eQEP_DEFS[eqep_num])
+        self._eqep = _eQEP.fromdict(_eQEP_DEFS[eqep_num])
         self._logger.info(
             "Configuring: {}, pin A: {}, pin B: {}, sys path: {}".format(
                 self._eqep.channel, self._eqep.pin_A, self._eqep.pin_B,
@@ -154,8 +212,8 @@ class RotaryEncoder(object):
     def enabled(self):
         '''Returns the enabled status of the module:
 
-            true: module is enabled
-            false: module is disabled
+        Returns:
+            bool: True if the eQEP channel is enabled, False otherwise.
         '''
         isEnabled = bool(int(self._eqep.node.enabled))
 
@@ -164,7 +222,11 @@ class RotaryEncoder(object):
     def _setEnable(self, enabled):
         '''Turns the eQEP hardware ON or OFF
 
-           value (int): 1 represents enabled, 0 is disabled
+        Args:
+            enabled (int): enable the module with 1, disable it with 0.
+
+        Raises:
+            ValueError: if the value for enabled is < 0 or > 1
 
         '''
         enabled = int(enabled)
@@ -189,8 +251,11 @@ class RotaryEncoder(object):
 
     @property
     def mode(self):
-        '''Returns the mode the eQEP hardware is in (absolute or relative).
+        '''Returns the mode the eQEP hardware is in.
 
+        Returns:
+            int: 0 if the eQEP channel is configured in absolute mode,
+            1 if configured in relative mode.
         '''
         mode = int(self._eqep.node.mode)
 
@@ -264,14 +329,13 @@ class RotaryEncoder(object):
         self._logger.debug("Set position: Channel {}, position: {}".format(
             self._eqep.channel, position))
 
-
     @property
     def frequency(self):
         '''Sets the frequency in Hz at which the driver reports
         new positions.
 
         '''
-        frequency = self._NS_FACTOR / int(self._eqep.node.period) 
+        frequency = self._NS_FACTOR / int(self._eqep.node.period)
 
         self._logger.debug(
             "Set frequency(): Channel {}, frequency: {} Hz, "
@@ -298,3 +362,4 @@ class RotaryEncoder(object):
         '''Resets the current position to 0'''
 
         self.position = 0
+
