@@ -329,7 +329,7 @@ Example::
 
 .. module:: Adafruit_BBIO.GPIO
 
-.. function:: setup(channel, direction[, pull_up_down=:data:`PUD_OFF`, initial=None, delay=0])
+.. function:: setup(channel, direction[, pull_up_down=PUD_OFF, initial=None, delay=0])
 
    Set up the given GPIO channel, its direction and (optional) pull/up down control
 
@@ -345,6 +345,9 @@ Example::
    Clean up by resetting all GPIO channels that have been used by
    the application to :data:`IN` with no pullup/pulldown and no event
    detection.
+
+   :note: It's recommended that you call this function upon exiting your
+       application.
 
 .. function:: output(channel, value)
 
