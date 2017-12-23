@@ -101,7 +101,8 @@ html_static_path = ['_static']
 # This is required for the alabaster theme
 # refs: http://alabaster.readthedocs.io/en/latest/installation.html#sidebars
 
-# Use the readthedocs theme if the documentation is being built there
+# Use the readthedocs theme if the documentation is being built there, or
+# use a Sphinx theme if the documentation is being built locally
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     html_theme = 'default'
@@ -116,6 +117,17 @@ else:
             'localtoc.html'
         ]
     }
+    # If you want to use the same theme as readthedocs, uncomment the lines
+    # below and install the readthedocs theme (pip install sphinx_rtd_theme)
+    # before doing a new build:
+    #html_theme = 'sphinx_rtd_theme'
+    #html_theme_options = {
+    #    'collapse_navigation': False,
+    #}
+
+# Do not show the "View source" link that shows the .rst files
+html_copy_source = False
+html_show_sourcelink = False
 
 # -- Options for HTMLHelp output ------------------------------------------
 
