@@ -1,3 +1,75 @@
+1.0.10
+----
+**features**
+* automatically set pin modes for UART (PR #158)
+* Encoder: README.md: added note about eqep group change (PR #214)
+* deprecate out of date Adafruit_I2C.py (PR #215)
+* Add Encoder module info to main README.md (PR #217)
+* Add automatic API documentation generation (PR #219)
+* Separate API docs into modules (PR #221)
+
+**shortlog**
+* David Planella (46):
+  * Encoder: README.md: added note about eqep group change
+  * Add Encoder module info to main README.md
+  * Added docstrings using Google syntax and Sphinx support to generate the API documentation for the Encoder and PWM modules for now.
+  * Made kernel version check to happen only if running on a beaglebone. The readthedocs builders that import the Encoder module have an old 3.3 kernel and the autodoc build fails
+  * Use the default readthedocs theme
+  * Use readthedocs theme if building docs there, remove redundand search link
+  * Readthedocs theme tweaks
+  * Removed redundant TOC, added global description
+  * Added UART documentation
+  * Added documentation badge
+  * Added ADC API docs, fixed UART module definition
+  * API docs: added SPI module
+  * Added SPI module attribute docs
+  * Added Python badges to README file
+  * Added SPI pins table and first shot at GPIO module. Functions still need to be documented
+  * Merge branch 'readthedocs' of https://github.com/dplanella/adafruit-beaglebone-io-python into readthedocs
+  * Documented the API docs build process
+  * Added docstrings using Google syntax and Sphinx support to generate the API documentation for the Encoder and PWM modules for now.
+  * Made kernel version check to happen only if running on a beaglebone. The readthedocs builders that import the Encoder module have an old 3.3 kernel and the autodoc build fails
+  * Use the default readthedocs theme
+  * Use readthedocs theme if building docs there, remove redundand search link
+  * Readthedocs theme tweaks
+  * Removed redundant TOC, added global description
+  * Added UART documentation
+  * Added documentation badge
+  * Added ADC API docs, fixed UART module definition
+  * API docs: added SPI module
+  * Added SPI module attribute docs
+  * Added Python badges to README file
+  * Added SPI pins table and first shot at GPIO module. Functions still need to be documented
+  * Documented the API docs build process
+  * Merge branch 'readthedocs' of https://github.com/dplanella/adafruit-beaglebone-io-python into readthedocs
+  * Update README.md
+  * Added some more API doc content
+  * Sync from upstream master
+  * Minor documentation and configuration improvements
+  * Finished documenting GPIO
+  * rST fixes
+  * Update README.md
+  * Minor API doc improvements
+  * Merge branch 'readthedocs' of https://github.com/dplanella/adafruit-beaglebone-io-python into readthedocs
+  * Generate the API documentation from a master index and a separate file for each module
+  * Sync from upstream master
+  * Improvements to the API docs output config
+  * Update docs generation description to reflect new separate modules
+  * Updated ADC API docs
+
+* Drew Fustini (10):
+  * use set_pin_mode() to set uart pinmux (#158)
+  * Add SPI instructions to README (#158)
+  * Update README.md
+  * Fix spidev path mismatch (#216)
+  * Merge pull request #217 from dplanella/patch-2
+  * Merge pull request #214 from dplanella/patch-1
+  * Deprecate Adafruit_BBIO.I2C in favor of Adafruit_GPIO.I2C (#215)
+  * Merge pull request #219 from dplanella/readthedocs
+  * relocate doc dir to avoid confusion (#218)
+  * Merge pull request #221 from dplanella/readthedocs
+
+
 1.0.9
 ----
 **Features:**
