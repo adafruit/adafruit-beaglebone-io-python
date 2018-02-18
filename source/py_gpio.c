@@ -218,6 +218,7 @@ static void run_py_callbacks(unsigned int gpio)
    PyObject *result;
    PyGILState_STATE gstate;
    struct py_callback *cb = py_callbacks;
+   unsigned char cookie[2] = {0};
    struct timeval tv_timenow;
    unsigned long long timenow;
 
@@ -225,28 +226,40 @@ static void run_py_callbacks(unsigned int gpio)
    {
       if (cb->gpio == gpio)
       {
-         gettimeofday(&tv_timenow, NULL);
-         timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
-         if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
+        //Store memory contents of the first byte of current callback structure as a "magic cookie"
+        memcpy(&cookie[0], cb, 1);
+        gettimeofday(&tv_timenow, NULL);
+        timenow = tv_timenow.tv_sec*1E6 + tv_timenow.tv_usec;
+        if (cb->bouncetime == 0 || timenow - cb->lastcall > cb->bouncetime*1000 || cb->lastcall == 0 || cb->lastcall > timenow) {
 
-            // save lastcall before calling func to prevent reentrant bounce
+        // save lastcall before calling func to prevent reentrant bounce
+        cb->lastcall = timenow;
+
+        // run callback
+        gstate = PyGILState_Ensure();
+        result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
+        //Check the first byte of callback structure after executing callback function body
+        memcpy(&cookie[1], cb, 1);
+
+        if (result == NULL && PyErr_Occurred())
+        {
+            PyErr_Print();
+            PyErr_Clear();
+        }
+        Py_XDECREF(result);
+        PyGILState_Release(gstate);
+        }
+        
+        // Current callback pointer might have changed _only_ if linked list structure has been altered from within the callback function, which should happen _only_ in remove_event_detect() call
+        // If that happened, cb* pointer will be now addressing different memory location with different data.
+        if (cookie[0] != cookie[1]) break;
+        
+        if (cb != NULL)
             cb->lastcall = timenow;
-
-            // run callback
-            gstate = PyGILState_Ensure();
-            result = PyObject_CallFunction(cb->py_cb, "s", cb->channel);
-
-            if (result == NULL && PyErr_Occurred())
-            {
-               PyErr_Print();
-               PyErr_Clear();
-            }
-            Py_XDECREF(result);
-            PyGILState_Release(gstate);
-         }
-         cb->lastcall = timenow;
       }
-      cb = cb->next;
+      // If callback just executed was the only one in chain and it was removed inside cb->py_cb() body, cb->next will be pointing to NULL now
+      if (cb != NULL)
+        cb = cb->next;
    }
 }
 
@@ -411,7 +424,9 @@ static PyObject *py_remove_event_detect(__attribute__ ((unused)) PyObject *self,
          temp = cb;
          cb = cb->next;
          free(temp);
-      } else {
+        } 
+        else 
+        {
          prev = cb;
          cb = cb->next;
       }

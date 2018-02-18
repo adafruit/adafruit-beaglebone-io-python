@@ -562,9 +562,11 @@ void run_callbacks(unsigned int gpio)
     struct callback *cb = callbacks;
     while (cb != NULL)
     {
-        if (cb->gpio == gpio)
+        if (cb->gpio == gpio) 
             cb->func(cb->gpio);
-        cb = cb->next;
+        // Current callback pointer might have changed _only_ if linked list structure has been altered from within the callback function, which should happen _only_ in remove_event_detect() call
+        if (cb != NULL)
+            cb = cb->next;
     }
 }
 
