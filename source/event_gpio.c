@@ -80,7 +80,7 @@ BBIO_err gpio_export(unsigned int gpio)
 
     // already exported by us?
     if (exported_gpios[gpio] != GPIO_NOT_EXPORTED) {
-        syslog(LOG_DEBUG, "gpio_export: %u already exported", gpio);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u already exported", gpio);
         ret = BBIO_OK;
         goto exit;
     }
@@ -91,7 +91,7 @@ BBIO_err gpio_export(unsigned int gpio)
 
     if (access(gpio_path, R_OK|W_OK|X_OK) != -1) {
         exported_gpios[gpio] = GPIO_ALREADY_EXPORTED;
-        syslog(LOG_DEBUG, "gpio_export: %u already exported", gpio);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u already exported", gpio);
         ret =  BBIO_OK;
         goto exit;
     }
@@ -99,7 +99,7 @@ BBIO_err gpio_export(unsigned int gpio)
     const char gpio_export[] = "/sys/class/gpio/export";
 
     if ((fd = open(gpio_export, O_WRONLY)) < 0) {
-        syslog(LOG_ERR, "gpio_export: %u couldn't open \"%s\": %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export: %u couldn't open \"%s\": %i-%s",
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
         goto exit;
@@ -107,7 +107,7 @@ BBIO_err gpio_export(unsigned int gpio)
 
     len = snprintf(str_gpio, sizeof(str_gpio), "%d", gpio);
     if(write(fd, str_gpio, len) < 0) {
-        syslog(LOG_ERR, "gpio_export: %u couldn't write \"%s\": %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export: %u couldn't write \"%s\": %i-%s",
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
         goto exit;
@@ -116,12 +116,12 @@ BBIO_err gpio_export(unsigned int gpio)
     // add to list
     exported_gpios[gpio] = GPIO_EXPORTED;
 
-    syslog(LOG_DEBUG, "gpio_export: %u OK", gpio);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u OK", gpio);
     ret = BBIO_OK;
 
     exit:
     if(fd && (ret = close(fd))) {
-        syslog(LOG_ERR, "gpio_export: %u couldn't close \"%s\": %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export: %u couldn't close \"%s\": %i-%s",
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
     }
@@ -190,37 +190,44 @@ int add_fd_list(unsigned int gpio, int fd)
 int open_value_file(unsigned int gpio)
 {
     int fd;
-    char filename[MAX_FILENAME];
+    char filename[MAX_FILENAME] = "";
 
     // create file descriptor of value file
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", gpio -  USR_LED_GPIO_MIN);
-    } else switch(gpio) {
-        case USR_LED_RED:
-           snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-           break;
-        case USR_LED_GREEN:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-            break;
-        case BAT25:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
-            break;
-        case BAT50:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
-            break;
-        case BAT75:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
-            break;
-        case BAT100:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
-            break;
-        case WIFI:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
-            break;
-        default:
-            snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-            break;
+    } else if (beaglebone_blue()) {
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: beaglebone_blue() is true\n");
+        switch(gpio) {
+            case USR_LED_RED:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+                break;
+            case USR_LED_GREEN:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
+                break;
+            case BAT25:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
+                break;
+            case BAT50:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
+                break;
+            case BAT75:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
+                break;
+            case BAT100:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
+                break;
+            case WIFI:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
+                break;
+            default:
+                snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+                break;
+        }
+    } else {
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: default gpio path\n");
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio open_value_file: filename=%s\n", filename);
     
     // if(gpio == USR_LED_RED) {     // red LED
     //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
@@ -231,7 +238,7 @@ int open_value_file(unsigned int gpio)
     // }
 
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0) {
-        syslog(LOG_ERR, "gpio open_value_file: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio open_value_file: %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return -1;
     }
@@ -252,7 +259,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
 #define GPIO_UNEXPORT "/sys/class/gpio/unexport"
 
     if ((fd = open(GPIO_UNEXPORT, O_WRONLY)) < 0) {
-      syslog(LOG_ERR, "gpio_unexport: %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
+      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport: %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
              gpio, errno, strerror(errno));
       return BBIO_SYSFS;
     }
@@ -261,7 +268,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
     int ret = write(fd, str_gpio, len);
     close(fd);
     if (ret < 0) {
-      syslog(LOG_ERR, "gpio_unexport: %u couldn't write '"GPIO_UNEXPORT"': %i-%s",
+      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport: %u couldn't write '"GPIO_UNEXPORT"': %i-%s",
              gpio, errno, strerror(errno));
       return BBIO_SYSFS;
     }
@@ -269,7 +276,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
     // remove from list
     exported_gpios[gpio] = GPIO_NOT_EXPORTED;
 
-    syslog(LOG_DEBUG, "gpio_unexport: %u OK", gpio);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_unexport: %u OK", gpio);
     return BBIO_OK;
 }
 
@@ -279,18 +286,29 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         char filename[40];
         char direction[10] = { 0 };
 
-        if (((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) ||
-                (gpio == USR_LED_RED) || (gpio == USR_LED_GREEN)
-                 || (gpio == BAT25) || (gpio == BAT50)
-                 || (gpio == BAT75) || (gpio == BAT100)
-                 || (gpio == WIFI)) {
-            syslog(LOG_DEBUG, "gpio_set_direction: %u not applicable to the USR LED", gpio);
+        if ( ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) 
+             ||
+             ( beaglebone_blue() 
+               &&
+               ( 
+                 (gpio == USR_LED_RED)
+                 || (gpio == USR_LED_GREEN)
+                 || (gpio == BAT25)
+                 || (gpio == BAT50)
+                 || (gpio == BAT75)
+                 || (gpio == BAT100)
+                 || (gpio == WIFI)
+               ) 
+             )
+           )
+        {
+            syslog(LOG_WARNING, "Adafruit_BBIO: gpio_set_direction: %u not applicable to built-in LEDs", gpio);
             return BBIO_OK; // direction is not applicable to the USR LED pins
         }
 
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
         if ((fd = open(filename, O_WRONLY)) < 0) {
-            syslog(LOG_ERR, "gpio_set_direction: %u couldn't open '%s': %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction: %u couldn't open '%s': %i-%s",
                    gpio, filename, errno, strerror(errno));
             return BBIO_SYSFS;
         }
@@ -304,12 +322,12 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         int ret = write(fd, direction, strlen(direction));
         close(fd);
         if (ret < 0) {
-            syslog(LOG_ERR, "gpio_set_direction: %u couldn't write '%s': %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction: %u couldn't write '%s': %i-%s",
                    gpio, filename, errno, strerror(errno));
             return BBIO_SYSFS;
         }
 
-        syslog(LOG_DEBUG, "gpio_set_direction: %u OK", gpio);
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_direction: %u OK", gpio);
         return BBIO_OK;
 }
 
@@ -321,7 +339,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0) {
-        syslog(LOG_ERR, "gpio_get_direction: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction: %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -330,7 +348,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
     int ret = read(fd, &direction, sizeof(direction) - 1);
     close(fd);
     if (ret < 0) {
-        syslog(LOG_ERR, "gpio_get_direction: %u couldn't read '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction: %u couldn't read '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -341,7 +359,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
         *value = INPUT;
     }
 
-    syslog(LOG_DEBUG, "gpio_get_direction: %u OK", gpio);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_direction: %u OK", gpio);
     return BBIO_OK;
 }
 
@@ -351,54 +369,76 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     char filename[MAX_FILENAME];
     char vstr[10];
 
+    // TODO: remove this debug output created for issue #178
+    /*
+    if(uboot_overlay_enabled()) {
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: uboot_overlay_enabled() is FASLE\n");
+    }
+
+    if(pocketbeagle()) {
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: pocketbeagle() is FASLE\n");
+    }
+
+    if(beaglebone_blue()) {
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is true\n");
+    } else {
+      fprintf(stderr, "gpio_set_value: beaglebone_blue() is FALSE\n");
+    }
+    */
+
+
     if ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) {
 
         char *usr_led_trigger[] = { "heartbeat", "mmc0", "cpu0", "mmc1" }; 
         int led = gpio -  USR_LED_GPIO_MIN;
 
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: USR LED path\n");
+
         snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:usr%d/brightness", led);
         if (access(filename, W_OK) < 0) {
            snprintf(filename, sizeof(filename), "/sys/class/leds/beaglebone:green:%s/brightness", usr_led_trigger[led]);
         }
-    
-    } else switch(gpio) {
-        case USR_LED_RED:
-           snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-           break;
-        case USR_LED_GREEN:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-            break;
-        case BAT25:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
-            break;
-        case BAT50:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
-            break;
-        case BAT75:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
-            break;
-        case BAT100:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
-            break;
-        case WIFI:
-            snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
-            break;
-        default:
-            snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-            break;
+    } else if (beaglebone_blue()) {
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: beaglebone_blue() is true\n");
+        switch(gpio) {
+            case USR_LED_RED:
+               snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
+               break;
+            case USR_LED_GREEN:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
+                break;
+            case BAT25:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat25/brightness");
+                break;
+            case BAT50:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat50/brightness");
+                break;
+            case BAT75:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat75/brightness");
+                break;
+            case BAT100:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/bat100/brightness");
+                break;
+            case WIFI:
+                snprintf(filename, sizeof(filename), "/sys/class/leds/wifi/brightness");
+                break;
+            default:
+                snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
+                break;
+        }
+    } else {
+        //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: default gpio path\n");
+        snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
     }
-
-    // if(gpio == USR_LED_RED) {
-    //     snprintf(filename, sizeof(filename), "/sys/class/leds/red/brightness");
-    // } else if(gpio == USR_LED_GREEN) {
-    //     snprintf(filename, sizeof(filename), "/sys/class/leds/green/brightness");
-    // } else {
-    //     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/value", gpio);
-    // }
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: filename=%s\n", filename);
 
     fd = open(filename, O_WRONLY);
     if (fd < 0) {
-        syslog(LOG_ERR, "gpio_set_value: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -412,12 +452,12 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     int ret = write(fd, vstr, strlen(vstr));
     close(fd);
     if (ret < 0) {
-        syslog(LOG_ERR, "gpio_set_value: %u couldn't write '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't write '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
 
-    syslog(LOG_DEBUG, "gpio_set_value: %u %u OK", gpio, value);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_set_value: %u %u OK", gpio, value);
     return BBIO_OK;
 }
 
@@ -429,7 +469,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
     if (!fd)
     {
         if ((fd = open_value_file(gpio)) == -1) {
-            syslog(LOG_ERR, "gpio_set_value: %u couldn't open value file: %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't open value file: %i-%s",
                    gpio, errno, strerror(errno));
             return BBIO_SYSFS;
         }
@@ -438,7 +478,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
     lseek(fd, 0, SEEK_SET);
     int ret = read(fd, &ch, sizeof(ch));
     if (ret < 0) {
-        syslog(LOG_ERR, "gpio_set_value: %u couldn't read value file: %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't read value file: %i-%s",
                gpio, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -449,7 +489,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
         *value = 0;
     }
 
-    syslog(LOG_DEBUG, "gpio_get_value: %u OK", gpio);
+    //syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_get_value: %u OK", gpio);
     return BBIO_OK;
 }
 

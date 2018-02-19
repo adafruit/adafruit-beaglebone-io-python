@@ -18,7 +18,7 @@ def get_pwm_dir():
         # .pwm or .ehrpwm, etc.
         results = glob.glob(
             "/sys/devices/platform/ocp/48302000.*/" +
-            "48302200.*/pwm/pwmchip?/pwm0")
+            "48302200.*/pwm/pwmchip?/pwm*")
         # We expect that there will be a result (a directory fitting
         # our path exists) so test that with an assertion.
         assert len(results) > 0

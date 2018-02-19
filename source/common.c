@@ -246,7 +246,7 @@ pins_t table[] = {
   { "GND", "P2_21", 0, -1, -1},
   { "GPIO1_14", "P2_22", 46, -1, -1},
   { "VOUT-3.3V", "P2_23", 0, -1, -1},
-  { "GPIO1_16", "P2_24", 48, -1, -1},
+  { "GPIO1_12", "P2_24", 44, -1, -1},
   { "SPI1_CS0", "P2_25", 41, -1, -1},
   { "RESET#", "P2_26", 0, -1, -1},
   { "SPI1_D0", "P2_27", 40, -1, -1},
@@ -262,14 +262,6 @@ pins_t table[] = {
   
   { NULL, NULL, 0, 0, 0 }
 };
-
-typedef struct uart_t { 
-    const char *name; 
-    const char *path;
-    const char *dt; 
-    const char *rx;
-    const char *tx;
-} uart_t;
 
 uart_t uart_table[] = {
   { "UART1", "/dev/ttyO1", "ADAFRUIT-UART1", "P9_26", "P9_24"},
@@ -301,7 +293,7 @@ pwm_t pwm_table[] = {
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_8"},
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_36"},
   { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_10"},
-  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_13"},
+  { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_33"},
   { "ehrpwm1", 3, 0, 6, "ehrpwm.1:0", "EHRPWM1A", "48302000", "48302200", "P2_1"},
   { "ehrpwm2", 6, 1, 3, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P2_3"},
   { NULL, 0, 0, 0, NULL, NULL, NULL, NULL, NULL }
@@ -538,7 +530,6 @@ int get_spi_bus_path_number(unsigned int spi)
 
 /*
    Refer to: http://elinux.org/Beagleboard:BeagleBoneBlack_Debian#U-Boot_Overlays
-
    Robert C. Nelson maintains the BeagleBoard.org Debian images and
    suggested adding this check to see if u-boot overlays are enabled.
 
@@ -554,14 +545,17 @@ int uboot_overlay_enabled(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "Adafruit_BBIO: error: uboot_overlay_enabled() failed to run cmd=%s\n", cmd);
        return -1;
     }
     uboot_overlay = fgetc(file);
     pclose(file);
 
     if(uboot_overlay == '1') {
+      syslog(LOG_DEBUG, "Adafruit_BBIO: uboot_overlay_enabled() is true\n");
       return 1;
     } else {
+      syslog(LOG_DEBUG, "Adafruit_BBIO: uboot_overlay_enabled() is false\n");
       return 0;
     }
 }
@@ -577,6 +571,7 @@ int pocketbeagle(void) {
     file = popen(cmd, "r");
     if (file == NULL) {
        fprintf(stderr, "error: pocketbeagle() failed to run cmd=%s\n", cmd);
+       syslog(LOG_ERR, "Adafruit_BBIO: error: pocketbeagle() failed to run cmd=%s\n", cmd);
        return -1;
     }
     pocketbeagle = fgetc(file);
@@ -588,6 +583,42 @@ int pocketbeagle(void) {
       return 0;
     }
 }
+
+
+/*
+   Check if board is a BeagleBone Blue
+
+   Refer to GitHub issue for more information:
+   https://github.com/adafruit/adafruit-beaglebone-io-python/issues/178
+*/
+int beaglebone_blue(void) {
+    const char *cmd = "/bin/grep -c 'TI AM335x BeagleBone Blue' /proc/device-tree/model";
+    // cache the value to avoid poor performance
+    // in functions that are called frequently like
+    // gpio_set_value() in source/event_gpio.c
+    static int initialized = 0;
+    static int retval = 0;
+    FILE *file = NULL;
+
+    //fprintf(stderr, "beaglebone_blue(): initialized=[%d] retval=[%d]\n", initialized, retval);
+    if(!initialized) {
+      initialized = 1;
+      //fprintf(stderr, "beaglebone_blue(): not initialized\n");
+      file = popen(cmd, "r");
+      if (file == NULL) {
+         fprintf(stderr, "Adafruit_BBIO: error in beaglebone_blue(): failed to run cmd=%s\n", cmd);
+         syslog(LOG_ERR, "Adafruit_BBIO: error in beaglebone_blue(): failed to run cmd=%s\n", cmd);
+         return -1;
+      }
+      if( fgetc(file) == '1' ) {
+         retval = 1;
+      }
+      pclose(file);
+    }
+
+    return retval;
+}
+
 
 BBIO_err load_device_tree(const char *name)
 {
@@ -745,7 +776,7 @@ void initlog(int level, const char* ident, int option)
     option = BBIO_LOG_OPTION;
   }
   openlog(ident, option, LOG_LOCAL1);
-  syslog(LOG_NOTICE, "libadafruit-bbio version %s initialized", "<unknown>");
+  syslog(LOG_NOTICE, "Adafruit_BBIO: version %s initialized", "<unknown>");
 
   initialized = 1;
 }
