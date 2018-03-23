@@ -108,7 +108,7 @@ static PyObject *py_setup_channel(__attribute__ ((unused)) PyObject *self, PyObj
       return NULL;
    }
 
-
+   fprintf(stderr, "DEBUG: py_gpio.c: channel=%s\n", channel);
    err = get_gpio_number(channel, &gpio);
    if (err != BBIO_OK)
        return NULL;
@@ -597,7 +597,7 @@ PyMODINIT_FUNC initGPIO(void)
 
    define_constants(module);
 
-   initlog(LOG_INFO, NULL, BBIO_LOG_OPTION);
+   initlog(LOG_DEBUG, NULL, BBIO_LOG_OPTION);
 
    if (!PyEval_ThreadsInitialized())
       PyEval_InitThreads();

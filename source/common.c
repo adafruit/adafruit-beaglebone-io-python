@@ -94,6 +94,7 @@ pins_t table[] = {
   { "GPIO0_27", "P8_17", 27, -1, -1},
   { "GPIO2_1", "P8_18", 65, -1, -1},
   { "EHRPWM2A", "P8_19", 22, 4, -1},
+  { "GPIO0_22", "P8_19", 22, 4, -1},
   { "GPIO1_31", "P8_20", 63, -1, -1},
   { "GPIO1_30", "P8_21", 62, -1, -1},
   { "GPIO1_5", "P8_22", 37, -1, -1},
@@ -302,22 +303,26 @@ pwm_t pwm_table[] = {
 int lookup_gpio_by_key(const char *key)
 {
   pins_t *p;
+  fprintf(stderr, "DEBUG: lookup_gpio_by_key(): key=%s\n", key);
   for (p = table; p->key != NULL; ++p) {
       if (strcmp(p->key, key) == 0) {
           return p->gpio;
       }
   }
+  fprintf(stderr, "DEBUG: lookup_gpio_by_key(): return 0\n");
   return 0;
 }
 
 int lookup_gpio_by_name(const char *name)
 {
   pins_t *p;
+  fprintf(stderr, "DEBUG: lookup_gpio_by_name(): name=%s\n", name);
   for (p = table; p->name != NULL; ++p) {
       if (strcmp(p->name, name) == 0) {
           return p->gpio;
       }
   }
+  fprintf(stderr, "DEBUG: lookup_gpio_by_name(): return 0\n");
   return 0;
 }
 
@@ -400,6 +405,7 @@ BBIO_err get_pwm_key_by_name(const char *name, char *key)
 
 BBIO_err get_gpio_number(const char *key, unsigned int *gpio)
 {
+    fprintf(stderr, "DEBUG: get_gpio_number(): key=%s\n", key);
     *gpio = lookup_gpio_by_key(key);
     
     if (!*gpio) {
@@ -407,9 +413,11 @@ BBIO_err get_gpio_number(const char *key, unsigned int *gpio)
     }
 
     if (!*gpio) {
+    	fprintf(stderr, "DEBUG: get_gpio_number(): return BBIO_INVARG\n");
         return BBIO_INVARG;
     }
 
+    fprintf(stderr, "DEBUG: get_gpio_number(): return BBIO_OK\n");
     return BBIO_OK;
 }
 
