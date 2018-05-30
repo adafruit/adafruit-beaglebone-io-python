@@ -377,12 +377,12 @@ static PyObject *py_add_event_detect(__attribute__ ((unused)) PyObject *self, Py
 
    if ((result = add_edge_detect(gpio, edge)) != 0)   // starts a thread
    {
-      if (result == 1)
+      if (result == -1)
       {
-         PyErr_SetString(PyExc_RuntimeError, "Edge detection already enabled for this GPIO channel");
+         PyErr_SetString(PyExc_KeyError, "Edge detection already enabled for this GPIO channel");
          return NULL;
       } else {
-         PyErr_SetString(PyExc_RuntimeError, "Failed to add edge detection");
+         PyErr_SetFromErrno(PyExc_RuntimeError);
          return NULL;
       }
    }

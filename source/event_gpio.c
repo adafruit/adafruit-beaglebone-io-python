@@ -560,11 +560,22 @@ int add_edge_callback(unsigned int gpio, void (*func)(unsigned int gpio))
 void run_callbacks(unsigned int gpio)
 {
     struct callback *cb = callbacks;
+    //Memory cookie
+    unsigned char cookie[2] = {0};
     while (cb != NULL)
     {
+        //Store memory contents of the first byte of current callback structure as a "magic cookie"
+        memcpy(&cookie[0], cb, 1);
         if (cb->gpio == gpio) 
             cb->func(cb->gpio);
+        
+        //Check the first byte of callback structure after executing callback function body
+        memcpy(&cookie[1], cb, 1);
+        
         // Current callback pointer might have changed _only_ if linked list structure has been altered from within the callback function, which should happen _only_ in remove_event_detect() call
+        // If that happened, cb* pointer will be now addressing different memory location with different data.
+        if (cookie[0] != cookie[1]) break;
+
         if (cb != NULL)
             cb = cb->next;
     }
@@ -702,8 +713,8 @@ int gpio_event_remove(unsigned int gpio)
 int add_edge_detect(unsigned int gpio, unsigned int edge)
 // return values:
 // 0 - Success
-// 1 - Edge detection already added
-// 2 - Other error
+// -1 - Even detection already enabled for that GPIO
+// Other error codes are system-wide
 {
     int fd = fd_lookup(gpio);
     pthread_t threads;
@@ -712,7 +723,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
 
     // check to see if this gpio has been added already
     if (gpio_event_add(gpio) != 0)
-        return 1;
+        return -1;
 
     // export /sys/class/gpio interface
     gpio_export(gpio);
@@ -722,24 +733,37 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     if (!fd)
     {
         if ((fd = open_value_file(gpio)) == -1)
-            return 2;
+        {
+            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: open_value_file error %i-%s", errno, strerror(errno));
+            return errno;
+        }
     }
 
     // create epfd if not already open
     if ((epfd == -1) && ((epfd = epoll_create(1)) == -1))
-        return 2;
+    {
+        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: epoll_create error %i-%s", errno, strerror(errno));
+        return errno;
+    }
+
 
     // add to epoll fd
     ev.events = EPOLLIN | EPOLLET | EPOLLPRI;
     ev.data.fd = fd;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev) == -1)
-        return 2;
+    {
+        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: epoll_ctl error %i-%s", errno, strerror(errno));
+        return errno;
+    }
 
     // start poll thread if it is not already running
     if (!thread_running)
     {
         if (pthread_create(&threads, NULL, poll_thread, (void *)t) != 0)
-            return 2;
+        {
+            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: pthread_create error %i-%s", errno, strerror(errno));
+            return errno;
+        }
     }
 
     return 0;
