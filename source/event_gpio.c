@@ -80,7 +80,7 @@ BBIO_err gpio_export(unsigned int gpio)
 
     // already exported by us?
     if (exported_gpios[gpio] != GPIO_NOT_EXPORTED) {
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u already exported", gpio);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export(): %u already exported before", gpio);
         ret = BBIO_OK;
         goto exit;
     }
@@ -91,7 +91,7 @@ BBIO_err gpio_export(unsigned int gpio)
 
     if (access(gpio_path, R_OK|W_OK|X_OK) != -1) {
         exported_gpios[gpio] = GPIO_ALREADY_EXPORTED;
-        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u already exported", gpio);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export(): %u already exported externally", gpio);
         ret =  BBIO_OK;
         goto exit;
     }
@@ -99,7 +99,7 @@ BBIO_err gpio_export(unsigned int gpio)
     const char gpio_export[] = "/sys/class/gpio/export";
 
     if ((fd = open(gpio_export, O_WRONLY)) < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export: %u couldn't open \"%s\": %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export(): %u couldn't open \"%s\": %i-%s",
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
         goto exit;
@@ -116,19 +116,19 @@ BBIO_err gpio_export(unsigned int gpio)
     // add to list
     exported_gpios[gpio] = GPIO_EXPORTED;
 
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export: %u OK", gpio);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_export(): %u OK", gpio);
     ret = BBIO_OK;
 
     exit:
     if(fd && (ret = close(fd))) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export: %u couldn't close \"%s\": %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_export(): %u couldn't close \"%s\": %i-%s",
                gpio, gpio_export, errno, strerror(errno));
         ret =  BBIO_SYSFS;
     }
     usleep(200000);      // Hack to wait for newly exported pins to get correct ownership
     return ret;
 }
-
+// Closes fd corresponding to specified GPIO pin and removes it from fdx list
 void close_value_fd(unsigned int gpio)
 {
     struct fdx *f = fd_list;
@@ -140,10 +140,12 @@ void close_value_fd(unsigned int gpio)
         if (f->gpio == gpio)
         {
             close(f->fd);
+            syslog(LOG_DEBUG, "Adafruit_BBIO: close_value_fd(): closed file descriptor %d", f->fd);
             if (prev == NULL)
                 fd_list = f->next;
             else
                 prev->next = f->next;
+            syslog(LOG_DEBUG, "Adafruit_BBIO: close_value_fd(): removing file descriptor %d for pin %u from opened descriptors list",f->fd, f->gpio);
             temp = f;
             f = f->next;
             free(temp);
@@ -153,7 +155,7 @@ void close_value_fd(unsigned int gpio)
         }
     }
 }
-
+// Returns file descriptor corresponding to specified GPIO pin
 int fd_lookup(unsigned int gpio)
 {
     struct fdx *f = fd_list;
@@ -165,7 +167,7 @@ int fd_lookup(unsigned int gpio)
     }
     return 0;
 }
-
+// Adds GPIO file descriptor to fdx list
 int add_fd_list(unsigned int gpio, int fd)
 {
     struct fdx *new_fd;
@@ -184,6 +186,7 @@ int add_fd_list(unsigned int gpio, int fd)
         new_fd->next = fd_list;
     }
     fd_list = new_fd;
+    syslog(LOG_DEBUG, "Adafruit_BBIO: add_fd_list(): registered file descriptor %d for pin %u.",fd, gpio);
     return 0;
 }
 
@@ -242,6 +245,7 @@ int open_value_file(unsigned int gpio)
                gpio, filename, errno, strerror(errno));
         return -1;
     }
+    syslog(LOG_DEBUG, "Adafruit_BBIO: open_value_file(): opened file descriptor %d for pin %u.",fd, gpio);
     add_fd_list(gpio, fd);
     return fd;
 }
@@ -251,15 +255,16 @@ BBIO_err gpio_unexport(unsigned int gpio)
     int fd, len;
     char str_gpio[10];
 
+    //If gpio is not exported by us - no need to do anything
     if (exported_gpios[gpio] != GPIO_EXPORTED)
         return 0;
-
+    //close gpio pin file descriptor
     close_value_fd(gpio);
 
 #define GPIO_UNEXPORT "/sys/class/gpio/unexport"
 
     if ((fd = open(GPIO_UNEXPORT, O_WRONLY)) < 0) {
-      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport: %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
+      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport(): %u couldn't open '"GPIO_UNEXPORT"': %i-%s",
              gpio, errno, strerror(errno));
       return BBIO_SYSFS;
     }
@@ -268,7 +273,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
     int ret = write(fd, str_gpio, len);
     close(fd);
     if (ret < 0) {
-      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport: %u couldn't write '"GPIO_UNEXPORT"': %i-%s",
+      syslog(LOG_ERR, "Adafruit_BBIO: gpio_unexport(): %u couldn't write '"GPIO_UNEXPORT"': %i-%s",
              gpio, errno, strerror(errno));
       return BBIO_SYSFS;
     }
@@ -276,7 +281,7 @@ BBIO_err gpio_unexport(unsigned int gpio)
     // remove from list
     exported_gpios[gpio] = GPIO_NOT_EXPORTED;
 
-    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_unexport: %u OK", gpio);
+    syslog(LOG_DEBUG, "Adafruit_BBIO: gpio_unexport(): %u OK", gpio);
     return BBIO_OK;
 }
 
@@ -308,7 +313,7 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
 
         snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
         if ((fd = open(filename, O_WRONLY)) < 0) {
-            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction: %u couldn't open '%s': %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction(): %u couldn't open '%s': %i-%s",
                    gpio, filename, errno, strerror(errno));
             return BBIO_SYSFS;
         }
@@ -322,7 +327,7 @@ BBIO_err gpio_set_direction(unsigned int gpio, unsigned int in_flag)
         int ret = write(fd, direction, strlen(direction));
         close(fd);
         if (ret < 0) {
-            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction: %u couldn't write '%s': %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_direction(): %u couldn't write '%s': %i-%s",
                    gpio, filename, errno, strerror(errno));
             return BBIO_SYSFS;
         }
@@ -339,7 +344,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
 
     snprintf(filename, sizeof(filename), "/sys/class/gpio/gpio%d/direction", gpio);
     if ((fd = open(filename, O_RDONLY | O_NONBLOCK)) < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction(): %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -348,7 +353,7 @@ BBIO_err gpio_get_direction(unsigned int gpio, unsigned int *value)
     int ret = read(fd, &direction, sizeof(direction) - 1);
     close(fd);
     if (ret < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction: %u couldn't read '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_get_direction(): %u couldn't read '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -438,7 +443,7 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
 
     fd = open(filename, O_WRONLY);
     if (fd < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't open '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value(): %u couldn't open '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -452,7 +457,7 @@ BBIO_err gpio_set_value(unsigned int gpio, unsigned int value)
     int ret = write(fd, vstr, strlen(vstr));
     close(fd);
     if (ret < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't write '%s': %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value(): %u couldn't write '%s': %i-%s",
                gpio, filename, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -469,7 +474,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
     if (!fd)
     {
         if ((fd = open_value_file(gpio)) == -1) {
-            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't open value file: %i-%s",
+            syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value(): %u couldn't open value file: %i-%s",
                    gpio, errno, strerror(errno));
             return BBIO_SYSFS;
         }
@@ -478,7 +483,7 @@ BBIO_err gpio_get_value(unsigned int gpio, unsigned int *value)
     lseek(fd, 0, SEEK_SET);
     int ret = read(fd, &ch, sizeof(ch));
     if (ret < 0) {
-        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value: %u couldn't read value file: %i-%s",
+        syslog(LOG_ERR, "Adafruit_BBIO: gpio_set_value(): %u couldn't read value file: %i-%s",
                gpio, errno, strerror(errno));
         return BBIO_SYSFS;
     }
@@ -511,7 +516,7 @@ int gpio_set_edge(unsigned int gpio, unsigned int edge)
 
         return 0;
 }
-
+//Returns gpio number corresponding to fd file descriptor
 unsigned int gpio_lookup(int fd)
 {
     struct fdx *f = fd_list;
@@ -554,6 +559,7 @@ int add_edge_callback(unsigned int gpio, void (*func)(unsigned int gpio))
             cb = cb->next;
         cb->next = new_cb;
     }
+    syslog(LOG_DEBUG, "Adafruit_BBIO: add_edge_callback(): added callback to %p for pin %u", new_cb->func, gpio);
     return 0;
 }
 
@@ -566,6 +572,7 @@ void run_callbacks(unsigned int gpio)
     {
         //Store memory contents of the first byte of current callback structure as a "magic cookie"
         memcpy(&cookie[0], cb, 1);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: run_callbacks(): running callback %p for pin %u", cb->func, gpio);
         if (cb->gpio == gpio) 
             cb->func(cb->gpio);
         
@@ -591,6 +598,7 @@ void remove_callbacks(unsigned int gpio)
     {
         if (cb->gpio == gpio)
         {
+            syslog(LOG_DEBUG, "Adafruit_BBIO: remove_callbacks(): removing callback to %p for pin %u", cb->func, cb->gpio);
             if (prev == NULL)
                 callbacks = cb->next;
             else
@@ -604,7 +612,7 @@ void remove_callbacks(unsigned int gpio)
         }
     }
 }
-
+// Resets <initial> flag for the corresponding gpio
 void set_initial_false(unsigned int gpio)
 {
     struct fdx *f = fd_list;
@@ -616,7 +624,7 @@ void set_initial_false(unsigned int gpio)
         f = f->next;
     }
 }
-
+// Checks if <initial> flag is set for the corresponding gpio
 int gpio_initial(unsigned int gpio)
 {
     struct fdx *f = fd_list;
@@ -640,28 +648,38 @@ void *poll_thread(__attribute__ ((unused)) void *threadarg)
     thread_running = 1;
     while (thread_running)
     {
+        // epoll_wait() returns -1 on error/timeout
         if ((n = epoll_wait(epfd, &events, 1, -1)) == -1)
         {
             thread_running = 0;
+            syslog(LOG_ERR, "Adafruit_BBIO: poll_thread(): exiting due to error/timeout returned by epoll_wait()");
             pthread_exit(NULL);
         }
+        // otherwise it returns number of file descriptors ready
         if (n > 0) {
+            // Set read/write offset to the beginning of the file
             lseek(events.data.fd, 0, SEEK_SET);
+            // Try to check if there's new data available on fd by reading from it, i.e. no error ocurred
             if (read(events.data.fd, &buf, 1) != 1)
             {
                 thread_running = 0;
+                syslog(LOG_ERR, "Adafruit_BBIO: poll_thread(): exiting due to no data available to read");
                 pthread_exit(NULL);
             }
+            // Find out gpio number corresponding to fd on which event has happened
             gpio = gpio_lookup(events.data.fd);
             if (gpio_initial(gpio)) {     // ignore first epoll trigger
+                syslog(LOG_DEBUG, "Adafruit_BBIO: poll_thread(): discarding first epoll() event for pin %u",gpio);
                 set_initial_false(gpio);
             } else {
                 event_occurred[gpio] = 1;
+                syslog(LOG_DEBUG, "Adafruit_BBIO: poll_thread(): running callbacks for pin %u",gpio);
                 run_callbacks(gpio);
             }
         }
     }
     thread_running = 0;
+    syslog(LOG_DEBUG, "Adafruit_BBIO: poll_thread(): normal exit");
     pthread_exit(NULL);
 }
 
@@ -703,6 +721,7 @@ int gpio_event_remove(unsigned int gpio)
         if (f->gpio == gpio)
         {
             f->is_evented = 0;
+            f->initial = 1;
             return 0;
         }
         f = f->next;
@@ -721,7 +740,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     struct epoll_event ev;
     long t = 0;
 
-    // check to see if this gpio has been added already
+    // check to see if this gpio has been added already to the list of gpios with event detection enabled
     if (gpio_event_add(gpio) != 0)
         return -1;
 
@@ -734,7 +753,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     {
         if ((fd = open_value_file(gpio)) == -1)
         {
-            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: open_value_file error %i-%s", errno, strerror(errno));
+            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect(): open_value_file() error %i-%s", errno, strerror(errno));
             return errno;
         }
     }
@@ -742,7 +761,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     // create epfd if not already open
     if ((epfd == -1) && ((epfd = epoll_create(1)) == -1))
     {
-        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: epoll_create error %i-%s", errno, strerror(errno));
+        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect(): epoll_create() error %i-%s", errno, strerror(errno));
         return errno;
     }
 
@@ -752,7 +771,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     ev.data.fd = fd;
     if (epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev) == -1)
     {
-        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: epoll_ctl error %i-%s", errno, strerror(errno));
+        syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect(): epoll_ctl() error %i-%s", errno, strerror(errno));
         return errno;
     }
 
@@ -761,7 +780,7 @@ int add_edge_detect(unsigned int gpio, unsigned int edge)
     {
         if (pthread_create(&threads, NULL, poll_thread, (void *)t) != 0)
         {
-            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect: pthread_create error %i-%s", errno, strerror(errno));
+            syslog(LOG_ERR, "Adafruit_BBIO: add_edge_detect(): pthread_create() error %i-%s", errno, strerror(errno));
             return errno;
         }
     }
@@ -777,17 +796,21 @@ void remove_edge_detect(unsigned int gpio)
     // delete callbacks for gpio
     remove_callbacks(gpio);
 
-    // delete epoll of fd
+    // delete fd from epoll
     epoll_ctl(epfd, EPOLL_CTL_DEL, fd, &ev);
 
     // set edge to none
     gpio_set_edge(gpio, NO_EDGE);
 
-    // unexport gpio
+    //clear event
     gpio_event_remove(gpio);
+
 
     // clear detected flag
     event_occurred[gpio] = 0;
+
+    syslog(LOG_DEBUG, "Adafruit_BBIO: remove_edge_detect(): event detection disabled for pin %u",gpio);
+
 }
 
 int event_detected(unsigned int gpio)
