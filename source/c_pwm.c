@@ -457,6 +457,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
                 }
             } else {
               strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path_udev));
+	      usleep(100*1000);
             }
         }
     }
