@@ -21,6 +21,14 @@ I/O (GPIO).
    `Beaglebone pin names table <https://github.com/adafruit/adafruit-beaglebone-io-python/blob/master/source/common.c#L73>`_
 
 
+.. note::
+
+   On-board LEDs (USR0-USR3) are handled by LED class driver rather than the GPIO pin driver.
+
+   They have a different path in the /sys/ filesystem.
+
+   Setup the pin for output and write GPIO.HIGH or GPIO.LOW
+
 Example::
 
     # Use the config-pin command line tool to set a pin's function to GPIO
@@ -37,6 +45,23 @@ Example::
     # Write a logic high or logic low
     GPIO.output("P8_14", GPIO.HIGH)  # You can also write '1' instead
     GPIO.output("P8_14", GPIO.LOW)   # You can also write '0' instead
+
+
+    # Blinking onboard led example
+    import Adafruit_BBIO.GPIO as GPIO
+    import time
+
+    for i in range(4):
+        GPIO.setup("USR%d" % i, GPIO.OUT)
+
+    while True:
+        for i in range(4):
+            GPIO.output("USR%d" % i, GPIO.HIGH)
+            time.sleep(1)
+        for i in range(4):
+            GPIO.output("USR%d" % i, GPIO.LOW)
+            time.sleep(1)
+
 
 .. module:: Adafruit_BBIO.GPIO
 
