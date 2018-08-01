@@ -65,15 +65,17 @@ Example::
 
 .. module:: Adafruit_BBIO.GPIO
 
-.. function:: setup(channel, direction[, pull_up_down=PUD_OFF, initial=None, delay=0])
+.. function:: setup(channel, direction[, pull_up_down=GPIO.PUD_OFF, initial=None, delay=0])
 
    Set up the given GPIO channel, its direction and (optional) pull/up down control
 
    :param str channel: GPIO channel to set up (e.g. "P8_16").
-   :param int direction: GPIO channel direction (:data:`IN` or :data:`OUT`).
+   :param int direction: GPIO channel direction
+       (:data:`GPIO.IN` or :data:`GPIO.OUT`).
    :param int pull_up_down: pull-up/pull-down resistor configuration
-       (:data:`PUD_OFF`, :data:`PUD_UP` or :data:`PUD_DOWN`).
-   :param int initial: initial value for an output channel (:data:`LOW`/:data:`HIGH`).
+       (:data:`GPIO.PUD_OFF`, :data:`GPIO.PUD_UP` or :data:`GPIO.PUD_DOWN`).
+   :param int initial: initial value for an output channel
+       (:data:`GPIO.LOW`/:data:`GPIO.HIGH`).
    :param int delay: time in milliseconds to wait after exporting the GPIO pin.
 
 .. function:: cleanup()
@@ -91,7 +93,7 @@ Example::
 
    :param str channel: GPIO channel to output the value to (e.g. "P8_16").
    :param value: value to set the output to-- 0/1 or False/True
-       or :data:`LOW`/:data:`HIGH`.
+       or :data:`GPIO.LOW`/:data:`GPIO.HIGH`.
    :type value: int or bool
 
 .. function:: input(channel)
@@ -107,8 +109,8 @@ Example::
    Enable edge detection events for the given GPIO channel.
 
    :param str channel: GPIO channel to detect events from (e.g. "P8_16").
-   :param int edge: edge to detect–– :data:`RISING`, :data:`FALLING`
-       or :data:`BOTH`
+   :param int edge: edge to detect–– :data:`GPIO.RISING`, :data:`GPIO.FALLING`
+       or :data:`GPIO.BOTH`
    :param func callback: a function to call once the event has been detected.
    :param int bouncetime: switch bounce timeout in ms for the callback.
 
@@ -143,8 +145,8 @@ Example::
    Wait for an edge on the given channel.
 
    :param str channel: GPIO channel to wait on (e.g. "P8_16").
-   :param int edge: edge to detect–– :data:`RISING`, :data:`FALLING`
-       or :data:`BOTH`
+   :param int edge: edge to detect–– :data:`GPIO.RISING`, :data:`GPIO.FALLING`
+       or :data:`GPIO.BOTH`
    :param int timeout: time to wait for an edge, in milliseconds.
        -1 will wait forever.
 
