@@ -2,7 +2,7 @@
 --------------------------------------------
 
 This module enables reading analog input values from the analog to digital
-converter (ADC) on the Beaglebone processor.
+converter (ADC) on the TI AM3358 SoC on the BeagleBone.
 
 Example::
 
