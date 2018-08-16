@@ -35,8 +35,8 @@ Example::
 
    Read the raw analog value for the channel.
    
-   :note: Kernels older than 4.1.x returned a raw value range based on
-       the reference voltage of 1.8 V–– from 0 to 1800.
+   :note: Kernels older than 4.1.x returned a raw value range 0 - 1800
+       based on the reference voltage of 1.8 V.
 
    :param str channel: GPIO channel to read the value from (e.g. "P8_16").
    :returns: raw value reading from 0 to 4095 (12 bits).
