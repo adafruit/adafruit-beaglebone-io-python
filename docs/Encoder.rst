@@ -1,4 +1,4 @@
-:mod:`Encoder` --- Quadrature Encoder interface
+:mod:`Encoder` --- Quadrature Encoder interface (eQEP)
 -----------------------------------------------
 
 .. automodule:: Adafruit_BBIO.Encoder
