@@ -206,6 +206,17 @@ if ser.isOpen():
     ser.write("Hello World!")
 ser.close()
 ```
+* Available UART names on BeagleBone
+  * `UART1`: /dev/ttyO1, Rx: P9_26, Tx: P9_24
+  * `UART2`: /dev/ttyO2, Rx: P9_22, Tx: P9_21
+  * `UART3`: /dev/ttyO3, Rx: P9_42, Tx: none
+  * `UART4`: /dev/ttyO4, Rx: P9_11, Tx: P9_13
+  * `UART5`: /dev/ttyO5, Rx: P8_38, Tx: P8_37
+  * note: `UART5` requires `disable_uboot_overlay_video=1` in `/boot/uEnv.txt`
+* Available UART names on PocketBeagle
+  * `PB-UART0`: /dev/ttyO0, Rx: P1_30, Tx: P1_32
+  * `PB-UART1`: /dev/ttyO1, Rx: P2_11, Tx: P2_09
+  * `PB-UART2`: /dev/ttyO2, Rx: P1_08, Tx: P1_10
 * [Loopback test with UART1 and UART2](https://learn.adafruit.com/setting-up-io-python-library-on-beaglebone-black/uart#testing-and-using-the-uart)
 
 
