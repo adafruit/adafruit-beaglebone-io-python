@@ -202,14 +202,13 @@ ser = serial.Serial(port = "/dev/ttyO1", baudrate=9600)
 ser.close()
 ser.open()
 if ser.isOpen():
-	print "Serial is open!"
+    print "Serial is open!"
     ser.write("Hello World!")
 ser.close()
 ```
 * Available UART names on BeagleBone
   * `UART1`: /dev/ttyO1, Rx: P9_26, Tx: P9_24
   * `UART2`: /dev/ttyO2, Rx: P9_22, Tx: P9_21
-  * `UART3`: /dev/ttyO3, Rx: P9_42, Tx: none
   * `UART4`: /dev/ttyO4, Rx: P9_11, Tx: P9_13
   * `UART5`: /dev/ttyO5, Rx: P8_38, Tx: P8_37
   * note: `UART5` requires `disable_uboot_overlay_video=1` in `/boot/uEnv.txt`
