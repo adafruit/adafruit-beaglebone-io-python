@@ -85,6 +85,27 @@ BBIO_err gpio_export(unsigned int gpio)
         goto exit;
     }
 
+    // Is GPIO an LED?
+    if ( ((gpio >= USR_LED_GPIO_MIN) && (gpio <=  USR_LED_GPIO_MAX)) 
+         ||
+         ( beaglebone_blue() 
+           &&
+           ( 
+             (gpio == USR_LED_RED)
+             || (gpio == USR_LED_GREEN)
+             || (gpio == BAT25)
+             || (gpio == BAT50)
+             || (gpio == BAT75)
+             || (gpio == BAT100)
+             || (gpio == WIFI)
+           ) 
+         )
+       )
+    {
+        syslog(LOG_WARNING, "Adafruit_BBIO: gpio_export: %u not applicable to built-in LEDs", gpio);
+        return BBIO_OK; // export is not applicable to the USR LED pins
+    }
+        
     // already exported by someone else?
     char gpio_path[64];
     snprintf(gpio_path, sizeof(gpio_path), "/sys/class/gpio/gpio%d", gpio);
