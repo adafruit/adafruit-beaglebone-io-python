@@ -46,13 +46,13 @@ BBIO_err uart_cleanup(void)
     if (e1 != BBIO_OK)
         return e1;
     if (e2 != BBIO_OK)
-        return e1;
+        return e2;
     if (e3 != BBIO_OK)
-        return e1;
+        return e3;
     if (e4 != BBIO_OK)
-        return e1;
+        return e4;
     if (e5 != BBIO_OK)
-        return e1;
+        return e5;
 
     return BBIO_OK;
 }
