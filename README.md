@@ -198,13 +198,10 @@ import serial
 
 UART.setup("UART1")
 
-ser = serial.Serial(port = "/dev/ttyO1", baudrate=9600)
-ser.close()
-ser.open()
-if ser.isOpen():
+with serial.Serial(port = "/dev/ttyO1", baudrate=9600) as ser:
     print("Serial is open!")
-    ser.write("Hello World!")
-ser.close()
+    ser.write(b"Hello World!")
+
 ```
 * Available UART names on BeagleBone
   * `UART1`: /dev/ttyO1, Rx: P9_26, Tx: P9_24
