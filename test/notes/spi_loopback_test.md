@@ -46,7 +46,7 @@ from Adafruit_BBIO.SPI import SPI
 #spi = SPI(1,1)	#/dev/spidev2.1
 
 spi = SPI(0,0) 
-print spi.xfer2([32, 11, 110, 22, 220]) 
+print(spi.xfer2([32, 11, 110, 22, 220]))
 spi.close() 
 ```
 

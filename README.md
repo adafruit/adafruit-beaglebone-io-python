@@ -150,7 +150,7 @@ Detecting events:
     #your amazing code here 
     #detect wherever: 
     if GPIO.event_detected("P9_12"):
-      print "event detected!"
+      print("event detected!")
 
 ### PWM
 **The PWM Duty Cycle range was reversed in 0.0.15 from 100(off)-0(on) to 0(off)-100(on).  Please update your code accordingly.**
@@ -198,13 +198,10 @@ import serial
 
 UART.setup("UART1")
 
-ser = serial.Serial(port = "/dev/ttyO1", baudrate=9600)
-ser.close()
-ser.open()
-if ser.isOpen():
-    print "Serial is open!"
-    ser.write("Hello World!")
-ser.close()
+with serial.Serial(port = "/dev/ttyO1", baudrate=9600) as ser:
+    print("Serial is open!")
+    ser.write(b"Hello World!")
+
 ```
 * Available UART names on BeagleBone
   * `UART1`: /dev/ttyO1, Rx: P9_26, Tx: P9_24

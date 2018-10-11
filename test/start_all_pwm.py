@@ -20,7 +20,7 @@ pins = [
 # /sys/devices/platform/ocp/48304000.epwmss/48304100.ecap/pwm/pwmchip5/pwm-5:0/duty_cycle
 
 for pin in pins:
-  print pin
+  print(pin)
   PWM.start(pin, 50, 2000, 1)
   PWM.stop(pin)
   PWM.cleanup()

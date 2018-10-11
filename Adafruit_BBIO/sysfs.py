@@ -41,7 +41,7 @@ Usage examples::
 
     # Print all block devices in /sys, with their sizes
     for block_dev in sys.block:
-        print block_dev, str(int(block_dev.size) / 1048576) + ' M'
+        print(block_dev, str(int(block_dev.size) / 1048576) + ' M')
 
     >>> import sysfs
     >>> # Read/write Beaglebone Black's eQEP module attributes
