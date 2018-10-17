@@ -587,7 +587,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
 BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
 {
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: %s, %f, %f, %i", key, duty, freq, polarity);
-    fprintf(stderr, "Adafruit_BBIO: pwm_start: %s, %f, %f, %i\n", key, duty, freq, polarity);
+    //fprintf(stderr, "Adafruit_BBIO: pwm_start: %s, %f, %f, %i\n", key, duty, freq, polarity);
 
     BBIO_err err;
     char buffer[20];

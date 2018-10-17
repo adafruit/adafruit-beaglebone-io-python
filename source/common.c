@@ -655,13 +655,13 @@ BBIO_err load_device_tree(const char *name)
 
     /* beaglebone blue has complete dtb file and does not need overlays */
     if(beaglebone_blue()) {
-      fprintf(stderr, "common.c: load_device_tree(): beaglebone_blue(): TRUE\n");
+      //fprintf(stderr, "common.c: load_device_tree(): beaglebone_blue(): TRUE\n");
       return BBIO_OK;
     }
 
     /* pocketbeagle has complete dtb file and does not need overlays */
     if(pocketbeagle()) {
-      fprintf(stderr, "common.c: load_device_tree(): pocketbeagle(): TRUE\n");
+      //fprintf(stderr, "common.c: load_device_tree(): pocketbeagle(): TRUE\n");
       return BBIO_OK;
     }
 
@@ -717,13 +717,13 @@ int device_tree_loaded(const char *name)
 
     /* beaglebone blue has complete dtb file and does not need overlays */
     if(beaglebone_blue()) {
-      fprintf(stderr, "common.c: device_tree_loaded(): beaglebone_blue(): TRUE\n");
+      //fprintf(stderr, "common.c: device_tree_loaded(): beaglebone_blue(): TRUE\n");
       return BBIO_OK;
     }
 
     /* pocketbeagle has complete dtb file and does not need overlays */
     if(pocketbeagle()) {
-      fprintf(stderr, "common.c: device_tree_loaded(): pocketbeagle(): TRUE\n");
+      //fprintf(stderr, "common.c: device_tree_loaded(): pocketbeagle(): TRUE\n");
       return BBIO_OK;
     }
 
@@ -767,13 +767,13 @@ BBIO_err unload_device_tree(const char *name)
 
     /* beaglebone blue has complete dtb file and does not need overlays */
     if(beaglebone_blue()) {
-      fprintf(stderr, "common.c: unload_device_tree(): beaglebone_blue(): TRUE\n");
+      //fprintf(stderr, "common.c: unload_device_tree(): beaglebone_blue(): TRUE\n");
       return BBIO_OK;
     }
 
     /* pocketbeagle has complete dtb file and does not need overlays */
     if(pocketbeagle()) {
-      fprintf(stderr, "common.c: unload_device_tree(): pocketbeagle(): TRUE\n");
+      //fprintf(stderr, "common.c: unload_device_tree(): pocketbeagle(): TRUE\n");
       return BBIO_OK;
     }
 
