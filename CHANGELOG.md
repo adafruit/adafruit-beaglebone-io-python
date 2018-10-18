@@ -1,3 +1,45 @@
+1.1.0
+---
+Aaron Marburg (1):
+ * Added usleep after successfully enabling PWM via udev.
+
+Drew Fustini (16):
+ * Merge pull request #233 from zsserg/fixed_segfault_in_event_detection
+ * Merge pull request #257 from zsserg/develop
+ * Merge pull request #251 from amarburg/master
+ * Merge pull request #271 from fcooper/documentation-updates
+ * Update ADC.rst
+ * Update Encoder.rst
+ * Update ADC.rst
+ * Add UART entries for the PocketBeagle (issue #242)
+ * update install and test shell scripts
+ * update UART section in README
+ * Merge pull request #282 from erikwelsh/master
+ * do not load overlays for the beaglebone blue #283
+ * Merge pull request #284 from sam-bristow/py3-docs
+ * Merge pull request #285 from sam-bristow/bugfix/uart-error-reporting
+ * fix pwm on pocketbeagle and beaglebone blue #286
+ * remove debug logging
+
+Erik Welsh (1):
+ * Fixed GPIO export problem; Leaves GPIO in bad state on latest BeagleBone image on PocketBeagle
+
+Franklin S Cooper Jr (3):
+ * docs/SPI.rst: Fix bus numbering in examples
+ * docs/GPIO.rst: Add information on blinking led
+ * docs/GPIO.rst Make documentation a bit newbie friendly
+
+Sam Bristow (3):
+ * Use print() function in all code and docs
+ * Use new python-serial API
+ * Return error-code for failing interface
+
+zserg (5):
+ * Fixed  SEGFAULT when calling remove_event_detect() inside python callback function.
+ * Fixed  SEGFAULT when calling remove_event_detect() inside python callback function.
+ * Fixed SEGFAULT in event_gpio,c run_callbacks() * Added more elaborate epoll() error logging
+ * Minor style fixes
+
 1.0.10
 ----
 **features**
