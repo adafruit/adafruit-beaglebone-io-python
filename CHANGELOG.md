@@ -1,3 +1,8 @@
+1.1.1
+---
+Attempt upload to PyPI again to avoid
+error reported in issue #293
+
 1.1.0
 ---
 Aaron Marburg (1):
