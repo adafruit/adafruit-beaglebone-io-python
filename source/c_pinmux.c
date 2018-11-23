@@ -32,13 +32,23 @@ BBIO_err set_pin_mode(const char *key, const char *mode)
 	snprintf(pinmux_dir, sizeof(pinmux_dir), "ocp:%s_pinmux", pin);
 	snprintf(path, sizeof(path), "%s/%s/state", ocp_dir, pinmux_dir);
 
+	/* beaglebone blue has complete dtb file and does not need overlays */
+	if(beaglebone_blue()) {
+		fprintf(stderr, "DEBUG: Adafruit_BBIO: set_pin_mode() :: Pinmux file: %s, mode: %s", path, mode); 
+		fprintf(stderr, "DEBUG: Adafruit_BBIO: set_pin_mode(): beaglebone_blue() is TRUE; return BBIO_OK\n");
+		return BBIO_OK;
+	}
+
+
 	f = fopen(path, "w");
 	if (NULL == f) {
 		return BBIO_ACCESS;
 	}
 	syslog(LOG_DEBUG, "Adafruit_BBIO: set_pin_mode() :: Pinmux file %s access OK", path); 
+	fprintf(stderr, "Adafruit_BBIO: set_pin_mode() :: Pinmux file %s access OK", path); 
 	fprintf(f, "%s", mode);
 	fclose(f);
 	syslog(LOG_DEBUG, "Adafruit_BBIO: set_pin_mode() :: Set pinmux mode to %s for %s", mode, pin);
+	fprintf(stderr, "Adafruit_BBIO: set_pin_mode() :: Set pinmux mode to %s for %s", mode, pin);
 	return BBIO_OK;
 }
