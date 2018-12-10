@@ -69,7 +69,7 @@ typedef struct pins_t {
     int ain;
 } pins_t;
 
-//Table generated based on https://raw.github.com/jadonk/bonescript/master/node_modules/bonescript/bone.js
+//Table generated based on https://github.com/jadonk/bonescript/blob/master/src/bone.js
 pins_t table[] = {
   { "USR0", "USR0", 53, -1, -1},
   { "USR1", "USR1", 54, -1, -1},
