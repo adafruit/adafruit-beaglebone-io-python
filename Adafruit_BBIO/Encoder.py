@@ -351,7 +351,8 @@ class RotaryEncoder(object):
         new positions.
 
         '''
-        period = self._NS_FACTOR / frequency  # Period in nanoseconds
+        # github issue #299: force period to be an integer
+        period = int(self._NS_FACTOR / frequency)  # Period in nanoseconds
         self._eqep.node.period = str(period)
         self._logger.debug(
             "Set frequency(): Channel {}, frequency: {} Hz, "
