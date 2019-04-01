@@ -13,7 +13,12 @@ BBIO_err set_pin_mode(const char *key, const char *mode)
 	char pinmux_dir[20]; // "ocp:P#_##_pinmux"
 	char pin[6]; //"P#_##"
 	FILE *f = NULL;
-	
+
+	// pin mode can not be set for the built-in USRn LEDs
+	if (strncmp(key, "USR", 3) == 0) {
+		return BBIO_OK;
+	}	
+
 	if (strlen(key) == 4)	// Key P#_# format, must inject '0' to be P#_0#
 		snprintf(pin, sizeof(pin), "%.3s0%c", key,key[3]);
 	else	//copy string
