@@ -189,7 +189,7 @@ pins_t table[] = {
   // These are for the PocketBeagle
   { "VIN_AC", "P1_1", 0, -1, -1},
   { "GPIO2_23", "P1_2", 87, -1, -1},
-  { "USB1_VBUS_OUT", "P1_3", 0, -1, -1},
+  { "USB1_DRVVBUS", "P1_3", 0, -1, -1},
   { "GPIO2_25", "P1_4", 89, -1, -1},
   { "USB1_VBUS_IN", "P1_5", 0, -1, -1},
   { "SPI0_CS0", "P1_6", 5, -1, -1},
