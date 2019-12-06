@@ -636,12 +636,10 @@ BBIO_err load_device_tree(const char *name)
 {
     char line[256];
     FILE *file = NULL;
-
+    char slots[100];
 #ifdef BBBVERSION41
-    char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 #else
-    char slots[40];
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
 
@@ -698,11 +696,10 @@ BBIO_err load_device_tree(const char *name)
 int device_tree_loaded(const char *name)
 {
     FILE *file = NULL;
+    char slots[100];
 #ifdef BBBVERSION41
-    char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 #else
-    char slots[40];
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
     char line[256];
@@ -755,11 +752,10 @@ int device_tree_loaded(const char *name)
 BBIO_err unload_device_tree(const char *name)
 {
     FILE *file = NULL;
+    char slots[100];
 #ifdef BBBVERSION41
-    char slots[41];
     snprintf(ctrl_dir, sizeof(ctrl_dir), "/sys/devices/platform/bone_capemgr");
 #else
-    char slots[40];
     build_path("/sys/devices", "bone_capemgr", ctrl_dir, sizeof(ctrl_dir));
 #endif
     char line[256];
