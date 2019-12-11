@@ -777,17 +777,17 @@ PyDoc_STRVAR(SPI_type_doc,
 	"specified SPI device interface.\n");
 
 static PyMethodDef SPI_methods[] = {
-	{"open", (PyCFunction)SPI_open, METH_VARARGS | METH_KEYWORDS,
+	{"open", (PyCFunction)(void *)SPI_open, METH_VARARGS | METH_KEYWORDS,
 		SPI_open_doc},
-	{"close", (PyCFunction)SPI_close, METH_NOARGS,
+	{"close", (PyCFunction)(void *)SPI_close, METH_NOARGS,
 		SPI_close_doc},
-	{"readbytes", (PyCFunction)SPI_readbytes, METH_VARARGS,
+	{"readbytes", (PyCFunction)(void *)SPI_readbytes, METH_VARARGS,
 		SPI_read_doc},
-	{"writebytes", (PyCFunction)SPI_writebytes, METH_VARARGS,
+	{"writebytes", (PyCFunction)(void *)SPI_writebytes, METH_VARARGS,
 		SPI_write_doc},
-	{"xfer", (PyCFunction)SPI_xfer, METH_VARARGS,
+	{"xfer", (PyCFunction)(void *)SPI_xfer, METH_VARARGS,
 		SPI_xfer_doc},
-	{"xfer2", (PyCFunction)SPI_xfer2, METH_VARARGS,
+	{"xfer2", (PyCFunction)(void *)SPI_xfer2, METH_VARARGS,
 		SPI_xfer2_doc},
 	{NULL},
 };
