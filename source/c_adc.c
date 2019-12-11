@@ -41,9 +41,9 @@ int adc_initialized = 0;
 BBIO_err initialize_adc(void)
 {
 #ifdef BBBVERSION41
-    char test_path[49];
+    char test_path[149];
 #else
-    char test_path[40];
+    char test_path[140];
 #endif
     FILE *fh;
     BBIO_err err;
@@ -94,10 +94,10 @@ BBIO_err read_value(unsigned int ain, float *value)
 {
     FILE * fh;
 #ifdef BBBVERSION41
-    char ain_path[49];
+    char ain_path[149];
     snprintf(ain_path, sizeof(ain_path), "%s%d_raw", adc_prefix_dir, ain);
 #else
-    char ain_path[40];
+    char ain_path[140];
     snprintf(ain_path, sizeof(ain_path), "%s%d", adc_prefix_dir, ain);
 #endif
 

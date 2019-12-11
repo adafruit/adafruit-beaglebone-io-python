@@ -119,7 +119,7 @@ BBIO_err initialize_pwm(void)
 
 BBIO_err pwm_set_frequency(const char *key, float freq) {
     int len;
-    char buffer[20];
+    char buffer[100];
     unsigned long period_ns;
     struct pwm_exp *pwm;
 
@@ -195,7 +195,7 @@ BBIO_err pwm_set_frequency(const char *key, float freq) {
 // Only works before chip is enabled
 BBIO_err pwm_set_polarity(const char *key, int polarity) {
     int len;
-    char buffer[9]; /* allow room for trailing NUL byte */
+    char buffer[100]; /* allow room for trailing NUL byte */
     struct pwm_exp *pwm;
 #ifdef BBBVERSION41
     int enabled; /* Maintain original state */
@@ -275,7 +275,7 @@ BBIO_err pwm_set_polarity(const char *key, int polarity) {
 
 BBIO_err pwm_set_duty_cycle(const char *key, float duty) {
     int len;
-    char buffer[20];
+    char buffer[100];
     struct pwm_exp *pwm;
 
     if (duty < 0.0 || duty > 100.0)
@@ -309,17 +309,17 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     struct pwm_exp *new_pwm;
 
 #ifdef BBBVERSION41
-    char pwm_dev_path[45]; // "/sys/devices/platform/ocp/48300000.epwmss"
-    char pwm_addr_path[60]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm"
-    char pwm_chip_path[75]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0"
-    char pwm_export_path[80]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/export"
-    char pwm_path[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1"
-    char pwm_path_udev[85]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm-0:1"
-    char ecap_path_udev[85];// "/sys/devices/platform/ocp/48300000.epwmss/48300100.ecap/pwm/pwmchip0/pwm-0:0/"
-    char duty_path[95]; // "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm1/duty_cycle"
-    char period_path[95];
-    char polarity_path[95];
-    char enable_path[90];
+    char pwm_dev_path[100]; 	// "/sys/devices/platform/ocp/48300000.epwmss"
+    char pwm_addr_path[150];	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm"
+    char pwm_chip_path[200]; 	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0"
+    char pwm_export_path[250]; 	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/export"
+    char pwm_path[250]; 	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm2"
+    char pwm_path_udev[250]; 	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm-0:2"
+    char ecap_path_udev[300];	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ecap/pwm/pwmchip0/pwm-0:0/"
+    char duty_path[300]; 	// "/sys/devices/platform/ocp/48300000.epwmss/48300200.ehrpwm/pwm/pwmchip0/pwm2/duty_cycle"
+    char period_path[300];
+    char polarity_path[300];
+    char enable_path[300];
     char pin_mode[PIN_MODE_LEN]; // "pwm" or "pwm2"
 
     int e;
@@ -400,7 +400,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[66], p->index);
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
     //ecap output with udev patch
-    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[67], p->index);
+    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[66], p->index);
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
 
     // Export PWM if hasn't already been
@@ -456,11 +456,11 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
                             return BBIO_GEN;
                         }
                     } else {
-                        strncpy(pwm_path, ecap_path_udev, sizeof(ecap_path_udev));
+                        strncpy(pwm_path, ecap_path_udev, sizeof(pwm_path));
                     }
                 }
             } else {
-              strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path_udev));
+              strncpy(pwm_path, pwm_path_udev, sizeof(pwm_path));
 	      usleep(100*1000);
             }
         }
@@ -470,12 +470,12 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     snprintf(duty_path, sizeof(duty_path), "%s/duty_cycle", pwm_path);
     snprintf(enable_path, sizeof(enable_path), "%s/enable", pwm_path);
 #else
-    char fragment[18];
-    char pwm_fragment[20];
-    char pwm_path[45];
-    char duty_path[56];
-    char period_path[50];
-    char polarity_path[55];
+    char fragment[100];
+    char pwm_fragment[100];
+    char pwm_path[100];
+    char duty_path[200];
+    char period_path[100];
+    char polarity_path[100];
     int period_fd, duty_fd, polarity_fd;
 
     if (!pwm_initialized) {
@@ -590,7 +590,7 @@ BBIO_err pwm_start(const char *key, float duty, float freq, int polarity)
     //fprintf(stderr, "Adafruit_BBIO: pwm_start: %s, %f, %f, %i\n", key, duty, freq, polarity);
 
     BBIO_err err;
-    char buffer[20];
+    char buffer[100];
     ssize_t len;
 
     struct pwm_exp *pwm = lookup_exported_pwm(key);
@@ -694,7 +694,7 @@ BBIO_err pwm_disable(const char *key)
 
 #ifndef BBBVERSION41
     BBIO_err err;
-    char fragment[18];
+    char fragment[100];
     snprintf(fragment, sizeof(fragment), "bone_pwm_%s", key);
     err = unload_device_tree(fragment);
     if (err != BBIO_OK)
@@ -709,7 +709,7 @@ BBIO_err pwm_disable(const char *key)
         {
 
 #ifdef BBBVERSION41
-	        char buffer[2];
+	        char buffer[100];
 	        size_t len;
 
 	        // Disable the PWM
