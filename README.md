@@ -273,6 +273,18 @@ sudo pytest
 ```
 NOTE: `sudo` should not be required when running [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29) with [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.x](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29) as udev configures group ownership and permission for [GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules)
 
+## Reporting issues
+
+When reporting issues, plesae run the following script which will print the system configuration:
+```
+sudo /opt/scripts/tools/version.sh
+```
+and paste the output in a reply.
+
+This script should be present for any Debian or Ubunut image downloaded from:
+https://beagleboard.org/ or https://rcn-ee.com/
+
+
 ## Credits
 
 The BeagleBone IO Python library was originally forked from the excellent MIT Licensed [RPi.GPIO](https://code.google.com/p/raspberry-gpio-python) library written by Ben Croston.
