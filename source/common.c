@@ -289,7 +289,7 @@ uart_t uart_table[] = {
 
 // Copied from https://github.com/jadonk/bonescript/blob/master/src/bone.js
 // See am335x technical manual, p. 183, for more info:
-// http://www.ti.com/lit/ug/spruh73n/spruh73n.pdf
+// https://www.ti.com/lit/ug/spruh73q/spruh73q.pdf
 pwm_t pwm_table[] = {
   { "ehrpwm2", 6, 1, 4, "ehrpwm.2:1", "EHRPWM2B", "48304000", "48304200", "P8_13"},
   { "ehrpwm2", 5, 0, 4, "ehrpwm.2:0", "EHRPWM2A", "48304000", "48304200", "P8_19"},
