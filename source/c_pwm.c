@@ -386,7 +386,9 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         return err;
     }
 
-    if(!is_dmtimer_pin(p)) {
+    int dmtimer_pin = is_dmtimer_pin(p);
+
+    if(!dmtimer_pin) {
         err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
         if (err != BBIO_OK) {
             syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_dev_path: %i", key, err);
@@ -417,10 +419,10 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path: %s", key, pwm_path);
 
     //pwm with udev patch
-    snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[66], p->index);
+    snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? p->module[5] : pwm_path[66], p->index);
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
     //ecap output with udev patch
-    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, pwm_path[66], p->index);
+    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? p->module[5] : pwm_path[66], p->index);
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
 
     // Export PWM if hasn't already been
