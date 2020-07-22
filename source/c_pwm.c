@@ -386,16 +386,25 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
         return err;
     }
 
-    err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
-    if (err != BBIO_OK) {
-        syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_dev_path: %i", key, err);
-        return err;
-    }
+    if(!is_dmtimer_pin(p)) {
+        err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
+        if (err != BBIO_OK) {
+            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_dev_path: %i", key, err);
+            return err;
+        }
 
-    err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
-    if (err != BBIO_OK) {
-        syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_addr_path: %i", key, err);
-        return err;
+        err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
+        if (err != BBIO_OK) {
+            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_addr_path: %i", key, err);
+            return err;
+        }
+    }
+    else {
+        err = build_path("/sys/devices/platform", p->addr, pwm_addr_path, sizeof(pwm_addr_path));
+        if (err != BBIO_OK) {
+            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_addr_path: %i", key, err);
+            return err;
+        }
     }
 
     err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
