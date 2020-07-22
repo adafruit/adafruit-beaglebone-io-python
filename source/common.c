@@ -308,7 +308,7 @@ pwm_t pwm_table[] = {
   { "timer4", 0, 0, 2, "", "", "", "dmtimer-pwm-4", "P8_7" },
   { "timer7", 0, 0, 2, "", "", "", "dmtimer-pwm-7", "P8_8" },
   { "timer5", 0, 0, 2, "", "", "", "dmtimer-pwm-5", "P8_9" },
-  { "timer6", 0, 0, 2, "", "", "", "dmtimer-pwm-6", "P8_10" }
+  { "timer6", 0, 0, 2, "", "", "", "dmtimer-pwm-6", "P8_10" },
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_8"},
   { "ehrpwm0", 0, 0, 1, "ehrpwm.0:0", "EHRPWM0A", "48300000", "48300200", "P1_36"},
   { "ehrpwm0", 1, 1, 1, "ehrpwm.0:1", "EHRPWM0B", "48300000", "48300200", "P1_10"},
