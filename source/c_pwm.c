@@ -94,10 +94,7 @@ void export_pwm(struct pwm_exp *new_pwm)
     }
 }
 
-int is_dmtimer_pin(pwm_t *p) {
-    if(strlen(p->module) < 5)
-        return 0;
-    
+int is_dmtimer_pin(pwm_t *p) {   
     char temp[6];
     strncpy(temp, p->module, 5);
     temp[5] = '\0';
