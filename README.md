@@ -7,10 +7,9 @@
 Adafruit BBIO is an API to enable [GPIO](README.md#gpio-setup), [PWM](README.md#pwm), [ADC](README.md#adc), [UART](README.md#uart), [SPI](README.md#spi) and [eQEP](README.md#eqep) (Quadrature Encoder) hardware access from Python applications running on the Beaglebone. 
 
 * It is recommended to use an [official BeagleBoard.org Debian image](https://beagleboard.org/latest-images)
-  * **Currently recommended image: [Debian 10.3 "Buster" IoT (2020-04-06)](http://beagleboard.org/latest-images)**
-    * Install [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.x](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29), or newer, to enable [non-root control of GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules) [_(commit)_](https://github.com/adafruit/adafruit-beaglebone-io-python/commit/b65cbf8e41b444bad7c4ef6cfd4f88a30210fd78)
+  * **Currently recommended image: [Debian 10.3 "Buster" IoT (2020-04-06)](http://beagleboard.org/latest-images)** _(default kernel is 4.19.x-ti)_
 
-* Adafruit_BBIO supports Linux kernels 3.8 through 4.14
+* Adafruit_BBIO supports Linux kernels 3.8 through 4.19
 
 * New versions of Adafruit_BBIO may break backwards compatibility. Please read the [changelog](CHANGELOG.md).
 
