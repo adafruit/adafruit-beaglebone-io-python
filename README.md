@@ -13,29 +13,31 @@ Adafruit BBIO is an API to enable [GPIO](README.md#gpio-setup), [PWM](README.md#
 
 * New versions of Adafruit_BBIO may break backwards compatibility. Please read the [changelog](CHANGELOG.md).
 
+* It is recommended to use Python 3
+
 ## Installation on Debian
 
-Easiest:
+Note: Follow the instructions on BeagleBoard.org to [get connected to the Internet](https://beagleboard.org/upgrade#connect)
+
+**Easiest:**
 ```
-sudo ntpdate pool.ntp.org
 sudo apt-get update
-sudo apt-get install build-essential python-dev python-pip -y
-sudo pip install Adafruit_BBIO
+sudo apt-get install build-essential python3-dev python3-pip -y
+sudo pip3 install Adafruit_BBIO
 ```
     
-Manual:
+**Manual:**
 ```
-sudo ntpdate pool.ntp.org
 sudo apt-get update
-sudo apt-get install build-essential python-dev python-pip -y
+sudo apt-get install build-essential python3-dev python3-pip -y
 git clone git://github.com/adafruit/adafruit-beaglebone-io-python.git
 cd adafruit-beaglebone-io-python
-sudo python setup.py install
+sudo python3 setup.py install
 ```
 
 Upgrade Adafruit_BBIO to latest version on [PyPI](https://pypi.python.org/pypi/Adafruit_BBIO):
 ```
-sudo pip install --upgrade Adafruit_BBIO
+sudo pip3 install --upgrade Adafruit_BBIO
 ```
     
 ## Usage
@@ -264,13 +266,13 @@ To use the enhanced Quadrature Encoder Pulse (eQEP) module, please refer to the 
 
 Install py.test to run the tests. You'll also need the python compiler package for pytest:
 ```
-sudo pip install pytest
+sudo pip3 install pytest
 ```
 Execute the following in the root of the project:
 ```
-sudo pytest
+pytest
 ```
-NOTE: `sudo` should not be required when running [Debian 9.2 "Stretch" iot (2017-10-29)](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#microSD.2FStandalone:_.28stretch-iot.29_.28All_BeagleBone_Variants_.26_PocketBeagle.29) with [Linux kernel](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Kernel_Options) [4.14.x](https://elinux.org/Beagleboard:BeagleBoneBlack_Debian#Mainline_.284.14.x_lts.29) as udev configures group ownership and permission for [GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules)
+NOTE: `sudo` should not be required as udev configures group ownership and permission for [GPIO](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/80-gpio-noroot.rules) and [PWM](https://github.com/rcn-ee/repos/blob/master/bb-customizations/suite/stretch/debian/81-pwm-noroot.rules)
 
 ## Reporting issues
 
