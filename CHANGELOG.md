@@ -1,3 +1,42 @@
+1.1.2
+---
+Daniel Nguyen (2):
+      Update common.c
+      Update common.c
+
+Drew Fustini (28):
+      upload to PyPI againt to resolve #293
+      do not set pinmux on the beaglebone blue
+      remove deug output
+      Fix dead link to bone.js #296
+      force Encoder period to be an integer #299
+      Ignore new compiler warnings in gcc 8.2.0
+      Update setup.py
+      do not set pin mode for built-in USRn LEDs
+      Change name of P1_3 to match bone.js
+      Fix warning about casting incompatible function types #308
+      Fix warning print format strings being truncated #308
+      Fix warning about casting incompatible function types #308
+      Fix warnings on format truncation and sizeof in strncpy #308
+      Fix warning about casting incompatible function types #308
+      Update travis config to specify Python 3.6
+      Update tox.ini to Python 3.6
+      Merge pull request #321 from adafruit/issue308
+      Update ISSUE_TEMPLATE.md
+      Update README.md
+      Update README.md
+      Merge pull request #327 from zer0cod3r/master
+      Merge pull request #337 from SamPovilus/docfix
+      Update README.md
+      Update README.md
+      Update README.md
+      remove -Werror from CFLAGS
+      Remove suppression of gcc warnings in CFLAGS #336
+      Update version in setup.py to v1.2
+
+Sam Povilus (1):
+      fixing document locaiton and version as current location dosn't load
+
 1.1.1
 ---
 Attempt upload to PyPI again to avoid
