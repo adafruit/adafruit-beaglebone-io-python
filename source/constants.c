@@ -35,39 +35,41 @@ SOFTWARE.
 
 void define_constants(PyObject *module)
 {
-   high = Py_BuildValue("i", HIGH);
-   PyModule_AddObject(module, "HIGH", high);
+   PyObject *object;
 
-   low = Py_BuildValue("i", LOW);
-   PyModule_AddObject(module, "LOW", low);
+   object = Py_BuildValue("i", HIGH);
+   PyModule_AddObject(module, "HIGH", object);
 
-   output = Py_BuildValue("i", OUTPUT);
-   PyModule_AddObject(module, "OUT", output);
+   object = Py_BuildValue("i", LOW);
+   PyModule_AddObject(module, "LOW", object);
 
-   input = Py_BuildValue("i", INPUT);
-   PyModule_AddObject(module, "IN", input);   
+   object = Py_BuildValue("i", OUTPUT);
+   PyModule_AddObject(module, "OUT", object);
 
-   alt0 = Py_BuildValue("i", ALT0);
-   PyModule_AddObject(module, "ALT0", alt0);
+   object = Py_BuildValue("i", INPUT);
+   PyModule_AddObject(module, "IN", object);
 
-   pud_off = Py_BuildValue("i", PUD_OFF);
-   PyModule_AddObject(module, "PUD_OFF", pud_off);
+   object = Py_BuildValue("i", ALT0);
+   PyModule_AddObject(module, "ALT0", object);
 
-   pud_up = Py_BuildValue("i", PUD_UP);
-   PyModule_AddObject(module, "PUD_UP", pud_up);
+   object = Py_BuildValue("i", PUD_OFF);
+   PyModule_AddObject(module, "PUD_OFF", object);
 
-   pud_down = Py_BuildValue("i", PUD_DOWN);
-   PyModule_AddObject(module, "PUD_DOWN", pud_down);
+   object = Py_BuildValue("i", PUD_UP);
+   PyModule_AddObject(module, "PUD_UP", object);
+
+   object = Py_BuildValue("i", PUD_DOWN);
+   PyModule_AddObject(module, "PUD_DOWN", object);
    
-   rising_edge = Py_BuildValue("i", RISING_EDGE);
-   PyModule_AddObject(module, "RISING", rising_edge);
+   object = Py_BuildValue("i", RISING_EDGE);
+   PyModule_AddObject(module, "RISING", object);
    
-   falling_edge = Py_BuildValue("i", FALLING_EDGE);
-   PyModule_AddObject(module, "FALLING", falling_edge);
+   object = Py_BuildValue("i", FALLING_EDGE);
+   PyModule_AddObject(module, "FALLING", object);
 
-   both_edge = Py_BuildValue("i", BOTH_EDGE);
-   PyModule_AddObject(module, "BOTH", both_edge);
+   object = Py_BuildValue("i", BOTH_EDGE);
+   PyModule_AddObject(module, "BOTH", object);
 
-   version = Py_BuildValue("s", "0.0.20");
-   PyModule_AddObject(module, "VERSION", version);
+   object = Py_BuildValue("s", "0.0.20");
+   PyModule_AddObject(module, "VERSION", object);
 }
