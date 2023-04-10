@@ -22,7 +22,7 @@ Example::
 
    Setup and start the ADC hardware.
 
-.. function:: setup_read(channel)
+.. function:: read(channel)
 
    Read the normalized analog value for the channel.
 
@@ -31,7 +31,7 @@ Example::
    :rtype: float
 
 
-.. function:: setup_read_raw(channel)
+.. function:: read_raw(channel)
 
    Read the raw analog value for the channel.
    
