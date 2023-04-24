@@ -599,8 +599,10 @@ PyMODINIT_FUNC initGPIO(void)
 
    initlog(LOG_INFO, NULL, BBIO_LOG_OPTION);
 
+#if PY_VERSION_HEX < 0x03090000
    if (!PyEval_ThreadsInitialized())
       PyEval_InitThreads();
+#endif
 
    if (Py_AtExit(event_cleanup) != 0)
    {
