@@ -1,4 +1,3 @@
-include distribute_setup.py
 include README.md
 include CHANGELOG.md
 recursive-include source *.h
