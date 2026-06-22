@@ -36,7 +36,6 @@ SOFTWARE.
 #include <unistd.h>
 #include <syslog.h>
 #include <sys/time.h>
-
 static int gpio_warnings = 1;
 
 struct py_callback
