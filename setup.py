@@ -1,13 +1,21 @@
 import io
 import platform
+import sys
 from setuptools import setup, Extension, find_packages
+from setuptools.command.install import install
 
-try:
-    from overlays import builder
-    builder.compile()
-    builder.copy()
-except:
-    pass
+
+class InstallWithOverlays(install):
+    def run(self):
+        install.run(self)
+        if 'bdist_wheel' in sys.argv:
+            return
+        try:
+            from overlays import builder
+            builder.compile()
+            builder.copy()
+        except:
+            pass
 
 open_as_utf8 = lambda x: io.open(x, encoding='utf-8')
 
@@ -47,6 +55,7 @@ setup(name             = 'Adafruit_BBIO',
       keywords         = 'Adafruit BeagleBone IO GPIO PWM ADC',
       url              = 'https://github.com/adafruit/adafruit-beaglebone-io-python/',
       classifiers      = classifiers,
+      cmdclass         = {'install': InstallWithOverlays},
       packages         = find_packages(),
       py_modules       = ['Adafruit_I2C'],
       ext_modules      = [Extension('Adafruit_BBIO.GPIO', ['source/py_gpio.c', 'source/event_gpio.c', 'source/c_pinmux.c', 'source/constants.c', 'source/common.c'], **extension_args),
