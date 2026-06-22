@@ -54,8 +54,11 @@ jobs:
       - name: Build source distribution
         run: python -m build --sdist
 
+      - name: Check distribution
+        run: twine check dist/*
+
       - name: Publish to PyPI
         env:
-          TWINE_USERNAME: ${{ secrets.pypi_username }}
-          TWINE_PASSWORD: ${{ secrets.pypi_password }}
+          TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: twine upload dist/*
