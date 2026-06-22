@@ -1,15 +1,5 @@
-try:
-    from overlays import builder
-    builder.compile()
-    builder.copy()
-except:
-    pass
-
-import distribute_setup
 import io
-import sys
 import platform
-distribute_setup.use_setuptools()
 from setuptools import setup, Extension, find_packages
 
 open_as_utf8 = lambda x: io.open(x, encoding='utf-8')
@@ -57,4 +47,3 @@ setup(name             = 'Adafruit_BBIO',
                           Extension('Adafruit_BBIO.ADC', ['source/py_adc.c', 'source/c_adc.c', 'source/constants.c', 'source/common.c'], **extension_args),
                           Extension('Adafruit_BBIO.SPI', ['source/spimodule.c', 'source/c_pinmux.c', 'source/constants.c', 'source/common.c'], **extension_args),
                           Extension('Adafruit_BBIO.UART', ['source/py_uart.c', 'source/c_pinmux.c', 'source/c_uart.c', 'source/constants.c', 'source/common.c'], **extension_args)] )
-
