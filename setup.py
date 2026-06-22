@@ -14,7 +14,7 @@ class InstallWithOverlays(install):
             from overlays import builder
             builder.compile()
             builder.copy()
-        except:
+        except Exception:
             pass
 
 open_as_utf8 = lambda x: io.open(x, encoding='utf-8')
