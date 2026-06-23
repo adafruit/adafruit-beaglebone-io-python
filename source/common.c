@@ -560,11 +560,23 @@ int get_spi_bus_path_number(unsigned int spi)
    If u-boot overlays are enabled, then device tree overlays should not
    be loaded with the cape manager by writing to the slots file.  There
    is currently a kernel bug that causes the write to hang.
+
+   On newer Debian images, bone_capemgr is no longer present. Instead,
+   the presence of /proc/device-tree/chosen/overlays (a directory) indicates
+   that U-Boot overlays are in use.
 */
 int uboot_overlay_enabled(void) {
     const char *cmd = "/bin/grep -c bone_capemgr.uboot_capemgr_enabled=1 /proc/cmdline";
     char uboot_overlay;
     FILE *file = NULL;
+    DIR *dir = NULL;
+
+    dir = opendir("/proc/device-tree/chosen/overlays");
+    if (dir != NULL) {
+       closedir(dir);
+       syslog(LOG_DEBUG, "Adafruit_BBIO: uboot_overlay_enabled() is true\n");
+       return 1;
+    }
 
     file = popen(cmd, "r");
     if (file == NULL) {
