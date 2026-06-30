@@ -22,6 +22,7 @@ SOFTWARE.
 */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -29,6 +30,7 @@ SOFTWARE.
 #include <sys/types.h>
 #include <syslog.h>
 #include <fcntl.h>
+#include <glob.h>
 #include <unistd.h>
 
 #include "c_pwm.h"
@@ -40,6 +42,10 @@ SOFTWARE.
 
 #define KEYLEN 7
 #define PIN_MODE_LEN 5
+
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif
 
 int pwm_initialized = 0;
 
@@ -101,6 +107,39 @@ int is_dmtimer_pin(pwm_t *p) {
 
     return (strcmp(temp, "timer") == 0);
 }
+
+#ifdef BBBVERSION41
+BBIO_err build_pwm_chip_path_from_sysfs(pwm_t *p, char *pwm_chip_path, size_t pwm_chip_path_len)
+{
+    glob_t results;
+    char resolved_path[PATH_MAX];
+    size_t i;
+    int glob_err;
+
+    glob_err = glob("/sys/class/pwm/pwmchip*", 0, NULL, &results);
+    if (glob_err != 0) {
+        if (glob_err == GLOB_NOSPACE) {
+            return BBIO_MEM;
+        }
+        return BBIO_GEN;
+    }
+
+    for (i = 0; i < results.gl_pathc; i++) {
+        if (realpath(results.gl_pathv[i], resolved_path) == NULL) {
+            continue;
+        }
+        if (strstr(resolved_path, p->addr) != NULL) {
+            strncpy(pwm_chip_path, results.gl_pathv[i], pwm_chip_path_len);
+            pwm_chip_path[pwm_chip_path_len - 1] = '\0';
+            globfree(&results);
+            return BBIO_OK;
+        }
+    }
+
+    globfree(&results);
+    return BBIO_GEN;
+}
+#endif
 
 BBIO_err initialize_pwm(void)
 {
@@ -331,6 +370,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     char pin_mode[PIN_MODE_LEN]; // "pwm" or "pwm2"
 
     int e;
+    int legacy_pwm_path = 0;
     int period_fd, duty_fd, polarity_fd, enable_fd;
     struct stat s;
     FILE *f = NULL;
@@ -387,15 +427,21 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
 
     if(!dmtimer_pin) {
         err = build_path(ocp_dir, p->chip, pwm_dev_path, sizeof(pwm_dev_path));
-        if (err != BBIO_OK) {
-            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_dev_path: %i", key, err);
-            return err;
+        if (err == BBIO_OK) {
+            err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
+            if (err == BBIO_OK) {
+                err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
+                legacy_pwm_path = (err == BBIO_OK);
+            }
         }
 
-        err = build_path(pwm_dev_path, p->addr, pwm_addr_path, sizeof(pwm_addr_path));
         if (err != BBIO_OK) {
-            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_addr_path: %i", key, err);
-            return err;
+            err = build_pwm_chip_path_from_sysfs(p, pwm_chip_path, sizeof(pwm_chip_path));
+            if (err != BBIO_OK) {
+                syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't find pwm chip path: %i", key, err);
+                return err;
+            }
+            syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: %s found pwm chip path from sysfs: %s", key, pwm_chip_path);
         }
     }
     else {
@@ -404,23 +450,29 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
             syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_addr_path, are you sure you've loaded the correct dmtimer device tree overlay?: %i", key, err);
             return err;
         }
-    }
 
-    err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
-    if (err != BBIO_OK) {
-        syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_chip_path: %i", key, err);
-        return err;
+        err = build_path(pwm_addr_path, "pwm/pwmchip", pwm_chip_path, sizeof(pwm_chip_path));
+        if (err != BBIO_OK) {
+            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't build pwm_chip_path: %i", key, err);
+            return err;
+        }
+        legacy_pwm_path = 1;
     }
 
     snprintf(pwm_path, sizeof(pwm_path), "%s/pwm%d", pwm_chip_path, p->index);
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path: %s", key, pwm_path);
 
-    //pwm with udev patch
-    snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[66], p->index);
-    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
-    //ecap output with udev patch
-    snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[67], p->index);
-    syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
+    if (legacy_pwm_path) {
+        //pwm with udev patch
+        snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[66], p->index);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
+        //ecap output with udev patch
+        snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[67], p->index);
+        syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
+    } else {
+        pwm_path_udev[0] = '\0';
+        ecap_path_udev[0] = '\0';
+    }
 
     // Export PWM if hasn't already been
     e = stat(pwm_path, &s);
@@ -458,6 +510,10 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     e = stat(pwm_path, &s);
     if (-1 == e) {
         if (ENOENT == errno) {
+            if (!legacy_pwm_path) {
+                syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: path for %s doesn't exist: %s", key, pwm_path);
+                return BBIO_GEN;
+            }
             // Directory still doesn't exist, try the new udev pwm path format in 4.14 kernel
             syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_setup: key: %s pwm_path: %s doesn't exist", key, pwm_path);
 
