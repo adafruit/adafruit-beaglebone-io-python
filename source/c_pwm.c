@@ -115,6 +115,7 @@ BBIO_err build_pwm_chip_path_from_sysfs(pwm_t *p, char *pwm_chip_path, size_t pw
     char resolved_path[PATH_MAX];
     size_t i;
     int glob_err;
+    int written;
 
     glob_err = glob("/sys/class/pwm/pwmchip*", 0, NULL, &results);
     if (glob_err != 0) {
@@ -127,8 +128,15 @@ BBIO_err build_pwm_chip_path_from_sysfs(pwm_t *p, char *pwm_chip_path, size_t pw
             continue;
         }
         if (strstr(resolved_path, p->addr) != NULL) {
-            strncpy(pwm_chip_path, results.gl_pathv[i], pwm_chip_path_len);
-            pwm_chip_path[pwm_chip_path_len - 1] = '\0';
+            if (pwm_chip_path_len == 0) {
+                globfree(&results);
+                return BBIO_GEN;
+            }
+            written = snprintf(pwm_chip_path, pwm_chip_path_len, "%s", results.gl_pathv[i]);
+            if (written < 0 || (size_t)written >= pwm_chip_path_len) {
+                globfree(&results);
+                return BBIO_GEN;
+            }
             globfree(&results);
             return BBIO_OK;
         }
