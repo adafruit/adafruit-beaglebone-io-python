@@ -109,6 +109,27 @@ int is_dmtimer_pin(pwm_t *p) {
 }
 
 #ifdef BBBVERSION41
+BBIO_err get_pwm_chip_number(const char *pwm_chip_path, long *pwm_chip_number)
+{
+    const char *pwmchip = strstr(pwm_chip_path, "pwmchip");
+    char *endptr;
+    long chip_number;
+
+    if (pwmchip == NULL) {
+        return BBIO_GEN;
+    }
+
+    pwmchip += strlen("pwmchip");
+    errno = 0;
+    chip_number = strtol(pwmchip, &endptr, 10);
+    if (errno != 0 || endptr == pwmchip) {
+        return BBIO_GEN;
+    }
+
+    *pwm_chip_number = chip_number;
+    return BBIO_OK;
+}
+
 BBIO_err build_pwm_chip_path_from_sysfs(pwm_t *p, char *pwm_chip_path, size_t pwm_chip_path_len)
 {
     glob_t results = {0};
@@ -377,6 +398,7 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
 
     int e;
     int legacy_pwm_path = 0;
+    long pwm_chip_number;
     int period_fd, duty_fd, polarity_fd, enable_fd;
     struct stat s;
     FILE *f = NULL;
@@ -469,11 +491,16 @@ BBIO_err pwm_setup(const char *key, __attribute__ ((unused)) float duty, __attri
     syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path: %s", key, pwm_path);
 
     if (legacy_pwm_path) {
+        err = get_pwm_chip_number(pwm_chip_path, &pwm_chip_number);
+        if (err != BBIO_OK) {
+            syslog(LOG_ERR, "Adafruit_BBIO: pwm_setup: %s couldn't get pwmchip number from %s: %i", key, pwm_chip_path, err);
+            return err;
+        }
         //pwm with udev patch
-        snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[66], p->index);
+        snprintf(pwm_path_udev, sizeof(pwm_path_udev), "%s/pwm-%ld:%d", pwm_chip_path, pwm_chip_number, p->index);
         syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, pwm_path_udev: %s", key, pwm_path_udev);
         //ecap output with udev patch
-        snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%c:%d", pwm_chip_path, dmtimer_pin ? pwm_path[47] : pwm_path[67], p->index);
+        snprintf(ecap_path_udev, sizeof(ecap_path_udev), "%s/pwm-%ld:%d", pwm_chip_path, pwm_chip_number, p->index);
         syslog(LOG_DEBUG, "Adafruit_BBIO: pwm_start: key: %s, ecap_path_udev: %s", key, ecap_path_udev);
     } else {
         pwm_path_udev[0] = '\0';
