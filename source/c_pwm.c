@@ -111,17 +111,15 @@ int is_dmtimer_pin(pwm_t *p) {
 #ifdef BBBVERSION41
 BBIO_err build_pwm_chip_path_from_sysfs(pwm_t *p, char *pwm_chip_path, size_t pwm_chip_path_len)
 {
-    glob_t results;
+    glob_t results = {0};
     char resolved_path[PATH_MAX];
     size_t i;
     int glob_err;
 
     glob_err = glob("/sys/class/pwm/pwmchip*", 0, NULL, &results);
     if (glob_err != 0) {
-        if (glob_err == GLOB_NOSPACE) {
-            return BBIO_MEM;
-        }
-        return BBIO_GEN;
+        globfree(&results);
+        return (glob_err == GLOB_NOSPACE) ? BBIO_MEM : BBIO_GEN;
     }
 
     for (i = 0; i < results.gl_pathc; i++) {
